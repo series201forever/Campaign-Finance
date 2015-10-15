@@ -276,8 +276,8 @@ end
 %% SOLVE
 %% min(theta) sum({contest-PHI(X.*theta)}.^2)
 if num==1
-    dL=(Contest-normcdf([ones(Samplesize,1),LOGW_I,XQ,XS.*Party,log(Tenure+1)]*theta,0,1)).^2;
-    SRR1=sum(dL,1)*sum(dL,1)';
+    dL=(Contest-[ones(Samplesize,1),LOGW_I,XQ,XS.*Party,log(Tenure+1)]*theta).^2;
+    SRR1=sum(dL,1);
     SRR1=SRR1/var(Contest);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -287,7 +287,7 @@ end
 %% min(theta) sum({primary_N-X.*theta)}.^2)
 if num==1
     dL=(Primary_N-[ones(Samplesize,1),LOGW_I,XQ,XS.*Party,log(Tenure+1)]*theta2).^2;
-    SRR3=sum(dL,1)*sum(dL,1)';
+    SRR3=sum(dL,1);
     SRR3=SRR3/var(Primary_N);
 end
 
@@ -311,28 +311,22 @@ if num==4
         TAU=[];
         TAU=find((TenureE_VCT<=Cutoff(i+1,1))&(TenureE_VCT>Cutoff(i,1))); % TAU indexes tenure;
         LOGD_E_VCTi=[];
-        LOGD_E_VCTi=LOGD_E_VCT;
-        LOGD_E_VCTi(TAU)=[];
+        LOGD_E_VCTi=LOGD_E_VCT(TAU);
 %         LOGLOGD_E_VCTi=LOGLOGD_E_VCT;
 %         LOGLOGD_E_VCTi(TAU)=[];
 %         LOGLOGTot_E_VCTi=LOGLOGTot_E_VCT;
 %         LOGLOGTot_E_VCTi(TAU)=[];
         XQEVCTi2=[];
-        XQEVCTi2=XQEVCT2;
-        XQEVCTi2(TAU)=[];
+        XQEVCTi2=XQEVCT2(TAU);
         
         LOGW_E_VCTi=[];
-        LOGW_E_VCTi=LOGW_E_VCT;
-        LOGW_E_VCTi(TAU)=[];
+        LOGW_E_VCTi=LOGW_E_VCT(TAU);
         PartyE_VCTi=[];
-        PartyE_VCTi=PartyE_VCT;
-        PartyE_VCTi(TAU)=[];
+        PartyE_VCTi=PartyE_VCT(TAU);
         UnemploymentE_VCTi=[];
-        UnemploymentE_VCTi=XS_EVCT_(:,1);
-        UnemploymentE_VCTi(TAU)=[];
+        UnemploymentE_VCTi=XS_EVCT_(TAU,1);
         pctWhiteE_VCTi=[];
-        pctWhiteE_VCTi=XS_EVCT_(:,2);
-        pctWhiteE_VCTi(TAU)=[];
+        pctWhiteE_VCTi=XS_EVCT_(TAU,2);
         loglikeE_VDI1iP=[];
         loglikeE_VDI1iM=[];
         loglikeE_VDI2i=[];
@@ -378,27 +372,21 @@ if num==4
         TAU=[];
         TAU=find((TenureE_VCT<=Cutoff(i+1,1))&(TenureE_VCT>Cutoff(i,1))); % TAU indexes tenure;
         LOGTotal_E_VCTi=[];
-        LOGTotal_E_VCTi=LOGTotal_E_VCT;
-        LOGTotal_E_VCTi(TAU)=[];
+        LOGTotal_E_VCTi=LOGTotal_E_VCT(TAU);
 %         LOGLOGD_E_VCTi=LOGLOGD_E_VCT;
 %         LOGLOGD_E_VCTi(TAU)=[];
 %         LOGLOGTot_E_VCTi=LOGLOGTot_E_VCT;
 %         LOGLOGTot_E_VCTi(TAU)=[];
         XQEVCTi2=[];
-        XQEVCTi2=XQEVCT2;
-        XQEVCTi2(TAU)=[];
+        XQEVCTi2=XQEVCT2(TAU);
         LOGW_E_VCTi=[];
-        LOGW_E_VCTi=LOGW_E_VCT;
-        LOGW_E_VCTi(TAU)=[];
+        LOGW_E_VCTi=LOGW_E_VCT(TAU);
         PartyE_VCTi=[];
-        PartyE_VCTi=PartyE_VCT;
-        PartyE_VCTi(TAU)=[];
+        PartyE_VCTi=PartyE_VCT(TAU);
         UnemploymentE_VCTi=[];
-        UnemploymentE_VCTi=XS_EVCT_(:,1);
-        UnemploymentE_VCTi(TAU)=[];
+        UnemploymentE_VCTi=XS_EVCT_(TAU,1);
         pctWhiteE_VCTi=[];
-        pctWhiteE_VCTi=XS_EVCT_(:,2);
-        pctWhiteE_VCTi(TAU)=[];
+        pctWhiteE_VCTi=XS_EVCT_(TAU,2);
         loglikeE_VTotI1iP=[];
         loglikeE_VTotI1iM=[];
         loglikeE_VTotI2i=[];
@@ -438,27 +426,21 @@ if num==4
         TAU=[];
         TAU=find((TenureE_VCTwnxt<=Cutoff(i+1,1))&(TenureE_VCTwnxt>Cutoff(i,1))); % TAU indexes tenure;
         LOGW_NXT_E_VCTwnxti=[];
-        LOGW_NXT_E_VCTwnxti=LOGW_NXT_E_VCTwnxt;
-        LOGW_NXT_E_VCTwnxti(TAU)=[];
+        LOGW_NXT_E_VCTwnxti=LOGW_NXT_E_VCTwnxt(TAU);
 %         LOGLOGD_E_VCTwnxti=LOGLOGD_E_VCTwnxt;
 %         LOGLOGD_E_VCTwnxti(TAU)=[];
 %         LOGLOGTot_E_VCTwnxti=LOGLOGTot_E_VCTwnxt;
 %         LOGLOGTot_E_VCTwnxti(TAU)=[];
         XQEVCTwnxti2=[];
-        XQEVCTwnxti2=XQEVCTwnxt2;
-        XQEVCTwnxti2(TAU)=[];
+        XQEVCTwnxti2=XQEVCTwnxt2(TAU);
         LOGW_E_VCTwnxti=[];
-        LOGW_E_VCTwnxti=LOGW_E_VCTwnxt;
-        LOGW_E_VCTwnxti(TAU)=[];
+        LOGW_E_VCTwnxti=LOGW_E_VCTwnxt(TAU);
         PartyE_VCTwnxti=[];
-        PartyE_VCTwnxti=PartyE_VCTwnxt;
-        PartyE_VCTwnxti(TAU)=[];
+        PartyE_VCTwnxti=PartyE_VCTwnxt(TAU);
         UnemploymentE_VCTwnxti=[];
-        UnemploymentE_VCTwnxti=XS_EVCTwnxt_(:,1);
-        UnemploymentE_VCTwnxti(TAU)=[];
+        UnemploymentE_VCTwnxti=XS_EVCTwnxt_(TAU,1);
         pctWhiteE_VCTwnxti=[];
-        pctWhiteE_VCTwnxti=XS_EVCTwnxt_(:,2);
-        pctWhiteE_VCTwnxti(TAU)=[];
+        pctWhiteE_VCTwnxti=XS_EVCTwnxt_(TAU,2);
         E_VCTa03iP=(1-(E_VCTa(11:15,i).^2)'*gammaCT(11:15,i).^2)^(1/2);
         E_VCTa03iM=(-1)*(1-(E_VCTa(11:15,i).^2)'*gammaCT(11:15,i).^2)^(1/2);
         loglikeE_VWnxtnxtI1iP=[];
@@ -524,10 +506,8 @@ end
 
 %%%%%%%%   Pr(win|w'_(t+1),w'_t,q_I,s,Entry)  %%%%%%%%%
 if num==3
-    dL2=cdf('norm',[ones(length(Win_AC),1),LOGW_IAC,XQAC2,XSAC2.*PartyAC,LOGW_IAC.^2,XQAC2.^2,...
-        log(TenureAC+1)]*thetawin,0,1);
-    L=Win_AC.*dL2+(1-Win_AC).*(1-dL2);
-    SRR15=-sum(log(L));
+    dL2=[ones(length(Win_AC),1),LOGW_IAC,XQAC2,XSAC2.*PartyAC,LOGW_IAC.^2,XQAC2.^2,log(TenureAC+1)]*thetawin;
+    SRR15=sum((Win_AC-dL2).^2)/var(Win_AC);
     
 end
 if num==4
