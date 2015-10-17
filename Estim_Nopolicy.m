@@ -18,15 +18,7 @@
 % global epsump
 % global Shockump
 % global Shockwh
-%global LOGD_NC
-%global LOGW_NC
-%global LOGWNXT_NC
-%global White
-%global White_NC
-%global Unemployment
-%global Unemployment_NC
-%global Party
-%global X_Knot2
+
 
 global iterate
 global Delt
@@ -42,6 +34,16 @@ global Unempsame
 global Partdemo
 global X_Knot1
 
+%global LOGD_NC
+%global LOGW_NC
+%global LOGWNXT_NC
+%global White
+%global White_NC
+%global Unemployment
+%global Unemployment_NC
+%global Party
+%global X_Knot2
+
 
 
 %Variables used in num=2
@@ -49,22 +51,29 @@ global SamplesizeAC
 global LOGD_IAC
 global LOGW_IAC
 global VSAC
-global NCAC
-global LOGTot_NCAC
 global RTotD_NCAC
-global Tenure_NCAC
 global LOGD_CAC
-global PartyAC
 global TenureAC
-global WhiteAC
-global White_NCAC
-global Win_AC
-global UnemploymentAC
-global Unemployment_NCAC
-global LOGLOGTot_NCAC
-global LOGLOGD_NCAC
+global UnempsameAC
+global PartdemoAC
 global X_KnotAC1
-global X_KnotAC2
+
+%global NCAC
+%global Tenure_NCAC
+%global LOGTot_NCAC
+%global PartyAC
+% global WhiteAC
+% global White_NCAC
+% global Win_AC
+% global UnemploymentAC
+% global Unemployment_NCAC
+% global LOGLOGTot_NCAC
+% global LOGLOGD_NCAC
+% global X_KnotAC2
+
+
+
+
 global E_VContestFUL
 global E_VNContestFUL
 global NCE_V
@@ -119,7 +128,6 @@ global NCE_VTenCTwnxt
 global LOGW_NXT_E_VC
 global LOGD_E_VC
 global LOGTot_E_VC
-global YearAC
 global YEARE_VCT
 global YEARE_VNCT
 global YEARE_VCTwnxt
@@ -130,8 +138,6 @@ global EPS
 global EPS2
 global EPS3
 global NumSim;
-global Year
-global Tenure_NC
 global mesh
 global IND5
 global Est1
@@ -160,16 +166,24 @@ rand('state',100);%??
 randn('state',10);%??
 dele1=find(sum(isnan(OP_INC_IV_july8),2)>0);
 OP_INC_IV_july8(dele1,:)=[]; %Drop NaN
+OP_INC_IV_july8(OP_INC_IV_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleA=find(OP_INC_IV_july8(:,16)==0);
 OP_INC_IV_july8(deleA,:)=[];%Drop if oppornent disburse=0
+
+
 dele2=find(sum(isnan(OP_INC_july8),2)>0);
 OP_INC_july8(dele2,:)=[]; %Drop NaN
+OP_INC_july8(OP_INC_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleB=find(((OP_INC_july8(:,16)==0).*OP_INC_july8(:,8))==1);
 OP_INC_july8(deleB,:)=[];%Drop if oppornent disburse=0 and contested
+OP_INC_july8(119:121,:)=[];%Drop an Rtotd outlier
+
 dele3=find(sum(isnan(E_V_july8),2)>0); 
 E_V_july8(dele3,:)=[]; %Drop NaN
+E_V_july8(E_V_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleC=find((E_V_july8(:,16)==0).*E_V_july8(:,8)==1);
 E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
+E_V_july8(102,:)=[];%Drop an Rtotd outlier
 
 Sofarbest=10^8;
 bestiter=0;
@@ -256,15 +270,16 @@ LOGD_NC=log(max(ones(Samplesize,1),Estimation_OP(:,32))); % D_INC
 %LOGWNXT_NC=log(max(ones(Samplesize,1),Estimation_OP(:,34))); %W'_INC
 RTotD_NC=(max(0,LOGD_NC).^(-1/2))./LOGTot_NC;  %% ratio of spending over total. (modify)
 RTotD_NC=RTotD_NC.*(exp(LOGTot_NC)./exp(LOGD_NC));
-RtotDsq_NC=RTotD_NC.^2;
-RtotDcu_NC=RTotD_NC.^3;
 % LOGLOGD_NC=log(max(ones(Samplesize,1),LOGD_NC));
 % LOGLOGTot_NC=log(max(ones(Samplesize,1),LOGTot_NC));
 %Tenure_NC=Estimation_OP(:,35); % Tenure_INC
 Tenure=Estimation_OP(:,15);
 Party=3*ones(Samplesize,1)-2*Estimation_OP(:,3);  %%Party=1  if candidate i is Democrat and Party=-1 if candidate i is Republican.
 Presparty=3*ones(Samplesize,1)-2*Estimation_OP(:,39);
-Same=Party==Presparty; %Same party if the two match
+Same=Party==Presparty;
+Dif=Party~=Presparty;
+Same=Same-Dif;%Same party=1 if candidate party=President party, otherwise -1
+
 Primary_N=Estimation_OP(:,36);
 % White=Estimation_OP(:,21);
 % Black=Estimation_OP(:,22);
@@ -305,8 +320,8 @@ Partdemo=Partisan.*Party;
 % end
 % PLUS=(LOGLOGTot_NC>=mesh(8,1)).*(LOGLOGTot_NC-mesh(8,1))/(mesh(9,1)-mesh(8,1));
 % X_Knot2=[X_Knot2,PLUS];
-fineness=9;
-mesh=quantile(RTotD_NC,linspace(0,1,fineness));
+fineness=7;
+mesh=quantile(RTotD_NC,linspace(0,1,fineness).');
 X_Knot1=(RTotD_NC<mesh(2,1)).*(1-(RTotD_NC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
 for i=0:(numel(mesh)-3)
     PLUS=(RTotD_NC>=mesh(i+1,1)).*(RTotD_NC<mesh(i+2,1)).*((RTotD_NC-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
@@ -354,29 +369,39 @@ LOGTot_NCAC=log(max(ones(SamplesizeAC,1),AC(:,31))); % Tot_INC
 % LOGLOGTot_NCAC=log(max(ones(SamplesizeAC,1),LOGTot_NCAC));
 RTotD_NCAC=(max(0,LOGD_NCAC).^(-1/2))./LOGTot_NCAC; %% D_INC./Tot_INC
 RTotD_NCAC=RTotD_NCAC.*(exp(LOGTot_NCAC)./exp(LOGD_NCAC));
-LOGWNXT_NCAC=log(max(ones(SamplesizeAC,1),AC(:,34))); %W'_INC
-Tenure_NCAC=AC(:,35); % Tenure_INC
-NCAC=[LOGD_NCAC,LOGW_NCAC,LOGWNXT_NCAC];
+%LOGWNXT_NCAC=log(max(ones(SamplesizeAC,1),AC(:,34))); %W'_INC
+%Tenure_NCAC=AC(:,35); % Tenure_INC
+%NCAC=[LOGD_NCAC,LOGW_NCAC,LOGWNXT_NCAC];
 LOGD_CAC=log(max(ones(SamplesizeAC,1),AC(:,16))); %Sepnding of Challenger
-LOGW_CAC=log(max(ones(SamplesizeAC,1),AC(:,17))); %Warchest of Challenger
-LOGW_CNXTAC=log(max(ones(SamplesizeAC,1),AC(:,18))); %Savings of Challenger
-YearAC=AC(:,2); % Current year.
-PartyAC=3*ones(SamplesizeAC,1)-2*AC(:,3);  %%PartyAC=1  if candidate i is Democrat and PartyAC=-1 if candidate i is Republican.
+% LOGW_CAC=log(max(ones(SamplesizeAC,1),AC(:,17))); %Warchest of Challenger
+% LOGW_CNXTAC=log(max(ones(SamplesizeAC,1),AC(:,18))); %Savings of Challenger
+% YearAC=AC(:,2); % Current year.
 
 TenureAC=AC(:,15);
+PartyAC=3*ones(SamplesizeAC,1)-2*AC(:,3);  %%PartyAC=1  if candidate i is Democrat and PartyAC=-1 if candidate i is Republican.
+PrespartyAC=3*ones(SamplesizeAC,1)-2*AC(:,39);
+SameAC=PartyAC==PrespartyAC; %Same party if the two match
+DifAC=PartyAC~=PrespartyAC;
+SameAC=SameAC-DifAC;
 
-Win_AC=(AC(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
+%Win_AC=(AC(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
 
 
 
-WhiteAC=AC(:,21);
-BlackAC=AC(:,22);
-OtherAC=AC(:,23);
-White_NCAC=AC(:,27);
-Black_NCAC=AC(:,28);
-Other_NCAC=AC(:,29);
+% WhiteAC=AC(:,21);
+% BlackAC=AC(:,22);
+% OtherAC=AC(:,23);
+% White_NCAC=AC(:,27);
+% Black_NCAC=AC(:,28);
+% Other_NCAC=AC(:,29);
 UnemploymentAC=AC(:,24);
-Unemployment_NCAC=AC(:,30);
+%Unemployment_NCAC=AC(:,30);
+PartisanAC=AC(:,63);
+
+
+UnempsameAC=UnemploymentAC.*SameAC;
+PartdemoAC=PartisanAC.*PartyAC;
+
 
 %%B-Spline for q_I(RTotD_NCAC), where RTotD_NCAC=(LOGD_NCAC./LOGTot_NCAC)  etc.%%
 %% take knots to be between 0.88 to 1.025 with 8 knots (8 basis functions). (Almost all lie
@@ -405,16 +430,16 @@ Unemployment_NCAC=AC(:,30);
 % end
 % PLUS=(LOGLOGTot_NCAC>=mesh(8,1)).*(LOGLOGTot_NCAC-mesh(8,1))/(mesh(9,1)-mesh(8,1));
 % X_KnotAC2=[X_KnotAC2,PLUS];
-mesh=quantile(RTotD_NCAC,[.125;.25;.375;.5;.625;.75;.875]);
-mesh=[min(RTotD_NCAC);mesh;max(RTotD_NCAC)];
+mesh=quantile(RTotD_NCAC,linspace(0,1,fineness).');
 X_KnotAC1=(RTotD_NCAC<mesh(2,1)).*(1-(RTotD_NCAC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-for i=0:6
+for i=0:(numel(mesh)-3)
     PLUS=(RTotD_NCAC>=mesh(i+1,1)).*(RTotD_NCAC<mesh(i+2,1)).*((RTotD_NCAC-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
         +(RTotD_NCAC>=mesh(i+2,1)).*(RTotD_NCAC<mesh(i+3,1)).*(1-(RTotD_NCAC-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
     X_KnotAC1=[X_KnotAC1,PLUS];
 end
-PLUS=(RTotD_NCAC>=mesh(8,1)).*(RTotD_NCAC-mesh(8,1))/(mesh(9,1)-mesh(8,1));
+PLUS=(RTotD_NCAC>=mesh((numel(mesh)-1),1)).*(RTotD_NCAC-mesh((numel(mesh)-1),1))/(mesh(numel(mesh),1)-mesh((numel(mesh)-1),1));
 X_KnotAC1=[X_KnotAC1,PLUS];
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -595,16 +620,16 @@ LOGTot_E_VC(E_VContestFUL,:)=[];
 % PLUS=(LOGLOGTot_E_V>=mesh(8,1)).*(LOGLOGTot_E_V-mesh(8,1))/(mesh(9,1)-mesh(8,1));
 % X_KnotEV2=[X_KnotEV2,PLUS];
 
-mesh=quantile(RTotDE_V,[.125;.25;.375;.5;.625;.75;.875]);
-mesh=[min(RTotDE_V);mesh;max(RTotDE_V)];
+mesh=quantile(RTotDE_V,linspace(0,1,fineness).');
 X_KnotEV1=(RTotDE_V<mesh(2,1)).*(1-(RTotDE_V-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-for i=0:6
+for i=0:(numel(mesh)-3)
     PLUS=(RTotDE_V>=mesh(i+1,1)).*(RTotDE_V<mesh(i+2,1)).*((RTotDE_V-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
         +(RTotDE_V>=mesh(i+2,1)).*(RTotDE_V<mesh(i+3,1)).*(1-(RTotDE_V-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
     X_KnotEV1=[X_KnotEV1,PLUS];
 end
-PLUS=(RTotDE_V>=mesh(8,1)).*(RTotDE_V-mesh(8,1))/(mesh(9,1)-mesh(8,1));
+PLUS=(RTotDE_V>=mesh((numel(mesh)-1),1)).*(RTotDE_V-mesh((numel(mesh)-1),1))/(mesh(numel(mesh),1)-mesh((numel(mesh)-1),1));
 X_KnotEV1=[X_KnotEV1,PLUS];
+
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %%%               q_e               %%%%
@@ -822,22 +847,39 @@ X_KnotEV1=[X_KnotEV1,PLUS];
 % Aineq(6,:)=-Aineq(5,:);
 % bineq(5,1)=0.99;
 % bineq(6,1)=-0.5;
-%%
-OPTIONS=optimset('MaxIter',50000,'MaxFunEvals',1000000);
-initialvalue=testing2;
-theta0=[initialvalue(1:10,1);initialvalue(12:21,1)]
-iterate=1;
-%[mintheta,SRR]=ktrlink(@Minimize,theta0,Aineq,bineq,[],[],bddtheta0(:,1),bddtheta0(:,2),@Const);
+% 
 
-    for sss=1:30
-[mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,1),theta0);
-theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta
-    end
-load ('./Best1.txt')
-Est1=Best1;
-save Est1.txt Est1 -ASCII
+%%
+%%%%%%%%%%%%%%%%%
+%Estimation of entry probability and Primary N
+%%%%%%%%%%%%%%%%%
+
+% %theta0=[initialvalue(1:10,1);initialvalue(12:21,1)]
+% theta0=ones(28,1);
+% iterate=1;
+% %[mintheta,SRR]=ktrlink(@Minimize,theta0,Aineq,bineq,[],[],bddtheta0(:,1),bddtheta0(:,2),@Const);
+% 
+%     for sss=1:30
+% [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,1),theta0);
+% theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta
+% print(sss)
+%     end
+% load ('./Best1.txt')
+% Est1=Best1;
+% save Est1.txt Est1 -ASCII
+
+Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),RTotD_NC,RTotD_NC.^2,RTotD_NC.^3];
+
+solentry=Xentry\Contest;
+solprimaryN=Xentry\Primary_N;
+
+
 %%
 Sofarbest=10^8;
+
+ OPTIONS=optimset('MaxIter',50000,'MaxFunEvals',1000000);
+ initialvalue=testing2;
+ 
 theta0=[initialvalue(22:23,1);initialvalue(24:32,1);initialvalue(11,1);initialvalue(33:37,1)];
     for sss=1:30
 [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,2),theta0)

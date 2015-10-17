@@ -1,5 +1,6 @@
 function SRR=Minimize_Apr2013(thetain,num)
 
+
 % global dF_gamma_ct
 % global dF_total_ct
 % global dF_nxt_nxt_ct
@@ -15,15 +16,7 @@ function SRR=Minimize_Apr2013(thetain,num)
 % global epsump
 % global Shockump
 % global Shockwh
-%global LOGD_NC
-%global LOGW_NC
-%global LOGWNXT_NC
-%global White
-%global White_NC
-%global Unemployment
-%global Unemployment_NC
-%global Party
-%global X_Knot2
+
 
 global iterate
 global Delt
@@ -39,28 +32,43 @@ global Unempsame
 global Partdemo
 global X_Knot1
 
+%global LOGD_NC
+%global LOGW_NC
+%global LOGWNXT_NC
+%global White
+%global White_NC
+%global Unemployment
+%global Unemployment_NC
+%global Party
+%global X_Knot2
 
 
+
+%Variables used in num=2
 global SamplesizeAC
 global LOGD_IAC
 global LOGW_IAC
 global VSAC
-global LOGTot_NCAC
 global RTotD_NCAC
-global NCAC
 global LOGD_CAC
-global PartyAC
 global TenureAC
-global Tenure_NCAC
-global WhiteAC
-global White_NCAC
-global Win_AC
-global UnemploymentAC
-global Unemployment_NCAC
-global LOGLOGTot_NCAC
-global LOGLOGD_NCAC
+global UnempsameAC
+global PartdemoAC
 global X_KnotAC1
-global X_KnotAC2
+
+%global NCAC
+%global Tenure_NCAC
+%global LOGTot_NCAC
+%global PartyAC
+% global WhiteAC
+% global White_NCAC
+% global Win_AC
+% global UnemploymentAC
+% global Unemployment_NCAC
+% global LOGLOGTot_NCAC
+% global LOGLOGD_NCAC
+% global X_KnotAC2
+
 global E_VContestFUL
 global E_VNContestFUL
 global NCE_V
@@ -132,16 +140,16 @@ global Est2
 %    E_VNCTa;E_VNCTt;gammaNCT;thetawin;cost1;ben1;sig;cost2];
 
 if num==1
-    thetaS=thetain(1:2,1);
-    thetaS(1,1)=1;
-    thetaQ(1,1)=1;
+%    thetaS=thetain(1:2,1);
+%    thetaS(1,1)=1;
+%    thetaQ(1,1)=1;
     % for ii=2:size(X_Knot1,2)
     %     thetaQ(ii,1)=1-sum(abs(thetain(3:(1+ii),1)));
     % end
-    thetaQ(2:9,1)=thetain(3:10,1);
+%    thetaQ(2:9,1)=thetain(3:10,1);
     %B_T=thetain(19,1);
-    theta=thetain(11:15,1);
-    theta2=thetain(16:20,1);
+%    theta=thetain(11:15,1);
+%    theta2=thetain(16:20,1);
     % B_I=thetain(30,1);
     % B_C=thetain(31,1);
     % Q_C1=thetain(32,1);
@@ -219,35 +227,35 @@ end
 
 
 if num<=2
-    XS=[Unempsame,Partdemo]*thetaS;
+    %XS=[Unempsame,Partdemo]*thetaS;
     % XSNC=[Unemployment_NC,White_NC]*thetaS;
     % XSNC2=[Unemployment_NC,White_NC]*thetaS2;
-    XQ=X_Knot1*thetaQ;  % q_I
+    %XQ=X_Knot1*thetaQ;  % q_I
     
-    XSAC=[UnemploymentAC,WhiteAC]*thetaS;   %State in this period.
+    %XSAC=[UnempsameAC,PartdemoAC]*thetaS;   %State in this period.
     % XSNCAC=[Unemployment_NCAC,White_NCAC]*thetaS;   %State in uncontested periods.
     % XSNCAC2=[Unemployment_NCAC,White_NCAC]*thetaS2;   %State in uncontested periods.
-    XQAC=X_KnotAC1*thetaQ;  % q_I
+    %XQAC=X_KnotAC1*thetaQ;  % q_I
     
-    PRENTAC=normcdf([ones(SamplesizeAC,1),LOGW_IAC,XQAC,XSAC.*PartyAC,log(TenureAC+1)]*theta,0,1); % Entry prob.
-    E_Primary_NAC=[ones(SamplesizeAC,1),LOGW_IAC,XQAC,XSAC.*PartyAC,log(TenureAC+1)]*theta2; %Number of expected entrants.
+    %PRENTAC=[ones(SamplesizeAC,1),LOGW_IAC,XQAC,XSAC,log(TenureAC+1)]*theta; % Entry prob.
+    %E_Primary_NAC=[ones(SamplesizeAC,1),LOGW_IAC,XQAC,XSAC,log(TenureAC+1)]*theta2; %Number of expected entrants.
     % XSNCEVCT=XSNCEVCT_*thetaS;
     % XSNCEVNCT=XSNCEVNCT_*thetaS;
     %
     % XSNCEVCTwnxt=XSNCEVCTwnxt_*thetaS;
     
-    XS_EVCT=XS_EVCT_*thetaS;
+    %XS_EVCT=XS_EVCT_*thetaS;
     
-    XS_EVNCT=XS_EVNCT_*thetaS;
+    %XS_EVNCT=XS_EVNCT_*thetaS;
     
     % XSEV=XSEV_*thetaS;
     % XS_EVCTwnxt=XS_EVCTwnxt_*thetaS;
     % lenE_VCT=length(XS_EVCT);
     % lenE_VNCT=length(XS_EVNCT);
     
-    XQEV=X_KnotEV1*thetaQ;  % q_I
-    XQEVCT=XQEV;
-    XQEVCT(E_VContestFUL,:)=[];
+    %XQEV=X_KnotEV1*thetaQ;  % q_I
+    %XQEVCT=XQEV;
+    %XQEVCT(E_VContestFUL,:)=[];
 end
 if num>=2
     XS2=[Unemployment,White]*thetaS2;
@@ -280,21 +288,21 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SOLVE
 %% min(theta) sum({contest-PHI(X.*theta)}.^2)
-if num==1
-    dL=(Contest-[ones(Samplesize,1),LOGW_I,XQ,XS,log(Tenure+1)]*theta).^2;
-    SRR1=sum(dL,1);
-    SRR1=SRR1/var(Contest);
-end
+%if num==1
+%    dL=(Contest-[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,X_Knot1,log(Tenure+1)]*theta).^2;
+%    SRR1=sum(dL,1);
+%    SRR1=SRR1/var(Contest);
+%end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   Estimation of E[primary_N]     %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SOLVE
 %% min(theta) sum({primary_N-X.*theta)}.^2)
-if num==1
-    dL=(Primary_N-[ones(Samplesize,1),LOGW_I,XQ,XS.*Party,log(Tenure+1)]*theta2).^2;
-    SRR3=sum(dL,1);
-    SRR3=SRR3/var(Primary_N);
-end
+%if num==1
+%    dL=(Primary_N-[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,X_Knot1,log(Tenure+1)]*theta2).^2;
+%    SRR3=sum(dL,1);
+%    SRR3=SRR3/var(Primary_N);
+%end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%      Ai & Chen     %%%%%%%%%%
