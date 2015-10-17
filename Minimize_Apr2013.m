@@ -1,41 +1,46 @@
 function SRR=Minimize_Apr2013(thetain,num)
 
+% global dF_gamma_ct
+% global dF_total_ct
+% global dF_nxt_nxt_ct
+% global dF_gamma_nct
+% global dF_total_nct
+% global dF_nxt_nxt_nct
+% global Entry
+% global Winrnd
+% global Ret
+% global Betawh
+% global Betaump
+% global epswh
+% global epsump
+% global Shockump
+% global Shockwh
+%global LOGD_NC
+%global LOGW_NC
+%global LOGWNXT_NC
+%global White
+%global White_NC
+%global Unemployment
+%global Unemployment_NC
+%global Party
+%global X_Knot2
+
 global iterate
-global LOGW_I
-global Contest
-global Party
 global Delt
-global dF_gamma_ct
-global dF_total_ct
-global dF_nxt_nxt_ct
-global dF_gamma_nct
-global dF_total_nct
-global dF_nxt_nxt_nct
-global Entry
-global Winrnd
-global Betawh
-global Betaump
-global epswh
-global epsump
-global Shockump
-global Shockwh
+
+%Variables used in num=1
 global Samplesize
-global Contest
 global LOGW_I
-global LOGD_NC
-global LOGW_NC
+global Contest
 global RTotD_NC
-global LOGWNXT_NC
 global Tenure
-global Party
 global Primary_N
-global White
-global White_NC
-global Unemployment
-global Unemployment_NC
-global Primary_N
+global Unempsame
+global Partdemo
 global X_Knot1
-global X_Knot2
+
+
+
 global SamplesizeAC
 global LOGD_IAC
 global LOGW_IAC
@@ -214,7 +219,7 @@ end
 
 
 if num<=2
-    XS=[Unemployment,White]*thetaS;
+    XS=[Unempsame,Partdemo]*thetaS;
     % XSNC=[Unemployment_NC,White_NC]*thetaS;
     % XSNC2=[Unemployment_NC,White_NC]*thetaS2;
     XQ=X_Knot1*thetaQ;  % q_I
@@ -276,7 +281,7 @@ end
 %% SOLVE
 %% min(theta) sum({contest-PHI(X.*theta)}.^2)
 if num==1
-    dL=(Contest-[ones(Samplesize,1),LOGW_I,XQ,XS.*Party,log(Tenure+1)]*theta).^2;
+    dL=(Contest-[ones(Samplesize,1),LOGW_I,XQ,XS,log(Tenure+1)]*theta).^2;
     SRR1=sum(dL,1);
     SRR1=SRR1/var(Contest);
 end
