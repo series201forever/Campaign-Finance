@@ -1,4 +1,4 @@
-
+clear
 % **
 % make sure you get the sign of q_e right. Also note that f_d_qe, f_w_qe have the PARTY of Challenger.
 % **
@@ -50,6 +50,7 @@ global X_Knot1
 global SamplesizeAC
 global LOGD_IAC
 global LOGW_IAC
+global LOGW_CAC
 global VSAC
 global RTotD_NCAC
 global LOGD_CAC
@@ -144,19 +145,18 @@ global Est1
 global Est2
 global XXX
 
+%%%%%%%%%%%%%%%%
+%Loading dataset
+%%%%%%%%%%%%%%%%
 
 %load ('./E_V_july8.mat')
 E_V_july8=csvread('E_Vjuly8partisan.csv',1,0);
 
-
-
 % load('./op_inc_july8.mat')
 OP_INC_july8=csvread('OP_INC_july8partisan.csv',1,0);
 
-
 % load('./op_inc_iv_july8.mat')
 OP_INC_IV_july8=csvread('OP_INC_IV_july8partisan.csv',1,0);
-
 
 load ('./State_Transition.mat')
 load ('./testing2.txt')
@@ -169,7 +169,7 @@ OP_INC_IV_july8(dele1,:)=[]; %Drop NaN
 OP_INC_IV_july8(OP_INC_IV_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleA=find(OP_INC_IV_july8(:,16)==0);
 OP_INC_IV_july8(deleA,:)=[];%Drop if oppornent disburse=0
-
+OP_INC_IV_july8(102,:)=[];%Drop an Rtotd outlier
 
 dele2=find(sum(isnan(OP_INC_july8),2)>0);
 OP_INC_july8(dele2,:)=[]; %Drop NaN
@@ -183,7 +183,7 @@ E_V_july8(dele3,:)=[]; %Drop NaN
 E_V_july8(E_V_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleC=find((E_V_july8(:,16)==0).*E_V_july8(:,8)==1);
 E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
-E_V_july8(102,:)=[];%Drop an Rtotd outlier
+
 
 Sofarbest=10^8;
 bestiter=0;
@@ -192,66 +192,9 @@ Delt=0.5;
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%% Preliminary Step: Transition Estimation  %%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% Regress unemployment Jump and the pct of white population on a constant
-%% and one period lagged value %%
-%% This can be done separately from the other first step estimation as
-%% there is not interdependence between the Transition Estimation and the
-%% other first-step moment restrictions.
-
-Ywh=[];
-Xw=[];
-Yump=[];
-Xu=[];
-
-%% Create Ywh, Xw (Yump, Xu) %%
-%% For each district, stack the percentage of whites into ever longer
-%% column vector. Do the same for unemployment >> Ywh, Yump
-%% We omit the first observation, because for that value, we don't observe
-%% the 1 period lagged value.
-
-%% Also create Xw and Xu analogously, but including all periods but the
-%% last.
-%% useornot=0 if we do not use the particular CD for any of the rest of the
-%% estimation: due to the fact that we cannot invert any of the policy
-%% functions.
-
-unuse=(useornot==0);
-State_Transition(unuse,:)=[];
-pctblk(unuse,:)=[];
-pctwh(unuse,:)=[];
-pctothr(unuse,:)=[];
-unemployment(unuse,:)=[];
-
-for i=1:length(State_Transition)
-    Jwh=pctwh(i,:);
-    Jump=unemployment(i,:);
-    Kwh=(Jwh==-1);
-    Kump=(Jump==-1);
-    Jwh(Kwh)=[];
-    Jump(Kump)=[];
-    Jwh=Jwh';
-    Jump=Jump';
-    Xwh(:,1)=ones(length(Jwh)-1,1);   %% Constant
-    Xwh(:,2)=Jwh(1:length(Jwh)-1,1);      %% lag value.
-    Xump(:,1)=ones(length(Jump)-1,1);
-    Xump(:,2)=Jump(1:length(Jump)-1,1);
-    Ywh=[Ywh;Jwh(2:length(Jwh),1)];
-    Xw=[Xw;Xwh];
-    Yump=[Yump;Jump(2:length(Jump),1)];
-    Xu=[Xu;Xump];
-    Xwh=[];
-    Xump=[];
-    Jwh=[];
-    Jump=[];
-end
-%Ywh,Yump [number of district*(years-1),1] vector. Xwh,Xu: regressors.
-
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Defining Variables
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Estimation_OP=OP_INC_july8; %Sample to estimate entry probability
 Samplesize=length(Estimation_OP);
@@ -295,10 +238,12 @@ Unempsame=Unemployment.*Same;
 Partdemo=Partisan.*Party;
 
 %%B-Spline for q_I(LOGLOGD_NC, LOGLOGTot_NC)  %%
-%% take knots to be between 0.88 to 1.025 with 9 knots (8 basis functions). (Almost all lie
-%% within this range) Let X_Knot be the matrix with 8 columns that contain
-%% the value of the B-Spline basis function evaluated at each of the 9
-%% basis functions.
+% take knots to be between 0.88 to 1.025 with 9 knots (8 basis functions). (Almost all lie
+% within this range) Let X_Knot be the matrix with 8 columns that contain
+% the value of the B-Spline basis function evaluated at each of the 9
+% basis functions.
+%---------------------------------------------------------
+
 % mesh=quantile(LOGLOGD_NC,[.125;.25;.375;.5;.625;.75;.875]);
 % mesh=[min(LOGLOGD_NC);mesh;max(LOGLOGD_NC)];
 % X_Knot1=(LOGLOGD_NC<mesh(2,1)).*(1-(LOGLOGD_NC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
@@ -331,7 +276,7 @@ end
 PLUS=(RTotD_NC>=mesh((numel(mesh)-1),1)).*(RTotD_NC-mesh((numel(mesh)-1),1))/(mesh(numel(mesh),1)-mesh((numel(mesh)-1),1));
 X_Knot1=[X_Knot1,PLUS];
 
-%%
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   Estimation of Probability     %%%%
@@ -373,7 +318,7 @@ RTotD_NCAC=RTotD_NCAC.*(exp(LOGTot_NCAC)./exp(LOGD_NCAC));
 %Tenure_NCAC=AC(:,35); % Tenure_INC
 %NCAC=[LOGD_NCAC,LOGW_NCAC,LOGWNXT_NCAC];
 LOGD_CAC=log(max(ones(SamplesizeAC,1),AC(:,16))); %Sepnding of Challenger
-% LOGW_CAC=log(max(ones(SamplesizeAC,1),AC(:,17))); %Warchest of Challenger
+LOGW_CAC=log(max(ones(SamplesizeAC,1),AC(:,17))); %Warchest of Challenger
 % LOGW_CNXTAC=log(max(ones(SamplesizeAC,1),AC(:,18))); %Savings of Challenger
 % YearAC=AC(:,2); % Current year.
 
@@ -631,6 +576,10 @@ PLUS=(RTotDE_V>=mesh((numel(mesh)-1),1)).*(RTotDE_V-mesh((numel(mesh)-1),1))/(me
 X_KnotEV1=[X_KnotEV1,PLUS];
 
 
+%%%%%%%%%%%%%%%%%%%%%%%% 
+% Defining variables: done
+%%%%%%%%%%%%%%%%%%%%%%%%
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %%%               q_e               %%%%
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -849,6 +798,70 @@ X_KnotEV1=[X_KnotEV1,PLUS];
 % bineq(6,1)=-0.5;
 % 
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Preliminary Step: Transition Estimation  %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Regress unemployment Jump and partisanship on a constant
+% and one period lagged value (for partisanship, samples show up once in 10
+% years).
+% Transition of presidential party is estimated later.
+
+% This can be done separately from the other first step estimation as
+% there is not interdependence between the Transition Estimation and the
+% other first-step moment restrictions.
+
+Ywh=[];
+Xw=[];
+Yump=[];
+Xu=[];
+
+% Create Ywh, Xw (Yump, Xu) %%
+% For each district, stack the percentage of whites into ever longer
+% column vector. Do the same for unemployment >> Ywh, Yump
+% We omit the first observation, because for that value, we don't observe
+% the 1 period lagged value.
+
+% Also create Xw and Xu analogously, but including all periods but the
+% last.
+% useornot=0 if we do not use the particular CD for any of the rest of the
+% estimation: due to the fact that we cannot invert any of the policy
+% functions.
+
+unuse=(useornot==0);
+State_Transition(unuse,:)=[];
+pctblk(unuse,:)=[];
+pctwh(unuse,:)=[];
+pctothr(unuse,:)=[];
+unemployment(unuse,:)=[];
+
+for i=1:length(State_Transition)
+    Jwh=pctwh(i,:);
+    Jump=unemployment(i,:);
+    Kwh=(Jwh==-1);
+    Kump=(Jump==-1);
+    Jwh(Kwh)=[];
+    Jump(Kump)=[];
+    Jwh=Jwh';
+    Jump=Jump';
+    Xwh(:,1)=ones(length(Jwh)-1,1);   %% Constant
+    Xwh(:,2)=Jwh(1:length(Jwh)-1,1);      %% lag value.
+    Xump(:,1)=ones(length(Jump)-1,1);
+    Xump(:,2)=Jump(1:length(Jump)-1,1);
+    Ywh=[Ywh;Jwh(2:length(Jwh),1)];
+    Xw=[Xw;Xwh];
+    Yump=[Yump;Jump(2:length(Jump),1)];
+    Xu=[Xu;Xump];
+    Xwh=[];
+    Xump=[];
+    Jwh=[];
+    Jump=[];
+end
+%Ywh,Yump [number of district*(years-1),1] vector. Xwh,Xu: regressors.
+
+
+
 %%
 %%%%%%%%%%%%%%%%%
 %Estimation of entry probability and Primary N
@@ -870,11 +883,26 @@ X_KnotEV1=[X_KnotEV1,PLUS];
 
 Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),RTotD_NC,RTotD_NC.^2,RTotD_NC.^3];
 
-solentry=Xentry\Contest;
-solprimaryN=Xentry\Primary_N;
-
+coefentry=Xentry\Contest;
+coefprimaryN=Xentry\Primary_N;
 
 %%
+%%%%%%%%%%%%%%%%%
+%Estimation of Vote share equation
+%%%%%%%%%%%%%%%%%
+
+% entryprob=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3]*coefentry;
+% primaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3]*coefprimaryN;
+% 
+% Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),primaryN,entryprob,primaryN.*entryprob,RTotD_NCAC,RTotD_NCAC.^2*100,RTotD_NCAC.^3*1000];
+% IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.^3,UnempsameAC,PartdemoAC,log(TenureAC+1),RTotD_NCAC,RTotD_NCAC.^2*100,RTotD_NCAC.^3*1000,LOGW_IAC.*RTotD_NCAC,LOGW_IAC.^2.*RTotD_NCAC];
+% IVvar=IVvoteshare.'*IVvoteshare;
+% %
+% %entryprob,primaryN,primaryN.*entryprob,
+% 
+% coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*(VSAC-0.5));
+%%
+
 Sofarbest=10^8;
 
  OPTIONS=optimset('MaxIter',50000,'MaxFunEvals',1000000);

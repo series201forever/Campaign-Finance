@@ -48,6 +48,7 @@ global X_Knot1
 global SamplesizeAC
 global LOGD_IAC
 global LOGW_IAC
+global LOGW_CAC
 global VSAC
 global RTotD_NCAC
 global LOGD_CAC
