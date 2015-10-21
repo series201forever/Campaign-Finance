@@ -24,15 +24,15 @@ global iterate
 global Delt
 
 %Variables used in num=1
-global Samplesize
-global LOGW_I
-global Contest
-global RTotD_NC
-global Tenure
-global Primary_N
-global Unempsame
-global Partdemo
-global X_Knot1
+% global Samplesize
+% global LOGW_I
+% global Contest
+% global RTotD_NC
+% global Tenure
+% global Primary_N
+% global Unempsame
+% global Partdemo
+% global X_Knot1
 
 %global LOGD_NC
 %global LOGW_NC
@@ -46,18 +46,18 @@ global X_Knot1
 
 
 
-%Variables used in num=2
-global SamplesizeAC
-global LOGD_IAC
-global LOGW_IAC
-global LOGW_CAC
-global VSAC
-global RTotD_NCAC
-global LOGD_CAC
-global TenureAC
-global UnempsameAC
-global PartdemoAC
-global X_KnotAC1
+%Variables used in num=2 and 3
+% global SamplesizeAC
+% global LOGD_IAC
+% global LOGW_IAC
+% global LOGW_CAC
+% global VSAC
+% global RTotD_NCAC
+% global LOGD_CAC
+% global TenureAC
+% global UnempsameAC
+% global PartdemoAC
+% global X_KnotAC1
 
 %global NCAC
 %global Tenure_NCAC
@@ -135,9 +135,9 @@ global YEARE_VCTwnxt
 global LOGW_CNXTAC
 global X_KnotEV1
 global X_KnotEV2
-global EPS
-global EPS2
-global EPS3
+% global EPS
+% global EPS2
+% global EPS3
 global NumSim;
 global mesh
 global IND5
@@ -320,7 +320,7 @@ RTotD_NCAC=RTotD_NCAC.*(exp(LOGTot_NCAC)./exp(LOGD_NCAC));
 %Tenure_NCAC=AC(:,35); % Tenure_INC
 %NCAC=[LOGD_NCAC,LOGW_NCAC,LOGWNXT_NCAC];
 LOGD_CAC=log(max(ones(SamplesizeAC,1),AC(:,16))); %Sepnding of Challenger
-LOGW_CAC=log(max(ones(SamplesizeAC,1),AC(:,17))); %Warchest of Challenger
+% LOGW_CAC=log(max(ones(SamplesizeAC,1),AC(:,17))); %Warchest of Challenger
 % LOGW_CNXTAC=log(max(ones(SamplesizeAC,1),AC(:,18))); %Savings of Challenger
 % YearAC=AC(:,2); % Current year.
 
@@ -353,9 +353,9 @@ Win_AC=(AC(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
 
 
 %Where do we use them?
-EPS=randn(SamplesizeAC,NumSim);
-EPS2=randn(SamplesizeAC,NumSim);
-EPS3=randn(SamplesizeAC,NumSim);
+% EPS=randn(SamplesizeAC,NumSim);
+% EPS2=randn(SamplesizeAC,NumSim);
+% EPS3=randn(SamplesizeAC,NumSim);
 
 
 %%B-Spline for q_I(RTotD_NCAC), where RTotD_NCAC=(LOGD_NCAC./LOGTot_NCAC)  etc.%%
@@ -953,7 +953,11 @@ coefprobwin=Xprobwin\Win_AC;
 % save Est3.txt Est3 -ASCII
 
 %%
-
+%%%%%%%%%%%%%%%%%%
+%Estimation of distribution of spending, saving and fund-raising when
+%contested
+%Number=4
+%%%%%%%%%%%%%%%%%%
 
 Sofarbest=10^8;
   OPTIONS=optimset('MaxIter',50000,'MaxFunEvals',1000000);
@@ -965,17 +969,31 @@ theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
 load ('./Best4.txt')
 Est4=Best4;
 save Est4.txt Est4 -ASCII
+%%
+%%%%%%%%%%%%%%%%%%
+%Estimation of distribution of spending, saving and fund-raising when
+%not contested
+%Number=5
+%%%%%%%%%%%%%%%%%%
 
-Sofarbest=10^8;
-theta0=initialvalue(173:205,1);
-    for sss=1:30
-[mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,5),theta0)
-theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
-    end
-load ('./Best5.txt')
-Est5=Best5;
-save Est5.txt Est5 -ASCII
+%Spending equation
+Xaction=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,PartyE_VNCT.*XS_EVNCT_(:,1),PartyE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,XQEVNCT2,...
+        LOGW_E_VNCT.^2,PartyE_VNCT.*(XS_EVNCT_(:,1)).^2,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,XQEVNCT2.^2];
+coefspend=Xaction\LOGD_E_VNCT;
+coeffund=Xaction\LOGTotal_E_VNCT;
+coefsave=Xaction\LOGW_NXT_E_VNCT;
 
+%
+% Sofarbest=10^8;
+% theta0=initialvalue(173:205,1);
+%     for sss=1:30
+% [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,5),theta0)
+% theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%     end
+% load ('./Best5.txt')
+% Est5=Best5;
+% save Est5.txt Est5 -ASCII
+%%
 
 minthetaall=[Est1(1:10,1);Est2(12,1);Est1(11:20,1);Est2(1:11,1);Est2(13:17,1);Est4(1:135,1);Est5(1:33,1);Est3(1:7,1)];
 minthetaall2=[Est1;Est2;Est3;Est4;Est5];

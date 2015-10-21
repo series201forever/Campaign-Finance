@@ -22,15 +22,15 @@ global iterate
 global Delt
 
 %Variables used in num=1
-global Samplesize
-global LOGW_I
-global Contest
-global RTotD_NC
-global Tenure
-global Primary_N
-global Unempsame
-global Partdemo
-global X_Knot1
+% global Samplesize
+% global LOGW_I
+% global Contest
+% global RTotD_NC
+% global Tenure
+% global Primary_N
+% global Unempsame
+% global Partdemo
+% global X_Knot1
 
 %global LOGD_NC
 %global LOGW_NC
@@ -44,18 +44,18 @@ global X_Knot1
 
 
 
-%Variables used in num=2
-global SamplesizeAC
-global LOGD_IAC
-global LOGW_IAC
-global LOGW_CAC
-global VSAC
-global RTotD_NCAC
-global LOGD_CAC
-global TenureAC
-global UnempsameAC
-global PartdemoAC
-global X_KnotAC1
+%Variables used in num=2 and 3
+% global SamplesizeAC
+% global LOGD_IAC
+% global LOGW_IAC
+% global LOGW_CAC
+% global VSAC
+% global RTotD_NCAC
+% global LOGD_CAC
+% global TenureAC
+% global UnempsameAC
+% global PartdemoAC
+% global X_KnotAC1
 
 %global NCAC
 %global Tenure_NCAC
@@ -156,7 +156,7 @@ if num==1
     % Q_C1=thetain(32,1);
     % Q_C2=thetain(33,1);
     % Q_C3=thetain(34,1);
-elseif num==2
+% elseif num==2
 %     thetaS=Est1(1:2,1);
 %     thetaS(1,1)=1;
 %     thetaQ(1,1)=1;
@@ -178,7 +178,7 @@ elseif num==2
 %     Q_C1=thetain(15,1);
 %     Q_C2=thetain(16,1);
 %     Q_C3=thetain(17,1);
-elseif num==3
+% elseif num==3
 %     thetawin=thetain(1:7,1);
 %     thetaS2=Est2(1:2,1); % do not normalize.
 %     thetaQ2(1,1)=Est2(3,1);
@@ -204,16 +204,16 @@ elseif num==4
     gammaCT(:,1)=thetain(menc+96:menc+110,1);
     gammaCT(:,2)=thetain(menc+111:menc+125,1);
     gammaCT(:,3)=thetain(menc+126:menc+140,1);
-elseif num==5
-    thetaS2=Est2(1:2,1); % do not normalize.
-    thetaQ2(1,1)=Est2(3,1);
-    %     for ii=2:size(X_Knot1,2)
-    %         thetaQ2(ii,1)=thetaQ2(1,1)-sum(abs(thetain(4:(ii+2),1)));
-    %     end
-    thetaQ2(2:9,1)=Est2(4:11,1);
-    gammaNCT(:,1)=thetain(1:11,1);
-    tNCT(:,1)=thetain(12:22,1);
-    wNCT(:,1)=thetain(23:33,1);
+% elseif num==5
+%     thetaS2=Est2(1:2,1); % do not normalize.
+%     thetaQ2(1,1)=Est2(3,1);
+%     %     for ii=2:size(X_Knot1,2)
+%     %         thetaQ2(ii,1)=thetaQ2(1,1)-sum(abs(thetain(4:(ii+2),1)));
+%     %     end
+%     thetaQ2(2:9,1)=Est2(4:11,1);
+%     gammaNCT(:,1)=thetain(1:11,1);
+%     tNCT(:,1)=thetain(12:22,1);
+%     wNCT(:,1)=thetain(23:33,1);
 end
 
 
@@ -259,10 +259,10 @@ end
     %XQEVCT(E_VContestFUL,:)=[];
 % end
 if num>=2
-    XS2=[Unemployment,White]*thetaS2;
-    XQ2=X_Knot1*thetaQ2;  % q_I
-    XSAC2=[UnemploymentAC,WhiteAC]*thetaS2;   %State in this period.
-    XQAC2=X_KnotAC1*thetaQ2;  % q_I
+%     XS2=[Unemployment,White]*thetaS2;
+%     XQ2=X_Knot1*thetaQ2;  % q_I
+%     XSAC2=[UnemploymentAC,WhiteAC]*thetaS2;   %State in this period.
+%     XQAC2=X_KnotAC1*thetaQ2;  % q_I
     XS_EVCT2=XS_EVCT_*thetaS2;
     XS_EVNCT2=XS_EVNCT_*thetaS2;
     XQEV2=X_KnotEV1*thetaQ2;  % q_I
@@ -407,7 +407,7 @@ if num==4
         loglikeE_VTotI4iP=[];
         loglikeE_VTotI4iM=[];
         
-        E_VCTa02iP=(1-(E_VCTa(6:10,i).^2)'*gammaCT(6:10,i).^2)^(1/2);
+        E_VCTa02iP=(1-(E_VCTa(6:10,i).^2)'*gammaCT(6:10,i).^2)^(1/2);%?
         E_VCTa02iM=(-1)*(1-(E_VCTa(6:10,i).^2)'*gammaCT(6:10,i).^2)^(1/2);
         
         loglikeE_VTotI1iP(:,1)=2*log(abs(E_VCTa02iP+E_VCTa(6,i)*(LOGTotal_E_VCTi-E_VCTt(6,i))+E_VCTa(7,i)*(XQEVCTi2-E_VCTt(7,i))+E_VCTa(8,i)*(LOGW_E_VCTi-E_VCTt(8,i))+...
@@ -418,7 +418,7 @@ if num==4
         
         loglikeE_VTotI2i(:,1)=(-1/2)*(((1/gammaCT(6,i))*(LOGTotal_E_VCTi-E_VCTt(6,i))).^2);
         
-        loglikeE_VTotI3i=(-1)*length(LOGTotal_E_VCTi)*log(gammaCT(6,i));
+        loglikeE_VTotI3i=(-1)*length(LOGTotal_E_VCTi)*log(gammaCT(6,i));%?
         
         loglikeE_VTotI4iP(:,1)=(-1)*log((E_VCTa02iP+E_VCTa(7,i)*(XQEVCTi2-E_VCTt(7,i))+E_VCTa(8,i)*(LOGW_E_VCTi-E_VCTt(8,i))+...
             E_VCTa(9,i)*(PartyE_VCTi.*UnemploymentE_VCTi-E_VCTt(9,i))+E_VCTa(10,i)*(PartyE_VCTi.*pctWhiteE_VCTi-E_VCTt(10,i))).^2+...
@@ -488,35 +488,35 @@ if num==4
     SRR11=(-1)*SRR11;
     
 end
-if num==5
-    
-    %%%%%%%%   gamma_I=gamma_I(w',q_I,s,Entry,tenure|contest=0)  %%%%%%%%%
-    %% Here, we want the (deterministic) function of spending|contest=0 as a
-    %% function of w',q_I,s,Entry,tenure
-    Xgamma_INCT=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,PartyE_VNCT.*XS_EVNCT_(:,1),PartyE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,XQEVNCT2,...
-        LOGW_E_VNCT.^2,PartyE_VNCT.*(XS_EVNCT_(:,1)).^2,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,XQEVNCT2.^2];
-    SRR12=sum((LOGD_E_VNCT-Xgamma_INCT*gammaNCT).^2);
-    
-    
-    %%%%%%%   total_I=tot_I(w',q_I,s,Entry|contest=0)  %%%%%%%%%
-    % Here, we want the deterministic function of fund-raising conditional on
-    % being uncontested as a function of w',q_I,s,tenure,Entry
-    
-    Xt_INCT=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,PartyE_VNCT.*XS_EVNCT_(:,1),PartyE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,XQEVNCT2,...
-        LOGW_E_VNCT.^2,PartyE_VNCT.*(XS_EVNCT_(:,1)).^2,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,XQEVNCT2.^2];
-    SRR13=sum((LOGTotal_E_VNCT-Xt_INCT*tNCT).^2);
-    
-    
-    %%%%%%%%   w'_(t+1)_I=savings_I(w',q_I,s,Entry|contest=0)  %%%%%%%%%
-    %% Here, we want the deterministic function of savings conditional on being
-    %% uncontested as a function of (w',q_I,s,tenure,Entry.
-    
-    Xw_INCT=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,PartyE_VNCT.*XS_EVNCT_(:,1),PartyE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,XQEVNCT2,...
-        LOGW_E_VNCT.^2,PartyE_VNCT.*(XS_EVNCT_(:,1)).^2,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,XQEVNCT2.^2];
-    SRR14=sum((LOGW_NXT_E_VNCT-Xw_INCT*wNCT).^2);
-    
-    
-end
+% if num==5
+%     
+%     %%%%%%%%   gamma_I=gamma_I(w',q_I,s,Entry,tenure|contest=0)  %%%%%%%%%
+%     %% Here, we want the (deterministic) function of spending|contest=0 as a
+%     %% function of w',q_I,s,Entry,tenure
+%     Xgamma_INCT=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,PartyE_VNCT.*XS_EVNCT_(:,1),PartyE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,XQEVNCT2,...
+%         LOGW_E_VNCT.^2,PartyE_VNCT.*(XS_EVNCT_(:,1)).^2,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,XQEVNCT2.^2];
+%     SRR12=sum((LOGD_E_VNCT-Xgamma_INCT*gammaNCT).^2);
+%     
+%     
+%     %%%%%%%   total_I=tot_I(w',q_I,s,Entry|contest=0)  %%%%%%%%%
+%     % Here, we want the deterministic function of fund-raising conditional on
+%     % being uncontested as a function of w',q_I,s,tenure,Entry
+%     
+%     Xt_INCT=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,PartyE_VNCT.*XS_EVNCT_(:,1),PartyE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,XQEVNCT2,...
+%         LOGW_E_VNCT.^2,PartyE_VNCT.*(XS_EVNCT_(:,1)).^2,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,XQEVNCT2.^2];
+%     SRR13=sum((LOGTotal_E_VNCT-Xt_INCT*tNCT).^2);
+%     
+%     
+%     %%%%%%%%   w'_(t+1)_I=savings_I(w',q_I,s,Entry|contest=0)  %%%%%%%%%
+%     %% Here, we want the deterministic function of savings conditional on being
+%     %% uncontested as a function of (w',q_I,s,tenure,Entry.
+%     
+%     Xw_INCT=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,PartyE_VNCT.*XS_EVNCT_(:,1),PartyE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,XQEVNCT2,...
+%         LOGW_E_VNCT.^2,PartyE_VNCT.*(XS_EVNCT_(:,1)).^2,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,XQEVNCT2.^2];
+%     SRR14=sum((LOGW_NXT_E_VNCT-Xw_INCT*wNCT).^2);
+%     
+%     
+% end
 
 %%%%%%%%   Pr(win|w'_(t+1),w'_t,q_I,s,Entry)  %%%%%%%%%
 % if num==3
@@ -553,8 +553,8 @@ if num==1
 %     SRR=SRR15;
 elseif num==4
     SRR=SRR9+SRR10+SRR11;
-elseif num==5
-    SRR=SRR12+SRR13+SRR14;
+% elseif num==5
+%     SRR=SRR12+SRR13+SRR14;
 end
 if SRR<Sofarbest
     Sofarbest=SRR;
