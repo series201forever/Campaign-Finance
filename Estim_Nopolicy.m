@@ -197,16 +197,19 @@ Delt=0.5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Estimation_OP=OP_INC_july8; %Sample to estimate entry probability
+
+%Variables used in Number=1, estimation of entry probability/PrimaryN.
+
 Samplesize=length(Estimation_OP);
 %Year=Estimation_OP(:,2); % year of election.
-
 Contest=Estimation_OP(:,8); % contest
+Primary_N=Estimation_OP(:,36);
+
 %LOGD_I=log(max(ones(Samplesize,1),Estimation_OP(:,10))); % spend
 LOGW_I=log(max(ones(Samplesize,1),Estimation_OP(:,11))); % w_I
 %LOGW_INXT=log(max(ones(Samplesize,1),Estimation_OP(:,12))); % W_I'
 %VS=Estimation_OP(:,13); %V_I
 %IDN=Estimation_OP(:,21); %Candidate ID
-
 LOGTot_NC=log(max(ones(Samplesize,1),Estimation_OP(:,31))); % Tot_INC
 LOGD_NC=log(max(ones(Samplesize,1),Estimation_OP(:,32))); % D_INC
 %LOGW_NC=log(max(ones(Samplesize,1),Estimation_OP(:,33))); % W_INC
@@ -222,8 +225,6 @@ Presparty=3*ones(Samplesize,1)-2*Estimation_OP(:,39);
 Same=Party==Presparty;
 Dif=Party~=Presparty;
 Same=Same-Dif;%Same party=1 if candidate party=President party, otherwise -1
-
-Primary_N=Estimation_OP(:,36);
 % White=Estimation_OP(:,21);
 % Black=Estimation_OP(:,22);
 % Other=Estimation_OP(:,23);
@@ -265,7 +266,7 @@ Partdemo=Partisan.*Party;
 % end
 % PLUS=(LOGLOGTot_NC>=mesh(8,1)).*(LOGLOGTot_NC-mesh(8,1))/(mesh(9,1)-mesh(8,1));
 % X_Knot2=[X_Knot2,PLUS];
-fineness=7;
+fineness=9;
 mesh=quantile(RTotD_NC,linspace(0,1,fineness).');
 X_Knot1=(RTotD_NC<mesh(2,1)).*(1-(RTotD_NC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
 for i=0:(numel(mesh)-3)
@@ -276,6 +277,8 @@ end
 PLUS=(RTotD_NC>=mesh((numel(mesh)-1),1)).*(RTotD_NC-mesh((numel(mesh)-1),1))/(mesh(numel(mesh),1)-mesh((numel(mesh)-1),1));
 X_Knot1=[X_Knot1,PLUS];
 
+%First column:redundant
+X_Knot1=X_Knot1(:,2:fineness);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -299,10 +302,9 @@ thetaProb0=zeros(9,1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 AC=OP_INC_IV_july8;%sample to estimate vote share
+
+%Variables used in Number=2, estimation of vote share
 SamplesizeAC=length(OP_INC_IV_july8);
-EPS=randn(SamplesizeAC,NumSim);
-EPS2=randn(SamplesizeAC,NumSim);
-EPS3=randn(SamplesizeAC,NumSim);
 LOGD_IAC=log(max(ones(SamplesizeAC,1),AC(:,10))); % spend
 LOGW_IAC=log(max(ones(SamplesizeAC,1),AC(:,11))); % w_I
 %LOGW_INXTAC=log(max(ones(SamplesizeAC,1),AC(:,12))); % W_I'
@@ -329,10 +331,6 @@ SameAC=PartyAC==PrespartyAC; %Same party if the two match
 DifAC=PartyAC~=PrespartyAC;
 SameAC=SameAC-DifAC;
 
-%Win_AC=(AC(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
-
-
-
 % WhiteAC=AC(:,21);
 % BlackAC=AC(:,22);
 % OtherAC=AC(:,23);
@@ -340,19 +338,31 @@ SameAC=SameAC-DifAC;
 % Black_NCAC=AC(:,28);
 % Other_NCAC=AC(:,29);
 UnemploymentAC=AC(:,24);
+UnemploymentsqAC=UnemploymentAC.^2;
 %Unemployment_NCAC=AC(:,30);
 PartisanAC=AC(:,63);
 
 
 UnempsameAC=UnemploymentAC.*SameAC;
+UnempsqsameAC=UnemploymentsqAC.*SameAC;
 PartdemoAC=PartisanAC.*PartyAC;
+
+
+%Variables used in number=3, estimation of winning probability
+Win_AC=(AC(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
+
+
+%Where do we use them?
+EPS=randn(SamplesizeAC,NumSim);
+EPS2=randn(SamplesizeAC,NumSim);
+EPS3=randn(SamplesizeAC,NumSim);
 
 
 %%B-Spline for q_I(RTotD_NCAC), where RTotD_NCAC=(LOGD_NCAC./LOGTot_NCAC)  etc.%%
 %% take knots to be between 0.88 to 1.025 with 8 knots (8 basis functions). (Almost all lie
-%% within this range) Let X_Knot be the matrix with 8 columns that contain
-%% the value of the B-Spline basis function evaluated at each of the 8
-%% basis functions.
+% within this range) Let X_Knot be the matrix with 8 columns that contain
+% the value of the B-Spline basis function evaluated at each of the 8
+% basis functions.
 % 
 % mesh=quantile(LOGLOGD_NCAC,[.125;.25;.375;.5;.625;.75;.875]);
 % mesh=[min(LOGLOGD_NCAC);mesh;max(LOGLOGD_NCAC)];
@@ -375,7 +385,10 @@ PartdemoAC=PartisanAC.*PartyAC;
 % end
 % PLUS=(LOGLOGTot_NCAC>=mesh(8,1)).*(LOGLOGTot_NCAC-mesh(8,1))/(mesh(9,1)-mesh(8,1));
 % X_KnotAC2=[X_KnotAC2,PLUS];
-mesh=quantile(RTotD_NCAC,linspace(0,1,fineness).');
+
+%Mesh defined above.
+%mesh=quantile(RTotD_NCAC,linspace(0,1,fineness).');
+
 X_KnotAC1=(RTotD_NCAC<mesh(2,1)).*(1-(RTotD_NCAC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
 for i=0:(numel(mesh)-3)
     PLUS=(RTotD_NCAC>=mesh(i+1,1)).*(RTotD_NCAC<mesh(i+2,1)).*((RTotD_NCAC-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
@@ -385,12 +398,13 @@ end
 PLUS=(RTotD_NCAC>=mesh((numel(mesh)-1),1)).*(RTotD_NCAC-mesh((numel(mesh)-1),1))/(mesh(numel(mesh),1)-mesh((numel(mesh)-1),1));
 X_KnotAC1=[X_KnotAC1,PLUS];
 
-
+%First column: redundant
+X_KnotAC1=X_KnotAC1(:,2:fineness);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%               E_V               %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Where to use?
+
 
 E_VContestFUL=find(E_V_july8(:,8)==0);           %% E_VContestFUL is the elements in which contest==0 :277 distinct districts
 E_VNContestFUL=find(E_V_july8(:,8)==1);          %% E_VNContestFUL is the elements in which contest==1 :297 distinct districts
@@ -537,9 +551,9 @@ LOGTot_E_VC(E_VContestFUL,:)=[];
 
 %%B-Spline for q_I(RTotDE_VCT), where RTotDE_VCT=(NCE_VCT(:,1)./LOGTotal_E_VCT)  etc.%%
 %% take knots to be between 0.88 to 1.025 with 8 knots (8 basis functions). (Almost all lie
-%% within this range) Let X_Knot be the matrix with 8 columns that contain
-%% the value of the B-Spline basis function evaluated at each of the 8
-%% basis functions.
+% within this range) Let X_Knot be the matrix with 8 columns that contain
+% the value of the B-Spline basis function evaluated at each of the 8
+% basis functions.
 
 
 % 
@@ -565,7 +579,7 @@ LOGTot_E_VC(E_VContestFUL,:)=[];
 % PLUS=(LOGLOGTot_E_V>=mesh(8,1)).*(LOGLOGTot_E_V-mesh(8,1))/(mesh(9,1)-mesh(8,1));
 % X_KnotEV2=[X_KnotEV2,PLUS];
 
-mesh=quantile(RTotDE_V,linspace(0,1,fineness).');
+%mesh=quantile(RTotDE_V,linspace(0,1,fineness).');
 X_KnotEV1=(RTotDE_V<mesh(2,1)).*(1-(RTotDE_V-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
 for i=0:(numel(mesh)-3)
     PLUS=(RTotDE_V>=mesh(i+1,1)).*(RTotDE_V<mesh(i+2,1)).*((RTotDE_V-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
@@ -575,6 +589,8 @@ end
 PLUS=(RTotDE_V>=mesh((numel(mesh)-1),1)).*(RTotDE_V-mesh((numel(mesh)-1),1))/(mesh(numel(mesh),1)-mesh((numel(mesh)-1),1));
 X_KnotEV1=[X_KnotEV1,PLUS];
 
+%First column:redundant
+X_KnotEV1=X_KnotEV1(:,2:fineness);
 
 %%%%%%%%%%%%%%%%%%%%%%%% 
 % Defining variables: done
@@ -865,7 +881,15 @@ end
 %%
 %%%%%%%%%%%%%%%%%
 %Estimation of entry probability and Primary N
+%Number=1
 %%%%%%%%%%%%%%%%%
+
+
+Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),X_Knot1,X_Knot1.*(LOGW_I*ones(1,fineness-1))];
+
+coefentry=Xentry\Contest;
+coefprimaryN=Xentry\Primary_N;
+
 
 % %theta0=[initialvalue(1:10,1);initialvalue(12:21,1)]
 % theta0=ones(28,1);
@@ -881,51 +905,58 @@ end
 % Est1=Best1;
 % save Est1.txt Est1 -ASCII
 
-Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),RTotD_NC,RTotD_NC.^2,RTotD_NC.^3];
-
-coefentry=Xentry\Contest;
-coefprimaryN=Xentry\Primary_N;
-
 %%
 %%%%%%%%%%%%%%%%%
 %Estimation of Vote share equation
+%Number=2
 %%%%%%%%%%%%%%%%%
 
-% entryprob=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3]*coefentry;
-% primaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3]*coefprimaryN;
+Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefentry;
+EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefprimaryN;
+
+Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN,Eentry,EprimaryN.*Eentry,(EprimaryN).^2,X_KnotAC1];
+IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))];
+IVvar=IVvoteshare.'*IVvoteshare;
+
+coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*(VSAC-0.5));
 % 
-% Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),primaryN,entryprob,primaryN.*entryprob,RTotD_NCAC,RTotD_NCAC.^2*100,RTotD_NCAC.^3*1000];
-% IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.^3,UnempsameAC,PartdemoAC,log(TenureAC+1),RTotD_NCAC,RTotD_NCAC.^2*100,RTotD_NCAC.^3*1000,LOGW_IAC.*RTotD_NCAC,LOGW_IAC.^2.*RTotD_NCAC];
-% IVvar=IVvoteshare.'*IVvoteshare;
-% %
-% %entryprob,primaryN,primaryN.*entryprob,
+% Sofarbest=10^8;
 % 
-% coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*(VSAC-0.5));
+
+%  initialvalue=testing2;
+%  
+% theta0=[initialvalue(22:23,1);initialvalue(24:32,1);initialvalue(11,1);initialvalue(33:37,1)];
+%     for sss=1:30
+% [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,2),theta0)
+% theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%     end
+% load ('./Best2.txt')    
+% Est2=Best2;
+% save Est2.txt Est2 -ASCII
+
+%%
+%%%%%%%%%%%%%%%%%%
+%Estimation of winning probability
+%Number=3
+%%%%%%%%%%%%%%%%%%
+Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1)];
+coefprobwin=Xprobwin\Win_AC;
+
+% Sofarbest=10^8;
+% theta0=initialvalue(206:212,1);
+%     for sss=1:30
+% [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,3),theta0)
+% theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%     end
+% load ('./Best3.txt')
+% Est3=Best3;
+% save Est3.txt Est3 -ASCII
+
 %%
 
-Sofarbest=10^8;
 
- OPTIONS=optimset('MaxIter',50000,'MaxFunEvals',1000000);
- initialvalue=testing2;
- 
-theta0=[initialvalue(22:23,1);initialvalue(24:32,1);initialvalue(11,1);initialvalue(33:37,1)];
-    for sss=1:30
-[mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,2),theta0)
-theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
-    end
-load ('./Best2.txt')    
-Est2=Best2;
-save Est2.txt Est2 -ASCII
 Sofarbest=10^8;
-theta0=initialvalue(206:212,1);
-    for sss=1:30
-[mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,3),theta0)
-theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
-    end
-load ('./Best3.txt')
-Est3=Best3;
-save Est3.txt Est3 -ASCII
-Sofarbest=10^8;
+  OPTIONS=optimset('MaxIter',50000,'MaxFunEvals',1000000);
 theta0=initialvalue(38:172,1);
    for sss=1:30
 [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,4),theta0);

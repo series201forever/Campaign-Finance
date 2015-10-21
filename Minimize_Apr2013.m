@@ -157,35 +157,35 @@ if num==1
     % Q_C2=thetain(33,1);
     % Q_C3=thetain(34,1);
 elseif num==2
-    thetaS=Est1(1:2,1);
-    thetaS(1,1)=1;
-    thetaQ(1,1)=1;
-    %     for ii=2:size(X_Knot1,2)
-    %         thetaQ(ii,1)=1-sum(abs(Est1(3:(ii+1),1)));
-    %     end
-    thetaQ(2:9,1)=Est1(3:10,1);
-    thetaS2=thetain(1:2,1); % do not normalize.
-    thetaQ2(1,1)=thetain(3,1);
-    %     for ii=2:size(X_Knot1,2)
-    %         thetaQ2(ii,1)=thetaQ2(1,1)-sum(abs(thetain(4:(ii+2),1)));
-    %     end
-    thetaQ2(2:9,1)=thetain(4:11,1);
-    B_T=thetain(12,1);
-    theta=Est1(11:15,1);
-    theta2=Est1(16:20,1);
-    B_I=thetain(13,1);
-    B_C=thetain(14,1);
-    Q_C1=thetain(15,1);
-    Q_C2=thetain(16,1);
-    Q_C3=thetain(17,1);
+%     thetaS=Est1(1:2,1);
+%     thetaS(1,1)=1;
+%     thetaQ(1,1)=1;
+%     %     for ii=2:size(X_Knot1,2)
+%     %         thetaQ(ii,1)=1-sum(abs(Est1(3:(ii+1),1)));
+%     %     end
+%     thetaQ(2:9,1)=Est1(3:10,1);
+%     thetaS2=thetain(1:2,1); % do not normalize.
+%     thetaQ2(1,1)=thetain(3,1);
+%     %     for ii=2:size(X_Knot1,2)
+%     %         thetaQ2(ii,1)=thetaQ2(1,1)-sum(abs(thetain(4:(ii+2),1)));
+%     %     end
+%     thetaQ2(2:9,1)=thetain(4:11,1);
+%     B_T=thetain(12,1);
+%     theta=Est1(11:15,1);
+%     theta2=Est1(16:20,1);
+%     B_I=thetain(13,1);
+%     B_C=thetain(14,1);
+%     Q_C1=thetain(15,1);
+%     Q_C2=thetain(16,1);
+%     Q_C3=thetain(17,1);
 elseif num==3
-    thetawin=thetain(1:7,1);
-    thetaS2=Est2(1:2,1); % do not normalize.
-    thetaQ2(1,1)=Est2(3,1);
-    %     for ii=2:size(X_Knot1,2)
-    %         thetaQ2(ii,1)=thetaQ2(1,1)-sum(abs(thetain(4:(ii+2),1)));
-    %     end
-    thetaQ2(2:9,1)=Est2(4:11,1);
+%     thetawin=thetain(1:7,1);
+%     thetaS2=Est2(1:2,1); % do not normalize.
+%     thetaQ2(1,1)=Est2(3,1);
+%     %     for ii=2:size(X_Knot1,2)
+%     %         thetaQ2(ii,1)=thetaQ2(1,1)-sum(abs(thetain(4:(ii+2),1)));
+%     %     end
+%     thetaQ2(2:9,1)=Est2(4:11,1);
     
 elseif num==4
     thetaS2=Est2(1:2,1); % do not normalize.
@@ -226,8 +226,8 @@ end
 
 
 
-
-if num<=2
+% 
+% if num<=2
     %XS=[Unempsame,Partdemo]*thetaS;
     % XSNC=[Unemployment_NC,White_NC]*thetaS;
     % XSNC2=[Unemployment_NC,White_NC]*thetaS2;
@@ -257,7 +257,7 @@ if num<=2
     %XQEV=X_KnotEV1*thetaQ;  % q_I
     %XQEVCT=XQEV;
     %XQEVCT(E_VContestFUL,:)=[];
-end
+% end
 if num>=2
     XS2=[Unemployment,White]*thetaS2;
     XQ2=X_Knot1*thetaQ2;  % q_I
@@ -309,14 +309,14 @@ end
 %%%%%%%%%%      Ai & Chen     %%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% [rho(z_1,alpha),rho(z_2,alpha),...,rho(z_n,alpha)]'
-if num==2
-    RHO=VSAC-0.5-B_I*LOGD_IAC-B_C*LOGD_CAC-(XSAC2-mean(XSAC2)).*PartyAC-XQAC2-PRENTAC*Q_C1-E_Primary_NAC*Q_C2-PRENTAC.*E_Primary_NAC*Q_C3-B_T*log(TenureAC+1);   %% sign of -[PRENTAC,PRENTAC.^2]*[Q_C1,Q_C2]' unlike in paper.
-    P=[ones(length(VSAC),1),log(TenureAC+1),UnemploymentAC.*PartyAC,WhiteAC.*PartyAC,X_KnotAC1(:,1:8),LOGW_IAC,(log(TenureAC+1)).^2,X_KnotAC1(:,1:8).^2,LOGW_IAC.^2,...
-        log(TenureAC+1).*PartyAC, log(TenureAC+1).*LOGW_IAC, PartyAC.*LOGW_IAC]; %% Basis function
-    
-    SRR2=RHO'*P*inv(P'*P)*P'*RHO;  %% EQ (6) in Ai and Chen p1799
-    SRR2=SRR2/var(VSAC);
-end
+% if num==2
+%     RHO=VSAC-0.5-B_I*LOGD_IAC-B_C*LOGD_CAC-(XSAC2-mean(XSAC2)).*PartyAC-XQAC2-PRENTAC*Q_C1-E_Primary_NAC*Q_C2-PRENTAC.*E_Primary_NAC*Q_C3-B_T*log(TenureAC+1);   %% sign of -[PRENTAC,PRENTAC.^2]*[Q_C1,Q_C2]' unlike in paper.
+%     P=[ones(length(VSAC),1),log(TenureAC+1),UnemploymentAC.*PartyAC,WhiteAC.*PartyAC,X_KnotAC1(:,1:8),LOGW_IAC,(log(TenureAC+1)).^2,X_KnotAC1(:,1:8).^2,LOGW_IAC.^2,...
+%         log(TenureAC+1).*PartyAC, log(TenureAC+1).*LOGW_IAC, PartyAC.*LOGW_IAC]; %% Basis function
+%     
+%     SRR2=RHO'*P*inv(P'*P)*P'*RHO;  %% EQ (6) in Ai and Chen p1799
+%     SRR2=SRR2/var(VSAC);
+% end
 
 if num==4
     Cutoff=[-1;3;7;100];
@@ -519,11 +519,11 @@ if num==5
 end
 
 %%%%%%%%   Pr(win|w'_(t+1),w'_t,q_I,s,Entry)  %%%%%%%%%
-if num==3
-    dL2=[ones(length(Win_AC),1),LOGW_IAC,XQAC2,XSAC2.*PartyAC,LOGW_IAC.^2,XQAC2.^2,log(TenureAC+1)]*thetawin;
-    SRR15=sum((Win_AC-dL2).^2)/var(Win_AC);
-    
-end
+% if num==3
+%     dL2=[ones(length(Win_AC),1),LOGW_IAC,XQAC2,XSAC2.*PartyAC,LOGW_IAC.^2,XQAC2.^2,log(TenureAC+1)]*thetawin;
+%     SRR15=sum((Win_AC-dL2).^2)/var(Win_AC);
+%     
+% end
 if num==4
     
     if (((E_VCTa(1:5,1).^2)'*gammaCT(1:5,1).^2)>=1)|(((E_VCTa(1:5,2).^2)'*gammaCT(1:5,2).^2)>=1)|(((E_VCTa(1:5,3).^2)'*gammaCT(1:5,3).^2)>=1)
@@ -546,11 +546,11 @@ if num==4
     end
 end
 if num==1
-    SRR=SRR1+SRR3;
-elseif num==2
-    SRR=SRR2;
-elseif num==3
-    SRR=SRR15;
+%     SRR=SRR1+SRR3;
+% elseif num==2
+%     SRR=SRR2;
+% elseif num==3
+%     SRR=SRR15;
 elseif num==4
     SRR=SRR9+SRR10+SRR11;
 elseif num==5
@@ -566,11 +566,11 @@ thetain_=thetain;
 
 if bestiter==iterate-1
     if num==1
-        save Best1.txt thetain_ SRR bestiter -ASCII
-    elseif num==2
-        save Best2.txt thetain_ SRR bestiter -ASCII
-    elseif num==3
-        save Best3.txt thetain_ SRR bestiter -ASCII
+%         save Best1.txt thetain_ SRR bestiter -ASCII
+%     elseif num==2
+%         save Best2.txt thetain_ SRR bestiter -ASCII
+%     elseif num==3
+%         save Best3.txt thetain_ SRR bestiter -ASCII
     elseif num==4
         save Best4.txt thetain_ SRR bestiter -ASCII
     elseif num==5
