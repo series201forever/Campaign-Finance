@@ -73,77 +73,95 @@ global Delt
 % global X_KnotAC2
 
 
-
-
+% Variables used in number=4
 global E_VContestFUL
-global E_VNContestFUL
-global NCE_V
-global NCE_VCT
-global NCE_VNCT
-global PartyE_V
-global PartyE_VCT
-global PartyE_VNCT
-global XSNCEVCT_
-global XSNCEVNCT_
-global XS_EVCT_
-global XS_EVNCT_
-global XS_EVCTwnxt_
-global XSEV_
-global TenureE_V
 global TenureE_VCT
-global TenureE_VNCT
-global NCE_VTenCT
-global NCE_VTenNCT
-global LOGLOGD_E_VCT
-global LOGLOGD_E_VNCT
-global LOGLOGTot_E_VCT
-global LOGLOGTot_E_VNCT
-global LOGLOGD_E_VCTwnxt
-global LOGLOGTot_E_VCTwnxt
 
+global Est2
+global IND5
+
+global LOGD_E_VCT
+global LOGTotal_E_VCT
+global LOGW_E_VCT
+global SameE_VCT
+global XS_EVCT_
+
+global LOGW_NXT_E_VCTwnxt
+global LOGW_E_VCTwnxt
+global SameE_VCTwnxt
+global XS_EVCTwnxt_
+
+global RTotDE_VCT
+global X_KnotEV1
+
+
+
+
+
+
+
+% global E_VNContestFUL
+% global NCE_V
+% global NCE_VCT
+% global NCE_VNCT
+% global PartyE_V
+% global PartyE_VCT
+% global PartyE_VCTwnxt
+% global PartyE_VNCT
+% global XSNCEVCT_
+% global XSNCEVNCT_
+% global XS_EVNCT_
+% global XSEV_
+% global TenureE_V
+% global TenureE_VNCT
+% global NCE_VTenCT
+% global NCE_VTenNCT
+% global LOGLOGD_E_VCT
+% global LOGLOGD_E_VNCT
+% global LOGLOGTot_E_VCT
+% global LOGLOGTot_E_VNCT
+% global LOGLOGD_E_VCTwnxt
+% global LOGLOGTot_E_VCTwnxt
 % global RTotDE_VCT
 % global RTotDE_VNCT
 % global RTotDE_V
 % global RTotDE_VCTwnxt
-global Win_E_VCT
-global LOGW_NXT_E_VCT
-global LOGW_NXT_E_VNCT
-global LOGTotal_E_VCT
-global LOGTotal_E_VNCT
-global LOGW_E_VCT
-global LOGW_E_VNCT
-global LOGW_E_VCTwnxt
-global LOGD_E_VCT
-global LOGD_E_VNCT
-global N
+% global Win_E_VCT
+% global LOGW_NXT_E_VNCT
+% global LOGTotal_E_VNCT
+% global LOGW_E_VNCT
+% global LOGW_NXT_E_VCT
+% 
+% global LOGD_E_VNCT
+% global N
 global Sofarbest
 global bestiter
-global numunits
-global numunitsAC
-global NCE_VCTwnxt
-global TenureE_VCTwnxt
-global PartyE_VCTwnxt
-global XSNCEVCTwnxt_
-global LOGW_NXT_E_VCTwnxt
-global NCE_VTenCTwnxt
+% global numunits
+% global numunitsAC
+% global NCE_VCTwnxt
+% global TenureE_VCTwnxt
+% 
+% global XSNCEVCTwnxt_
+% 
+% global NCE_VTenCTwnxt
 global LOGW_NXT_E_VC
 global LOGD_E_VC
 global LOGTot_E_VC
-global YEARE_VCT
-global YEARE_VNCT
-global YEARE_VCTwnxt
-global LOGW_CNXTAC
-global X_KnotEV1
-global X_KnotEV2
+% global YEARE_VCT
+% global YEARE_VNCT
+% global YEARE_VCTwnxt
+% global LOGW_CNXTAC
+% 
+% global X_KnotEV2
 % global EPS
 % global EPS2
 % global EPS3
-global NumSim;
-global mesh
-global IND5
-global Est1
-global Est2
-global XXX
+%global NumSim;
+%global mesh
+
+%global Est1
+
+%global XXX
 
 %%%%%%%%%%%%%%%%
 %Loading dataset
@@ -386,7 +404,8 @@ Win_AC=(AC(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
 % PLUS=(LOGLOGTot_NCAC>=mesh(8,1)).*(LOGLOGTot_NCAC-mesh(8,1))/(mesh(9,1)-mesh(8,1));
 % X_KnotAC2=[X_KnotAC2,PLUS];
 
-%Mesh defined above.
+%Use the same quantile defined in OP_INC_july8. No need to re-define mesh
+%here.
 %mesh=quantile(RTotD_NCAC,linspace(0,1,fineness).');
 
 X_KnotAC1=(RTotD_NCAC<mesh(2,1)).*(1-(RTotD_NCAC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
@@ -409,49 +428,62 @@ X_KnotAC1=X_KnotAC1(:,2:fineness);
 E_VContestFUL=find(E_V_july8(:,8)==0);           %% E_VContestFUL is the elements in which contest==0 :277 distinct districts
 E_VNContestFUL=find(E_V_july8(:,8)==1);          %% E_VNContestFUL is the elements in which contest==1 :297 distinct districts
 
+Win_E_V=(E_V_july8(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
+Win_E_VCT=Win_E_V;
+Win_E_VCT(E_VContestFUL,:)=[];
+IND5=find(Win_E_VCT==0);  % index for elections with incumbent loss (among those with entry).
+                          % Number of distinct districts within contest=0 is 27.
+                          % Number of distinct districts within contest=1 is 295.
 
-LOGTot_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,31)));
-LOGD_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,32)));
-LOGW_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,33)));
-LOGWNXT_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,34)));
-Tenure_NCE_V=E_V_july8(:,35); % Tenure_NC
 
 
-NCE_V=[LOGD_NCE_V,LOGW_NCE_V,LOGWNXT_NCE_V];
-NCE_VCT=NCE_V;
-NCE_VCT(E_VContestFUL,:)=[];        %NCE_V limited to samples in which there is entry.
-NCE_VNCT=NCE_V;
-NCE_VNCT(E_VNContestFUL,:)=[];       %NCE_V limited to samples in which there is no entry.
-NCE_VTenCT=Tenure_NCE_V;
-NCE_VTenCT(E_VContestFUL,:)=[];
-NCE_VTenNCT=Tenure_NCE_V;
-NCE_VTenNCT(E_VNContestFUL,:)=[];
-LOGTot_NCE_VCT=LOGTot_NCE_V;
-LOGTot_NCE_VCT(E_VContestFUL,:)=[];
-LOGTot_NCE_VNCT=LOGTot_NCE_V;
-LOGTot_NCE_VNCT(E_VNContestFUL,:)=[];
 
 PartyE_V=3*ones(length(E_V_july8),1)-2*E_V_july8(:,3);  %%PartyE_V=1  if candidate i is Democrat and PartyE_V=-1 if candidate i is Republican.
-PartyE_VCT=PartyE_V;
-PartyE_VCT(E_VContestFUL,:)=[];     %PartyE_VCT is the party indicator when there is entry next period.
-PartyE_VNCT=PartyE_V;
-PartyE_VNCT(E_VNContestFUL,:)=[];    %PartyE_VCT is the party indicator when there is NO entry next period.
+% PartyE_VCT=PartyE_V;
+% PartyE_VCT(E_VContestFUL,:)=[];     %PartyE_VCT is the party indicator when there is entry next period.
+% PartyE_VCTwnxt=PartyE_VCT;
+% PartyE_VCTwnxt(IND5,:)=[];
+% PartyE_VNCT=PartyE_V;
+% PartyE_VNCT(E_VNContestFUL,:)=[];    %PartyE_VCT is the party indicator when there is NO entry next period.
 
-YEARE_V=E_V_july8(:,2);           % YEARE_V is the year of the election.
-YEARE_VCT=YEARE_V;
-YEARE_VCT(E_VContestFUL,:)=[];
-YEARE_VNCT=YEARE_V;
-YEARE_VNCT(E_VNContestFUL,:)=[];
+PrespartyE_V=3*ones(length(E_V_july8),1)-2*E_V_july8(:,39);
+SameE_V=PartyE_V==PrespartyE_V; %Same party if the two match
+DifE_V=PartyE_V~=PrespartyE_V;
+SameE_V=SameE_V-DifE_V;
+SameE_VCT=SameE_V;
+SameE_VCT(E_VContestFUL,:)=[];     %PartyE_VCT is the party indicator when there is entry next period.
+SameE_VCTwnxt=SameE_VCT;
+SameE_VCTwnxt(IND5,:)=[];
+SameE_VNCT=PartyE_V;
+SameE_VNCT(E_VNContestFUL,:)=[];    %PartyE_VCT is the party indicator when there is NO entry next period.
 
-XSNCEV_=[E_V_july8(:,30),E_V_july8(:,27)];       % E_V(:,30)=unemployment_NC (%), E_V(:,27)=pctwhite_NC
-XSNCEVCT_=XSNCEV_;
-XSNCEVCT_(E_VContestFUL,:)=[];
-XSNCEVNCT_=XSNCEV_;
-XSNCEVNCT_(E_VNContestFUL,:)=[];
+% YEARE_V=E_V_july8(:,2);           % YEARE_V is the year of the election.
+% YEARE_VCT=YEARE_V;
+% YEARE_VCT(E_VContestFUL,:)=[];
+% YEARE_VCTwnxt=YEARE_VCT;
+% YEARE_VCTwnxt(IND5,:)=[];
+% YEARE_VNCT=YEARE_V;
+% YEARE_VNCT(E_VNContestFUL,:)=[];
+% 
+% XSNCEV_=[E_V_july8(:,30),E_V_july8(:,27)];       % E_V(:,30)=unemployment_NC (%), E_V(:,27)=pctwhite_NC
+% XSNCEVCT_=XSNCEV_;
+% XSNCEVCT_(E_VContestFUL,:)=[];
+% XSNCEVCTwnxt_=XSNCEVCT_;
+% XSNCEVCTwnxt_(IND5,:)=[];
+% XSNCEVNCT_=XSNCEV_;
+% XSNCEVNCT_(E_VNContestFUL,:)=[];
+% 
+% XSEV_=[E_V_july8(:,24),E_V_july8(:,21)];    % E_V(:,24)=unemployment (%), E_V(:,21)=pctwhite (%)
+% XS_EVCT_=XSEV_;
+% XS_EVCT_(E_VContestFUL,:)=[];
+% XS_EVNCT_=XSEV_;
+% XS_EVNCT_(E_VNContestFUL,:)=[];
 
-XSEV_=[E_V_july8(:,24),E_V_july8(:,21)];    % E_V(:,24)=unemployment (%), E_V(:,21)=pctwhite (%)
+XSEV_=[E_V_july8(:,24),E_V_july8(:,63)];    % E_V(:,24)=unemployment (%), E_V(:,63)=partisanship
 XS_EVCT_=XSEV_;
 XS_EVCT_(E_VContestFUL,:)=[];
+XS_EVCTwnxt_=XS_EVCT_;
+XS_EVCTwnxt_(IND5,:)=[];
 XS_EVNCT_=XSEV_;
 XS_EVNCT_(E_VNContestFUL,:)=[];
 
@@ -461,28 +493,12 @@ TenureE_VCT(E_VContestFUL,:)=[];
 TenureE_VNCT=TenureE_V;
 TenureE_VNCT(E_VNContestFUL,:)=[];
 
-Win_E_V=(E_V_july8(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
-Win_E_VCT=Win_E_V;
-Win_E_VCT(E_VContestFUL,:)=[];
-IND5=find(Win_E_VCT==0);  % index for elections with incumbent loss (among those with entry).
-                          % Number of distinct districts within contest=0 is 27.
-                          % Number of distinct districts within contest=1 is 295.
 
 
-NCE_VCTwnxt=NCE_VCT;
-NCE_VCTwnxt(IND5,:)=[];
-YEARE_VCTwnxt=YEARE_VCT;
-YEARE_VCTwnxt(IND5,:)=[];
-TenureE_VCTwnxt=TenureE_VCT;
-TenureE_VCTwnxt(IND5,:)=[];
-XS_EVCTwnxt_=XS_EVCT_;
-XS_EVCTwnxt_(IND5,:)=[];
-PartyE_VCTwnxt=PartyE_VCT;
-PartyE_VCTwnxt(IND5,:)=[];
-XSNCEVCTwnxt_=XSNCEVCT_;
-XSNCEVCTwnxt_(IND5,:)=[];
-NCE_VTenCTwnxt=NCE_VTenCT;
-NCE_VTenCTwnxt(IND5,:)=[];
+
+
+
+
 
 % LOGLOGD_E_V=log(max(ones(length(E_V_july8),1),NCE_V(:,1)));
 % LOGLOGD_E_VCT=LOGLOGD_E_V;
@@ -499,15 +515,42 @@ NCE_VTenCTwnxt(IND5,:)=[];
 % LOGLOGTot_E_VCTwnxt=LOGLOGTot_E_VCT;
 % LOGLOGTot_E_VCTwnxt(IND5,:)=[];
 
+LOGTot_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,31)));
+LOGD_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,32)));
+LOGW_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,33)));
+LOGWNXT_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,34)));
+% Tenure_NCE_V=E_V_july8(:,35); % Tenure_NC
+% TenureE_VCTwnxt=TenureE_VCT;
+% TenureE_VCTwnxt(IND5,:)=[];
+
+NCE_V=[LOGD_NCE_V,LOGW_NCE_V,LOGWNXT_NCE_V];
+NCE_VCT=NCE_V;
+NCE_VCT(E_VContestFUL,:)=[];        %NCE_V limited to samples in which there is entry.
+% NCE_VCTwnxt=NCE_VCT;
+% NCE_VCTwnxt(IND5,:)=[];
+NCE_VNCT=NCE_V;
+NCE_VNCT(E_VNContestFUL,:)=[];       %NCE_V limited to samples in which there is no entry.
+% NCE_VTenCT=Tenure_NCE_V;
+% NCE_VTenCT(E_VContestFUL,:)=[];
+% NCE_VTenCTwnxt=NCE_VTenCT;
+% NCE_VTenCTwnxt(IND5,:)=[];
+% NCE_VTenNCT=Tenure_NCE_V;
+% NCE_VTenNCT(E_VNContestFUL,:)=[];
+LOGTot_NCE_VCT=LOGTot_NCE_V;
+LOGTot_NCE_VCT(E_VContestFUL,:)=[];
+LOGTot_NCE_VNCT=LOGTot_NCE_V;
+LOGTot_NCE_VNCT(E_VNContestFUL,:)=[];
+
 
 RTotDE_V=(max(0,NCE_V(:,1)).^(-1/2))./LOGTot_NCE_V;
 RTotDE_V=RTotDE_V.*(exp(LOGTot_NCE_V)./exp(NCE_V(:,1)));
 RTotDE_VCT=(max(0,NCE_VCT(:,1)).^(-1/2))./LOGTot_NCE_VCT;
 RTotDE_VCT=RTotDE_VCT.*(exp(LOGTot_NCE_VCT)./exp(NCE_VCT(:,1)));
-RTotDE_VNCT=(max(0,NCE_VNCT(:,1)).^(-1/2))./LOGTot_NCE_VNCT;
-RTotDE_VNCT=RTotDE_VNCT.*(exp(LOGTot_NCE_VNCT)./exp(NCE_VNCT(:,1)));
 RTotDE_VCTwnxt=RTotDE_VCT;
 RTotDE_VCTwnxt(IND5,:)=[];
+RTotDE_VNCT=(max(0,NCE_VNCT(:,1)).^(-1/2))./LOGTot_NCE_VNCT;
+RTotDE_VNCT=RTotDE_VNCT.*(exp(LOGTot_NCE_VNCT)./exp(NCE_VNCT(:,1)));
+
 
 LOGD_E_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,10)));  %log(Spend)
 LOGD_E_VCT=LOGD_E_V;
@@ -816,66 +859,6 @@ X_KnotEV1=X_KnotEV1(:,2:fineness);
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%% Preliminary Step: Transition Estimation  %%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Regress unemployment Jump and partisanship on a constant
-% and one period lagged value (for partisanship, samples show up once in 10
-% years).
-% Transition of presidential party is estimated later.
-
-% This can be done separately from the other first step estimation as
-% there is not interdependence between the Transition Estimation and the
-% other first-step moment restrictions.
-
-Ywh=[];
-Xw=[];
-Yump=[];
-Xu=[];
-
-% Create Ywh, Xw (Yump, Xu) %%
-% For each district, stack the percentage of whites into ever longer
-% column vector. Do the same for unemployment >> Ywh, Yump
-% We omit the first observation, because for that value, we don't observe
-% the 1 period lagged value.
-
-% Also create Xw and Xu analogously, but including all periods but the
-% last.
-% useornot=0 if we do not use the particular CD for any of the rest of the
-% estimation: due to the fact that we cannot invert any of the policy
-% functions.
-
-unuse=(useornot==0);
-State_Transition(unuse,:)=[];
-pctblk(unuse,:)=[];
-pctwh(unuse,:)=[];
-pctothr(unuse,:)=[];
-unemployment(unuse,:)=[];
-
-for i=1:length(State_Transition)
-    Jwh=pctwh(i,:);
-    Jump=unemployment(i,:);
-    Kwh=(Jwh==-1);
-    Kump=(Jump==-1);
-    Jwh(Kwh)=[];
-    Jump(Kump)=[];
-    Jwh=Jwh';
-    Jump=Jump';
-    Xwh(:,1)=ones(length(Jwh)-1,1);   %% Constant
-    Xwh(:,2)=Jwh(1:length(Jwh)-1,1);      %% lag value.
-    Xump(:,1)=ones(length(Jump)-1,1);
-    Xump(:,2)=Jump(1:length(Jump)-1,1);
-    Ywh=[Ywh;Jwh(2:length(Jwh),1)];
-    Xw=[Xw;Xwh];
-    Yump=[Yump;Jump(2:length(Jump),1)];
-    Xu=[Xu;Xump];
-    Xwh=[];
-    Xump=[];
-    Jwh=[];
-    Jump=[];
-end
-%Ywh,Yump [number of district*(years-1),1] vector. Xwh,Xu: regressors.
-
 
 
 %%
@@ -885,25 +868,14 @@ end
 %%%%%%%%%%%%%%%%%
 
 
-Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),X_Knot1,X_Knot1.*(LOGW_I*ones(1,fineness-1))];
-
+Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),X_Knot1];
 coefentry=Xentry\Contest;
 coefprimaryN=Xentry\Primary_N;
 
+%  Xentry2=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),X_Knot1,X_Knot1.*(LOGW_I*ones(1,fineness-1))];
+%  coefentry2=Xentry2\Contest;
+%  coefprimaryN2=Xentry2\Primary_N;
 
-% %theta0=[initialvalue(1:10,1);initialvalue(12:21,1)]
-% theta0=ones(28,1);
-% iterate=1;
-% %[mintheta,SRR]=ktrlink(@Minimize,theta0,Aineq,bineq,[],[],bddtheta0(:,1),bddtheta0(:,2),@Const);
-% 
-%     for sss=1:30
-% [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,1),theta0);
-% theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta
-% print(sss)
-%     end
-% load ('./Best1.txt')
-% Est1=Best1;
-% save Est1.txt Est1 -ASCII
 
 %%
 %%%%%%%%%%%%%%%%%
@@ -911,29 +883,24 @@ coefprimaryN=Xentry\Primary_N;
 %Number=2
 %%%%%%%%%%%%%%%%%
 
-Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefentry;
-EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefprimaryN;
+Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry;
+EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefprimaryN;
 
-Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN,Eentry,EprimaryN.*Eentry,(EprimaryN).^2,X_KnotAC1];
+Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN,Eentry,EprimaryN.*Eentry,RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3];
 IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))];
 IVvar=IVvoteshare.'*IVvoteshare;
 
 coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*(VSAC-0.5));
-% 
-% Sofarbest=10^8;
-% 
 
-%  initialvalue=testing2;
-%  
-% theta0=[initialvalue(22:23,1);initialvalue(24:32,1);initialvalue(11,1);initialvalue(33:37,1)];
-%     for sss=1:30
-% [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,2),theta0)
-% theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
-%     end
-% load ('./Best2.txt')    
-% Est2=Best2;
-% save Est2.txt Est2 -ASCII
 
+% Eentry2=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefentry2;
+% EprimaryN2=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefprimaryN2;
+% Xvoteshare2=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN2,Eentry2,EprimaryN2.*Eentry2,(EprimaryN2).^2,X_KnotAC1];
+% IVvoteshare2=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))];
+% IVvar2=IVvoteshare2.'*IVvoteshare2;
+% 
+% coefvoteshare2=inv(Xvoteshare2.'*IVvoteshare2*inv(IVvar2)*IVvoteshare2.'*Xvoteshare2)*(Xvoteshare2.'*IVvoteshare2*inv(IVvar2)*IVvoteshare2.'*(VSAC-0.5));
+% % 
 %%
 %%%%%%%%%%%%%%%%%%
 %Estimation of winning probability
@@ -942,15 +909,14 @@ coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*
 Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1)];
 coefprobwin=Xprobwin\Win_AC;
 
-% Sofarbest=10^8;
-% theta0=initialvalue(206:212,1);
-%     for sss=1:30
-% [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,3),theta0)
-% theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
-%     end
-% load ('./Best3.txt')
-% Est3=Best3;
-% save Est3.txt Est3 -ASCII
+
+%%
+%%%%%%%%%%%%%%%%%%
+%Define variables to feed into number=4
+%%%%%%%%%%%%%%%%%%
+Est1=[coefentry;coefprimaryN];
+Est2=coefvoteshare;
+
 
 %%
 %%%%%%%%%%%%%%%%%%
@@ -976,23 +942,14 @@ save Est4.txt Est4 -ASCII
 %Number=5
 %%%%%%%%%%%%%%%%%%
 
-%Spending equation
+%Each actions
 Xaction=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,PartyE_VNCT.*XS_EVNCT_(:,1),PartyE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,XQEVNCT2,...
         LOGW_E_VNCT.^2,PartyE_VNCT.*(XS_EVNCT_(:,1)).^2,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,XQEVNCT2.^2];
 coefspend=Xaction\LOGD_E_VNCT;
 coeffund=Xaction\LOGTotal_E_VNCT;
 coefsave=Xaction\LOGW_NXT_E_VNCT;
 
-%
-% Sofarbest=10^8;
-% theta0=initialvalue(173:205,1);
-%     for sss=1:30
-% [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,5),theta0)
-% theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
-%     end
-% load ('./Best5.txt')
-% Est5=Best5;
-% save Est5.txt Est5 -ASCII
+
 %%
 
 minthetaall=[Est1(1:10,1);Est2(12,1);Est1(11:20,1);Est2(1:11,1);Est2(13:17,1);Est4(1:135,1);Est5(1:33,1);Est3(1:7,1)];
