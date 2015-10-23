@@ -177,9 +177,9 @@ OP_INC_july8=csvread('OP_INC_july8partisan.csv',1,0);
 % load('./op_inc_iv_july8.mat')
 OP_INC_IV_july8=csvread('OP_INC_IV_july8partisan.csv',1,0);
 
-load ('./State_Transition.mat')
-load ('./testing2.txt')
-load ('./retire.txt')
+%load ('./State_Transition.mat')
+%load ('./testing2.txt')
+%load ('./retire.txt')
 
 % rand('state',100);%??
 % randn('state',10);%??
@@ -202,7 +202,7 @@ E_V_july8(dele3,:)=[]; %Drop NaN
 E_V_july8(E_V_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleC=find((E_V_july8(:,16)==0).*E_V_july8(:,8)==1);
 E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
-
+E_V_july8(174:177,:)=[]; %Drop an Rtotd outlier
 
 
 % Lamda=0.108;
@@ -215,7 +215,6 @@ E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
 
 Estimation_OP=OP_INC_july8; %Sample to estimate entry probability
 
-%Variables used in Number=1, estimation of entry probability/PrimaryN.
 
 Samplesize=length(Estimation_OP);
 %Year=Estimation_OP(:,2); % year of election.
@@ -298,21 +297,6 @@ X_Knot1=[X_Knot1,PLUS];
 X_Knot1=X_Knot1(:,2:fineness);
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%   Estimation of Probability     %%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%S=(c0_s+c1_s*pctwhite*c2_s*unemployment)
-%q_I=(c1+c2*d_nc+c3*w_nc+c4*w'_nc+c5*S+c6*(d_nc)^2+
-%c7*(w_nc)^2+c8*(w'_nc)^2+c9*PartyDem+c10*PartyRep+c11*S*PartyDem+c12*S*PartyRep
-
-%[[+c9_q*(w_i_nc)(w'_i_nc)+ c10_q*(w_i_nc)(d_i_nc)+c11_q*(w_i_nc)S+c12_q*(w'_i_nc)(d_i_nc)+
-%c13_q*(w'_i_nc)S+c14_q*(d_i_nc)S]]
-
-thetaProb0=zeros(9,1);
-% OPTIONS=optimset('TolX',1e-5,'TolFun',1e-4,'Diagnostics','off','MaxIter',500,'MaxFunEvals',1000);
-% [thetaEnt,fval]=fminsearch(@(theta) Entryprob(theta,XSQ),thetaProb0);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%      Ai & Chen     %%%%%%%%%%
@@ -976,6 +960,6 @@ Est5=[coefspend;coeffund;coefsave];
 
 
 %minthetaall=[Est1(1:10,1);Est2(12,1);Est1(11:20,1);Est2(1:11,1);Est2(13:17,1);Est4(1:135,1);Est5(1:33,1);Est3(1:7,1)];
-minthetaall2=[Est1;Est2;Est3;Est4;Est5];
+minthetaall2=[Est1;Est2;Est3;Est4;Est5]; %Est2 comes at the end because its length differs based on specification
 save minimizedtheta minthetaall2
 save minimizedtheta.txt minthetaall2 -ASCII
