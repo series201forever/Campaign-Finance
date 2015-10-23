@@ -18,9 +18,10 @@ function SRR=Minimize_Apr2013(thetain,num)
 % global Shockump
 % global Shockwh
 
-
-global iterate
-global Delt
+% global Sofarbest
+% global bestiter
+% global iterate
+% global Delt
 
 %Variables used in num=1
 % global Samplesize
@@ -76,6 +77,7 @@ global Delt
 % Variables used in number=4
 global E_VContestFUL
 global TenureE_VCT
+global TenureE_VCTwnxt
 
 global Est2
 global IND5
@@ -134,8 +136,7 @@ global X_KnotEV1
 % 
 % global LOGD_E_VNCT
 % global N
-global Sofarbest
-global bestiter
+
 % global numunits
 % global numunitsAC
 % global NCE_VCTwnxt
@@ -144,9 +145,9 @@ global bestiter
 % global XSNCEVCTwnxt_
 % 
 % global NCE_VTenCTwnxt
-global LOGW_NXT_E_VC
-global LOGD_E_VC
-global LOGTot_E_VC
+% global LOGW_NXT_E_VC
+% global LOGD_E_VC
+% global LOGTot_E_VC
 % global YEARE_VCT
 % global YEARE_VNCT
 % global YEARE_VCTwnxt
@@ -181,7 +182,7 @@ if num==4
     %         thetaQ2(ii,1)=thetaQ2(1,1)-sum(abs(thetain(4:(ii+2),1)));
     %     end
     %thetaQ2(2:9,1)=Est2(4:11,1);
-    thetaQ2=Est2(7:numel(Est2));
+    thetaQ2=Est2(9:numel(Est2));
 %     menc=-5;
 %     E_VCTa(:,1)=thetain(menc+6:menc+20,1);
 %     E_VCTa(:,2)=thetain(menc+21:menc+35,1);
@@ -205,10 +206,10 @@ if num==4
     
     %XS_EVCT2=XS_EVCT_*thetaS2;
     %XS_EVNCT2=XS_EVNCT_*thetaS2;
-    if numel(Est2)==3
+    if numel(thetaQ2)==3
         XQEV2=[RTotDE_VCT,RTotDE_VCT.^2,RTotDE_VCT.^3]*thetaQ2; % q_I
         XQEVCT2=XQEV2;
-        XQEVCT2(E_VContestFUL,:)=[];
+        %XQEVCT2(E_VContestFUL,:)=[];
         XQEVCTwnxt2=XQEVCT2;
         XQEVCTwnxt2(IND5,:)=[];
     else
@@ -254,7 +255,7 @@ if num==4
         
         
         E_VCTa01iP=(1-(E_VCTa(1:6,i).^2)'*gammaCT(1:6,i).^2)^(1/2);
-        E_VCTa01iM=(-1)*(1-(E_VCTa(1:5,i).^2)'*gammaCT(1:5,i).^2)^(1/2);
+        E_VCTa01iM=(-1)*(1-(E_VCTa(1:6,i).^2)'*gammaCT(1:6,i).^2)^(1/2);
         loglikeE_VDI1iP(:,1)=2*log(abs(E_VCTa01iP+E_VCTa(1,i)*(LOGD_E_VCTi-E_VCTt(1,i))+E_VCTa(2,i)*(XQEVCTi2-E_VCTt(2,i))+E_VCTa(3,i)*(LOGW_E_VCTi-E_VCTt(3,i))+...
             E_VCTa(4,i)*(UnemploymentE_VCTi-E_VCTt(4,i))+E_VCTa(5,i)*(PartisanE_VCTi-E_VCTt(5,i))+E_VCTa(6,i)*(SameE_VCTi-E_VCTt(6,i))));
         loglikeE_VDI1iM(:,1)=2*log(abs(E_VCTa01iM+E_VCTa(1,i)*(LOGD_E_VCTi-E_VCTt(1,i))+E_VCTa(2,i)*(XQEVCTi2-E_VCTt(2,i))+E_VCTa(3,i)*(LOGW_E_VCTi-E_VCTt(3,i))+...
@@ -370,23 +371,23 @@ if num==4
         E_VCTa03iM=(-1)*(1-(E_VCTa(13:18,i).^2)'*gammaCT(13:18,i).^2)^(1/2);
 
         
-        loglikeE_VWnxtnxtI1iP(:,1)=2*log(abs(E_VCTa03iP+E_VCTa(11,i)*(LOGW_NXT_E_VCTwnxti-E_VCTt(11,i))+E_VCTa(12,i)*(XQEVCTwnxti2-E_VCTt(12,i))+E_VCTa(13,i)*(LOGW_E_VCTwnxti-E_VCTt(13,i))+...
-            E_VCTa(14,i)*(PartyE_VCTwnxti.*UnemploymentE_VCTwnxti-E_VCTt(14,i))+E_VCTa(15,i)*(PartyE_VCTwnxti.*pctWhiteE_VCTwnxti-E_VCTt(15,i))));
+        loglikeE_VWnxtnxtI1iP(:,1)=2*log(abs(E_VCTa03iP+E_VCTa(13,i)*(LOGW_NXT_E_VCTwnxti-E_VCTt(13,i))+E_VCTa(14,i)*(XQEVCTwnxti2-E_VCTt(14,i))+E_VCTa(15,i)*(LOGW_E_VCTwnxti-E_VCTt(15,i))+...
+            E_VCTa(16,i)*(UnemploymentE_VCTwnxti-E_VCTt(16,i))+E_VCTa(17,i)*(PartisanE_VCTwnxti-E_VCTt(17,i))+E_VCTa(18,i)*(SameE_VCTwnxti-E_VCTt(18,i))));
         
-        loglikeE_VWnxtnxtI1iM(:,1)=2*log(abs(E_VCTa03iM+E_VCTa(11,i)*(LOGW_NXT_E_VCTwnxti-E_VCTt(11,i))+E_VCTa(12,i)*(XQEVCTwnxti2-E_VCTt(12,i))+E_VCTa(13,i)*(LOGW_E_VCTwnxti-E_VCTt(13,i))+...
-            E_VCTa(14,i)*(PartyE_VCTwnxti.*UnemploymentE_VCTwnxti-E_VCTt(14,i))+E_VCTa(15,i)*(PartyE_VCTwnxti.*pctWhiteE_VCTwnxti-E_VCTt(15,i))));
+        loglikeE_VWnxtnxtI1iM(:,1)=2*log(abs(E_VCTa03iM+E_VCTa(13,i)*(LOGW_NXT_E_VCTwnxti-E_VCTt(13,i))+E_VCTa(14,i)*(XQEVCTwnxti2-E_VCTt(14,i))+E_VCTa(15,i)*(LOGW_E_VCTwnxti-E_VCTt(15,i))+...
+            E_VCTa(16,i)*(UnemploymentE_VCTwnxti-E_VCTt(16,i))+E_VCTa(17,i)*(PartisanE_VCTwnxti-E_VCTt(17,i))+E_VCTa(18,i)*(SameE_VCTwnxti-E_VCTt(18,i))));
         
-        loglikeE_VWnxtnxtI2i(:,1)=(-1/2)*(((1/gammaCT(11,i))*(LOGW_NXT_E_VCTwnxti-E_VCTt(11,i))).^2);
+        loglikeE_VWnxtnxtI2i(:,1)=(-1/2)*(((1/gammaCT(13,i))*(LOGW_NXT_E_VCTwnxti-E_VCTt(13,i))).^2);
         
-        loglikeE_VWnxtnxtI3i=(-1)*length(LOGW_NXT_E_VCTwnxti)*log(gammaCT(11,i));
+        loglikeE_VWnxtnxtI3i=(-1)*length(LOGW_NXT_E_VCTwnxti)*log(gammaCT(13,i));
         
-        loglikeE_VWnxtnxtI4iP(:,1)=(-1)*log((E_VCTa03iP+E_VCTa(12,i)*(XQEVCTwnxti2-E_VCTt(12,i))+E_VCTa(13,i)*(LOGW_E_VCTwnxti-E_VCTt(13,i))+...
-            E_VCTa(14,i)*(PartyE_VCTwnxti.*UnemploymentE_VCTwnxti-E_VCTt(14,i))+E_VCTa(15,i)*(PartyE_VCTwnxti.*pctWhiteE_VCTwnxti-E_VCTt(15,i))).^2+...
-        (E_VCTa(11,i)^2)*(gammaCT(11,i)^2));
+        loglikeE_VWnxtnxtI4iP(:,1)=(-1)*log((E_VCTa03iP+E_VCTa(14,i)*(XQEVCTwnxti2-E_VCTt(14,i))+E_VCTa(15,i)*(LOGW_E_VCTwnxti-E_VCTt(15,i))+...
+            E_VCTa(16,i)*(UnemploymentE_VCTwnxti-E_VCTt(16,i))+E_VCTa(17,i)*(PartisanE_VCTwnxti-E_VCTt(17,i))+E_VCTa(18,i)*(SameE_VCTwnxti-E_VCTt(18,i))).^2+...
+        (E_VCTa(13,i)^2)*(gammaCT(13,i)^2));
         
-        loglikeE_VWnxtnxtI4iM(:,1)=(-1)*log((E_VCTa03iP+E_VCTa(12,i)*(XQEVCTwnxti2-E_VCTt(12,i))+E_VCTa(13,i)*(LOGW_E_VCTwnxti-E_VCTt(13,i))+...
-            E_VCTa(14,i)*(PartyE_VCTwnxti.*UnemploymentE_VCTwnxti-E_VCTt(14,i))+E_VCTa(15,i)*(PartyE_VCTwnxti.*pctWhiteE_VCTwnxti-E_VCTt(15,i))).^2+...
-            (E_VCTa(11,i)^2)*(gammaCT(11,i)^2));
+        loglikeE_VWnxtnxtI4iM(:,1)=(-1)*log((E_VCTa03iP+E_VCTa(14,i)*(XQEVCTwnxti2-E_VCTt(14,i))+E_VCTa(15,i)*(LOGW_E_VCTwnxti-E_VCTt(15,i))+...
+            E_VCTa(16,i)*(UnemploymentE_VCTwnxti-E_VCTt(16,i))+E_VCTa(17,i)*(PartisanE_VCTwnxti-E_VCTt(17,i))+E_VCTa(18,i)*(SameE_VCTwnxti-E_VCTt(18,i))).^2+...
+            (E_VCTa(13,i)^2)*(gammaCT(13,i)^2));
         
         loglikeE_VWnxtnxtIi=max(sum(loglikeE_VWnxtnxtI1iP+loglikeE_VWnxtnxtI2i+loglikeE_VWnxtnxtI4iP)+loglikeE_VWnxtnxtI3i,...
             sum(loglikeE_VWnxtnxtI1iM+loglikeE_VWnxtnxtI2i+loglikeE_VWnxtnxtI4iM)+loglikeE_VWnxtnxtI3i);
@@ -428,54 +429,27 @@ end
 
 if num==4
     
-    if (((E_VCTa(1:5,1).^2)'*gammaCT(1:5,1).^2)>=1)|(((E_VCTa(1:5,2).^2)'*gammaCT(1:5,2).^2)>=1)|(((E_VCTa(1:5,3).^2)'*gammaCT(1:5,3).^2)>=1)
+    if (((E_VCTa(1:6,1).^2)'*gammaCT(1:6,1).^2)>=1)||(((E_VCTa(1:6,2).^2)'*gammaCT(1:6,2).^2)>=1)||(((E_VCTa(1:6,3).^2)'*gammaCT(1:6,3).^2)>=1)
         SRR9=0;
         for i=1:3
-            SRR9=SRR9+10000000*max(0,((E_VCTa(1:5,i).^2)'*gammaCT(1:5,i).^2-1));
+            SRR9=SRR9+10000000*max(0,((E_VCTa(1:6,i).^2)'*gammaCT(1:6,i).^2-1));
         end
     end
-    if (((E_VCTa(6:10,1).^2)'*gammaCT(6:10,1).^2)>=1)|(((E_VCTa(6:10,2).^2)'*gammaCT(6:10,2).^2)>=1)|(((E_VCTa(6:10,3).^2)'*gammaCT(6:10,3).^2)>=1)
+    if (((E_VCTa(7:12,1).^2)'*gammaCT(7:12,1).^2)>=1)||(((E_VCTa(7:12,2).^2)'*gammaCT(7:12,2).^2)>=1)||(((E_VCTa(7:12,3).^2)'*gammaCT(7:12,3).^2)>=1)
         SRR10=0;
         for i=1:3
-            SRR10=SRR10+10000000*max(0,((E_VCTa(6:10,i).^2)'*gammaCT(6:10,i).^2-1));
+            SRR10=SRR10+10000000*max(0,((E_VCTa(7:12,i).^2)'*gammaCT(7:12,i).^2-1));
         end
     end
-    if (((E_VCTa(11:15,1).^2)'*gammaCT(11:15,1).^2)>=1)|(((E_VCTa(11:15,2).^2)'*gammaCT(11:15,2).^2)>=1)|(((E_VCTa(11:15,3).^2)'*gammaCT(11:15,3).^2)>=1)
+    if (((E_VCTa(13:18,1).^2)'*gammaCT(13:18,1).^2)>=1)||(((E_VCTa(13:18,2).^2)'*gammaCT(13:18,2).^2)>=1)||(((E_VCTa(13:18,3).^2)'*gammaCT(13:18,3).^2)>=1)
         SRR11=0;
         for i=1:3
-            SRR11=SRR11+10000000*max(0,((E_VCTa(11:15,i).^2)'*gammaCT(11:15,i).^2-1));
+            SRR11=SRR11+10000000*max(0,((E_VCTa(13:18,i).^2)'*gammaCT(13:18,i).^2-1));
         end
     end
 end
-if num==1
-%     SRR=SRR1+SRR3;
-% elseif num==2
-%     SRR=SRR2;
-% elseif num==3
-%     SRR=SRR15;
-elseif num==4
-    SRR=SRR9+SRR10+SRR11;
-% elseif num==5
-%     SRR=SRR12+SRR13+SRR14;
-end
-if SRR<Sofarbest
-    Sofarbest=SRR;
-    bestiter=iterate;
-end
 
-iterate=iterate+1;
-thetain_=thetain;
 
-if bestiter==iterate-1
-    if num==1
-%         save Best1.txt thetain_ SRR bestiter -ASCII
-%     elseif num==2
-%         save Best2.txt thetain_ SRR bestiter -ASCII
-%     elseif num==3
-%         save Best3.txt thetain_ SRR bestiter -ASCII
-    elseif num==4
-        save Best4.txt thetain_ SRR bestiter -ASCII
-    elseif num==5
-        save Best5.txt thetain_ SRR bestiter -ASCII
-    end
-end
+SRR=SRR9+SRR10+SRR11;
+
+

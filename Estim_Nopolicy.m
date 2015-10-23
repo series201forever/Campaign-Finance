@@ -20,8 +20,8 @@ clear
 % global Shockwh
 
 
-global iterate
-global Delt
+% global iterate
+% %global Delt
 
 %Variables used in num=1
 % global Samplesize
@@ -76,6 +76,7 @@ global Delt
 % Variables used in number=4
 global E_VContestFUL
 global TenureE_VCT
+global TenureE_VCTwnxt
 
 global Est2
 global IND5
@@ -134,8 +135,8 @@ global X_KnotEV1
 % 
 % global LOGD_E_VNCT
 % global N
-global Sofarbest
-global bestiter
+% global Sofarbest
+% global bestiter
 % global numunits
 % global numunitsAC
 % global NCE_VCTwnxt
@@ -144,9 +145,9 @@ global bestiter
 % global XSNCEVCTwnxt_
 % 
 % global NCE_VTenCTwnxt
-global LOGW_NXT_E_VC
-global LOGD_E_VC
-global LOGTot_E_VC
+% global LOGW_NXT_E_VC
+% global LOGD_E_VC
+% global LOGTot_E_VC
 % global YEARE_VCT
 % global YEARE_VNCT
 % global YEARE_VCTwnxt
@@ -180,8 +181,8 @@ load ('./State_Transition.mat')
 load ('./testing2.txt')
 load ('./retire.txt')
 
-rand('state',100);%??
-randn('state',10);%??
+% rand('state',100);%??
+% randn('state',10);%??
 dele1=find(sum(isnan(OP_INC_IV_july8),2)>0);
 OP_INC_IV_july8(dele1,:)=[]; %Drop NaN
 OP_INC_IV_july8(OP_INC_IV_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
@@ -203,9 +204,7 @@ deleC=find((E_V_july8(:,16)==0).*E_V_july8(:,8)==1);
 E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
 
 
-Sofarbest=10^8;
-bestiter=0;
-Delt=0.5;
+
 % Lamda=0.108;
 
 
@@ -451,11 +450,11 @@ SameE_V=PartyE_V==PrespartyE_V; %Same party if the two match
 DifE_V=PartyE_V~=PrespartyE_V;
 SameE_V=SameE_V-DifE_V;
 SameE_VCT=SameE_V;
-SameE_VCT(E_VContestFUL,:)=[];     %PartyE_VCT is the party indicator when there is entry next period.
+SameE_VCT(E_VContestFUL,:)=[];     %SameE_VCT is the same indicator when there is entry next period.
 SameE_VCTwnxt=SameE_VCT;
 SameE_VCTwnxt(IND5,:)=[];
 SameE_VNCT=PartyE_V;
-SameE_VNCT(E_VNContestFUL,:)=[];    %PartyE_VCT is the party indicator when there is NO entry next period.
+SameE_VNCT(E_VNContestFUL,:)=[];    %SameE_VNCT is the same indicator when there is NO entry next period.
 
 % YEARE_V=E_V_july8(:,2);           % YEARE_V is the year of the election.
 % YEARE_VCT=YEARE_V;
@@ -490,6 +489,8 @@ XS_EVNCT_(E_VNContestFUL,:)=[];
 TenureE_V=E_V_july8(:,15);      %Tenure=# of terms from first period.
 TenureE_VCT=TenureE_V;
 TenureE_VCT(E_VContestFUL,:)=[];
+TenureE_VCTwnxt=TenureE_VCT;
+TenureE_VCTwnxt(IND5,:)=[];
 TenureE_VNCT=TenureE_V;
 TenureE_VNCT(E_VNContestFUL,:)=[];
 
@@ -520,8 +521,7 @@ LOGD_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,32)));
 LOGW_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,33)));
 LOGWNXT_NCE_V=log(max(ones(length(E_V_july8),1),E_V_july8(:,34)));
 % Tenure_NCE_V=E_V_july8(:,35); % Tenure_NC
-% TenureE_VCTwnxt=TenureE_VCT;
-% TenureE_VCTwnxt(IND5,:)=[];
+
 
 NCE_V=[LOGD_NCE_V,LOGW_NCE_V,LOGWNXT_NCE_V];
 NCE_VCT=NCE_V;
@@ -634,6 +634,9 @@ X_KnotEV1=[X_KnotEV1,PLUS];
 
 %First column:redundant
 X_KnotEV1=X_KnotEV1(:,2:fineness);
+
+X_KnotE_VNCT=X_KnotEV1;
+X_KnotE_VNCT(E_VNContestFUL,:)=[];
 
 %%%%%%%%%%%%%%%%%%%%%%%% 
 % Defining variables: done
@@ -924,17 +927,32 @@ Est2=coefvoteshare;
 %contested
 %Number=4
 %%%%%%%%%%%%%%%%%%
-
 Sofarbest=10^8;
-  OPTIONS=optimset('MaxIter',50000,'MaxFunEvals',1000000);
-theta0=initialvalue(38:172,1);
-   for sss=1:30
-[mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,4),theta0);
-theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
-   end
-load ('./Best4.txt')
-Est4=Best4;
-save Est4.txt Est4 -ASCII
+%bestiter=0;
+%iterate=1;
+%Delt=0.5;
+
+  OPTIONS=optimset('MaxIter',500000,'MaxFunEvals',1000000,'Display','iter');
+%theta0=initialvalue(38:172,1);
+load ('inittheta.mat');
+theta0=mintheta;
+%%
+%for sss=1:30
+    [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,4),theta0,OPTIONS);
+    theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
+    
+    if SRR<Sofarbest
+        Sofarbest=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta SRR -ASCII
+        save Est4 mintheta
+    end
+    
+    %iterate=iterate+1;
+    
+%end
+load ('Est4.mat');
+Est4=mintheta;
 %%
 %%%%%%%%%%%%%%%%%%
 %Estimation of distribution of spending, saving and fund-raising when
@@ -942,16 +960,22 @@ save Est4.txt Est4 -ASCII
 %Number=5
 %%%%%%%%%%%%%%%%%%
 
+
 %Each actions
-Xaction=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,PartyE_VNCT.*XS_EVNCT_(:,1),PartyE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,XQEVNCT2,...
-        LOGW_E_VNCT.^2,PartyE_VNCT.*(XS_EVNCT_(:,1)).^2,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,XQEVNCT2.^2];
+Xaction=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2),SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,X_KnotE_VNCT,...
+        LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,SameE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2];
 coefspend=Xaction\LOGD_E_VNCT;
 coeffund=Xaction\LOGTotal_E_VNCT;
 coefsave=Xaction\LOGW_NXT_E_VNCT;
 
-
 %%
+%Define coefficients
+Est3=coefprobwin;
+Est5=[coefspend;coeffund;coefsave];
 
-minthetaall=[Est1(1:10,1);Est2(12,1);Est1(11:20,1);Est2(1:11,1);Est2(13:17,1);Est4(1:135,1);Est5(1:33,1);Est3(1:7,1)];
+
+
+%minthetaall=[Est1(1:10,1);Est2(12,1);Est1(11:20,1);Est2(1:11,1);Est2(13:17,1);Est4(1:135,1);Est5(1:33,1);Est3(1:7,1)];
 minthetaall2=[Est1;Est2;Est3;Est4;Est5];
-save minimizedtheta.txt minthetaall -ASCII
+save minimizedtheta minthetaall2
+save minimizedtheta.txt minthetaall2 -ASCII
