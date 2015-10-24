@@ -903,6 +903,8 @@ coefprobwin=Xprobwin\Win_AC;
 %%%%%%%%%%%%%%%%%%
 Est1=[coefentry;coefprimaryN];
 Est2=coefvoteshare;
+%Est1=[coefentry2;coefprimaryN2];
+%Est2=coefvoteshare2;
 
 
 %%
@@ -921,6 +923,7 @@ Sofarbest=10^8;
 load ('inittheta.mat');
 theta0=mintheta;
 %%
+
 %for sss=1:30
     [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,4),theta0,OPTIONS);
     theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
@@ -931,10 +934,8 @@ theta0=mintheta;
         %save Est4.txt mintheta SRR -ASCII
         save Est4 mintheta
     end
-    
-    %iterate=iterate+1;
-    
 %end
+
 load ('Est4.mat');
 Est4=mintheta;
 %%
@@ -960,6 +961,9 @@ Est5=[coefspend;coeffund;coefsave];
 
 
 %minthetaall=[Est1(1:10,1);Est2(12,1);Est1(11:20,1);Est2(1:11,1);Est2(13:17,1);Est4(1:135,1);Est5(1:33,1);Est3(1:7,1)];
-minthetaall2=[Est1;Est2;Est3;Est4;Est5]; %Est2 comes at the end because its length differs based on specification
+minthetaall2=[Est1;Est2;Est3;Est4;Est5]; %Est1,Est2length differ depending on specification
+mintheta1=[Est1;Est2];
+mintheta2=[Est3;Est4;Est5];
+
 save minimizedtheta minthetaall2
 save minimizedtheta.txt minthetaall2 -ASCII
