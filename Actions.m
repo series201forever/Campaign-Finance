@@ -12,7 +12,7 @@ for i=1:N
     ST_=ST;
     Ten_=Ten;
     Same_=Same;
-    w_I_=(1+interest)*w_I;
+    w_I_=log(1+interest)+w_I;
     while j<Ret(i)
 %       Update state
         ST_=[Betaump'*[1;ST_(1,1)]+shockump(j,i);Betapartisan'*[1;ST_(2,1)]+shockpartisan(j,i)];
@@ -119,7 +119,7 @@ for i=1:N
              C(3,j,i)=total;
              C(4,j,i)=savings;
              C(5,j,i)=win;
-             w_I_=(1+interest)*savings;
+             w_I_=log(1+interest)+savings;
              j=j+1;
             % j=(1-win)*Ret(1,i)+win*j;
         else
@@ -132,7 +132,7 @@ for i=1:N
              C(3,j,i)=total;
              C(4,j,i)=savings;
              C(5,j,i)=1;
-            w_I_=(1+interest)*savings;
+            w_I_=log(1+interest)+savings;
             j=j+1;
         end
     end

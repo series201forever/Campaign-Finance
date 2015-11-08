@@ -161,7 +161,7 @@ load('./Est5.mat');
 
 load ('./retire.txt');
 
-
+% load ('./theta0.txt')
 load ('./stateevol.mat')
 % 
 % load ('./Fststage_kettei.txt')
@@ -791,8 +791,6 @@ sig=0.3;
 % Q_C3=thetain1step(menc+5,1);
 
 coefentry=Est1(1:(length(Est1)/2));
-
-
     E_VCTa(:,1)=Est4(1:18,1);
     E_VCTa(:,2)=Est4(19:36,1);
     E_VCTa(:,3)=Est4(37:54,1);
@@ -802,6 +800,16 @@ coefentry=Est1(1:(length(Est1)/2));
     gammaCT(:,1)=Est4(109:126,1);
     gammaCT(:,2)=Est4(127:144,1);
     gammaCT(:,3)=Est4(145:162,1);
+
+%     E_VCTa(:,1)=theta0(1:18,1);
+%     E_VCTa(:,2)=theta0(19:36,1);
+%     E_VCTa(:,3)=theta0(37:54,1);
+%     E_VCTt(:,1)=theta0(55:72,1);
+%     E_VCTt(:,2)=theta0(73:90,1);
+%     E_VCTt(:,3)=theta0(91:108,1);
+%     gammaCT(:,1)=theta0(109:126,1);
+%     gammaCT(:,2)=theta0(127:144,1);
+%     gammaCT(:,3)=theta0(145:162,1);
 
 coefspend(:,1)=Est5(1:19);
 coeffund(:,1)=Est5(20:38);
@@ -943,10 +951,12 @@ Shockpartisan3=sqrt(epspartisan)*randn(T,N,length(E_V_july8));
 incwin=0.75;
 newele=0.5;
 
-%Midone considers a case of mid-election where current president's
-%incumbency has just started (next election the president runs for
-%reelection)
-midone=find(YEARE_V==1982|YEARE_V==1990|YEARE_V==1994|YEARE_V==2002);
+%Midone considers a case:
+%Presidential election takes place today, in which incumbent is running for reelection. 
+%This implies the next election (initial element of the matrix) corresponds
+%to mid-term election where president might be either new/old.
+midone=find(YEARE_V==1984|YEARE_V==1992|YEARE_V==1996|YEARE_V==2004);
+
 
 %Draws for winning.
 presseqmidone=rand(T,N,length(midone));
@@ -955,9 +965,11 @@ presseqmidone=rand(T,N,length(midone));
 %reelection or not.
 presyearmidone=ones(T,N,length(midone));
 
-%Midterm election: No change in incumbency
+%Elections overlapping with presidential election (even periods): previous election being
+%midterm. So no change in presidential incumbency from previous period.
 presseqmidone([2,4,6,8,10],:,:)=0;
-%1st election=incumbent runs for reelection. 1 if incumbent loses, 0 otherwise.
+%The next election from now=midterm election. In the previous election (today),
+%incumbent runs for reelection. 1 if incumbent loses, 0 otherwise.
 presseqmidone(1,:,:)=(presseqmidone(1,:,:)>incwin);
 presyearmidone(1,:,:)=1+(1-presseqmidone(1,:,:));
 %At election i, if incumbent year=2,  new election. If year=1,
@@ -977,8 +989,12 @@ for k=1:length(midone)
 end
 
 
-%Midtwo: in the next election, current president cannot run for reelection.
-midtwo=find(YEARE_V==1986|YEARE_V==1998);
+%Midtwo considers a case:
+%Presidential election takes place today, in which incumbent cannot run for reelection. 
+%This implies the next election (initial element of the matrix) corresponds
+%to mid-term election where president must be new.
+midtwo=find(YEARE_V==1988|YEARE_V==2000);
+
 
 %Draws for winning.
 presseqmidtwo=rand(T,N,length(midtwo));
@@ -989,7 +1005,7 @@ presyearmidtwo=ones(T,N,length(midtwo));
 
 %Midterm election: No change in incumbency
 presseqmidtwo([2,4,6,8,10],:,:)=0;
-%1st election=incumbent cannot run for reelection. 1 if party changes.
+%Today:incumbent cannot run for reelection. 1 if party changes.
 presseqmidtwo(1,:,:)=(presseqmidtwo(1,:,:)>newele);
 presyearmidtwo(1,:,:)=1;
 %At election i, if incumbent year=2,  new election. If year=1,
@@ -1008,9 +1024,10 @@ for k=1:length(midtwo)
     end
 end
 
-%Begone considers a case where a new president has just been elected, and
-%next election is a mid-term.
-begone=find(YEARE_V==1980|YEARE_V==1988|YEARE_V==1992|YEARE_V==2000);
+%Begone considers a case:
+%Today:midterm election.  
+%and Next election has presidential, where incumbent can run for reelection.
+begone=find(YEARE_V==1990|YEARE_V==1994|YEARE_V==2002);
 
 %Draws for winning.
 presseqbegone=rand(T,N,length(begone));
@@ -1019,9 +1036,9 @@ presseqbegone=rand(T,N,length(begone));
 %reelection or not.
 presyearbegone=ones(T,N,length(begone));
 
-%midterm election: No change in incumbency
+%If previous election is midterm election: No change in incumbency
 presseqbegone([1,3,5,7,9],:,:)=0;
-%2nd election=incumbent runs for reelection. 1 if incumbent loses, 0 otherwise.
+%2nd election=incumbent runs for reelection at 1st election. 1 if incumbent loses, 0 otherwise.
 presseqbegone(2,:,:)=(presseqbegone(2,:,:)>incwin);
 presyearbegone(2,:,:)=1+(1-presseqbegone(2,:,:));
 %At election i, if incumbent year=2,  new election. If year=1,
@@ -1041,9 +1058,10 @@ for k=1:length(begone)
 end
 
 
-%begtwo considers a case where the incumbent's second period has just been started, and
-%next election is a mid-term.
-begtwo=find(YEARE_V==1984|YEARE_V==1996);
+%Begtwo considers a case:
+%Today:midterm election.  
+%and Next election has presidential, where incumbent cannot run for reelection.
+begtwo=find(YEARE_V==1986|YEARE_V==1998);
 
 %Draws for winning.
 presseqbegtwo=rand(T,N,length(begtwo));
@@ -1083,10 +1101,10 @@ presseq(:,:,begtwo)=presseqbegtwo;
 
 %%
 
-Continue1=zeros(length(NCE_V),N);
-DContinue1=zeros(length(NCE_V),N);
+%Continue1=zeros(length(NCE_V),N);
+%DContinue1=zeros(length(NCE_V),N);
  C=zeros(5,T,N,length(NCE_V));
- DC=zeros(5,T,N,length(NCE_V));
+% DC=zeros(5,T,N,length(NCE_V));
 for i=1:length(NCE_V)
          C(:,:,:,i)=Actions(i,XSEV_(i,:)',SameE_V(i,1), XQEV2(i,1),X_KnotEV1(i,:), TenureE_V(i,1),LOGW_NXT_E_V(i,1),PartyE_V(i,1),...
          Shockpartisan(:,:,i), Shockump(:,:,i), presseq(:,:,i),Entry(:,:,i), coefentry, E_VCTa, E_VCTt, gammaCT, coefspend, coeffund,coefsave, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
@@ -1126,7 +1144,7 @@ for i=1:length(NCE_V)
 end
 
   save C.mat C
-  save DC.mat DC
+  %save DC.mat DC
 %%
 load('./C.mat');
 % load('./DC.mat');

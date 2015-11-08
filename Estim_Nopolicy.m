@@ -757,8 +757,9 @@ coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*
 %Number=3
 %%%%%%%%%%%%%%%%%%
 Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1)];
+%Xprobwin=[LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1)];
 coefprobwin=Xprobwin\Win_AC;
-
+errorprobwin=sum((Win_AC-Xprobwin*coefprobwin).^2);
 
 %%
 %%%%%%%%%%%%%%%%%%
@@ -782,24 +783,22 @@ Sofarbest=10^8;
 %Delt=0.5;
 
   OPTIONS=optimset('MaxIter',500000,'MaxFunEvals',1000000,'Display','iter');
-%theta0=initialvalue(38:172,1);
-load ('inittheta.mat');
-theta0=mintheta;
-%%
+load ('./inittheta.mat');
+theta0=Est4;
 
-%for sss=1:30
+for sss=1:10
     [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,4),theta0,OPTIONS);
-    theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
+    theta0=mintheta+0.8*(rand(size(mintheta,1),1)-0.5).*mintheta;
     
     if SRR<Sofarbest
         Sofarbest=SRR;
         %    bestiter=iterate;
         %save Est4.txt mintheta SRR -ASCII
-        %save Est4 mintheta
+        save Est42 mintheta
     end
-%end
+end
 
-%load ('Est4.mat');
+load ('Est42.mat');
 Est4=mintheta;
 %%
 %%%%%%%%%%%%%%%%%%
