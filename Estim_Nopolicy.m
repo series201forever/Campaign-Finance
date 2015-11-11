@@ -16,11 +16,13 @@ global LOGTotal_E_VCT
 global LOGW_E_VCT
 global SameE_VCT
 global XS_EVCT_
+global PartyE_VCT
 
 global LOGW_NXT_E_VCTwnxt
 global LOGW_E_VCTwnxt
 global SameE_VCTwnxt
 global XS_EVCTwnxt_
+global PartyE_VCTwnxt
 
 global RTotDE_VCT
 global X_KnotEV1
@@ -285,12 +287,12 @@ IND5=find(Win_E_VCT==0);  % index for elections with incumbent loss (among those
 
 
 PartyE_V=3*ones(length(E_V_july8),1)-2*E_V_july8(:,3);  %%PartyE_V=1  if candidate i is Democrat and PartyE_V=-1 if candidate i is Republican.
-% PartyE_VCT=PartyE_V;
-% PartyE_VCT(E_VContestFUL,:)=[];     %PartyE_VCT is the party indicator when there is entry next period.
-% PartyE_VCTwnxt=PartyE_VCT;
-% PartyE_VCTwnxt(IND5,:)=[];
-% PartyE_VNCT=PartyE_V;
-% PartyE_VNCT(E_VNContestFUL,:)=[];    %PartyE_VCT is the party indicator when there is NO entry next period.
+PartyE_VCT=PartyE_V;
+PartyE_VCT(E_VContestFUL,:)=[];     %PartyE_VCT is the party indicator when there is entry next period.
+PartyE_VCTwnxt=PartyE_VCT;
+PartyE_VCTwnxt(IND5,:)=[];
+PartyE_VNCT=PartyE_V;
+PartyE_VNCT(E_VNContestFUL,:)=[];    %PartyE_VCT is the party indicator when there is NO entry next period.
 
 PrespartyE_V=3*ones(length(E_V_july8),1)-2*E_V_july8(:,39);
 SameE_V=PartyE_V==PrespartyE_V; %Same party if the two match
@@ -756,10 +758,21 @@ coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*
 %Estimation of winning probability
 %Number=3
 %%%%%%%%%%%%%%%%%%
-Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1)];
-%Xprobwin=[LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1)];
+Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,UnempsqsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1),log(TenureAC+1).^2,log(TenureAC+1).*LOGW_IAC,...
+    X_KnotAC1.*(LOGW_IAC*ones(1,8)),X_KnotAC1.*(UnempsameAC*ones(1,8)),X_KnotAC1.*(PartdemoAC*ones(1,8)),X_KnotAC1.*(log(TenureAC+1)*ones(1,8))];
+%Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1)];
+
 coefprobwin=Xprobwin\Win_AC;
-errorprobwin=sum((Win_AC-Xprobwin*coefprobwin).^2);
+
+%If modifying Xprobwin, make sure the corresponding part on "actions.m" is
+%modified as well.
+
+%%
+%Specification check for winning probability
+predprobwin=Xprobwin*coefprobwin;
+errorprobwin=sum((Win_AC-Xprobwin*coefprobwin).^2)/(var(Win_AC)*length(Win_AC));
+plotprobwin=sortrows([Win_AC,predprobwin]);
+scatter(plotprobwin(:,1),plotprobwin(:,2));
 
 %%
 %%%%%%%%%%%%%%%%%%
@@ -788,7 +801,7 @@ theta0=Est4;
 
 for sss=1:10
     [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,4),theta0,OPTIONS);
-    theta0=mintheta+0.8*(rand(size(mintheta,1),1)-0.5).*mintheta;
+    theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
     
     if SRR<Sofarbest
         Sofarbest=SRR;
@@ -809,11 +822,28 @@ Est4=mintheta;
 
 
 %Each actions
-Xaction=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2),SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,2),TenureE_VNCT,X_KnotE_VNCT,...
-        LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,SameE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2];
+Xaction=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2).*PartyE_VNCT,SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,1),TenureE_VNCT,X_KnotE_VNCT,...
+        LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,(XS_EVNCT_(:,1)).^2.*PartyE_VNCT,SameE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,...
+        X_KnotE_VNCT.*(LOGW_E_VNCT*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,1).*SameE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,2).*PartyE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((TenureE_VNCT)*ones(1,8))];
+
 coefspend=Xaction\LOGD_E_VNCT;
 coeffund=Xaction\LOGTotal_E_VNCT;
 coefsave=Xaction\LOGW_NXT_E_VNCT;
+
+%If modifying Xaction, make sure the corresponding part on "actions.m" is
+%modified as well.
+
+%%
+%Specification check for actions
+predspend=Xaction*coefspend;
+predfund=Xaction*coeffund;
+predsave=Xaction*coefsave;
+
+errorspend=(sum((LOGD_E_VNCT-predspend).^2))/(var(LOGD_E_VNCT)*length(LOGD_E_VNCT));
+errorfund=(sum((LOGTotal_E_VNCT-predfund).^2))/(var(LOGTotal_E_VNCT)*length(LOGTotal_E_VNCT));
+errorsave=(sum((LOGW_NXT_E_VNCT-predsave).^2))/(var(LOGW_NXT_E_VNCT)*length(LOGW_NXT_E_VNCT));
+[exp(LOGD_E_VNCT),exp(predspend)];
+scatter(LOGD_E_VNCT,predspend);
 
 %%
 %Define coefficients

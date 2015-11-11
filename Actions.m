@@ -1,6 +1,8 @@
 function C=Actions(num,ST,Same, q_I, X_Knot1, Ten,w_I,demo,shockpartisan, shockump, presseq, Entry, coefentry, E_VCTa, E_VCTt, gammact, coefspend, coeffund,coefsave, dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,coefprobwin,Ret,Betapartisan,Betaump)
 %options = optimset();
-
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%Make sure that specification chosen at the first stage and "entryprob",
+%"X_(contested)", "X_(uncontested)", "win" matches.
 
 global N;  % the number of simulations
 global interest
@@ -35,6 +37,7 @@ for i=1:N
         end
         
         %Calculate probability of entry given updated state
+        %%%%%%%%%%%%%%%Need to match with first stage specification
         if length(coefentry)==13
             entryprob=[1,w_I_,ST_(1,1)*Same_,ST_(2,1)*demo,log(Ten_+1),X_Knot1]*coefentry;
         else
@@ -44,7 +47,9 @@ for i=1:N
         if (Entry(j,i)<entryprob)  %% CONTEST.
             C(1,j,i)=1;  % Contest==1
             qtile1=dF_gamma_ct(j,i);
-            X_=[q_I ,w_I_,ST_(1,1),ST_(2,1),Same_]';
+            %%%%%%%%%%%%%%%Need to match with first stage specification
+            X_=[q_I ,w_I_,ST_(1,1),ST_(2,1).*demo,Same_]';
+            %%%%%%%%%%%%%%%
             A1sp=(sqrt(1-(E_VCTa(1:6,iK).^2)'*(gammact(1:6,iK).^2))+E_VCTa(2:6,iK)'*(X_-E_VCTt(2:6,iK)))^2;
             A2sp=2*E_VCTa(1,iK)*(sqrt(1-(E_VCTa(1:6,iK).^2)'*(gammact(1:6,iK).^2))+E_VCTa(2:6,iK)'*(X_-E_VCTt(2:6,iK)));
 
@@ -114,6 +119,8 @@ for i=1:N
 %                 jay=j
 %             end
 
+
+ %%%%%%%%%%%%%%%Need to match with first stage specification
              win=(Winrnd(j,i)<=[1,w_I_,ST_(1,1)*Same_,ST_(2,1)*demo,w_I_.^2,X_Knot1,log(Ten_+1)]*coefprobwin);        %% win if Winrnd<probability of winning
              C(2,j,i)=spending;
              C(3,j,i)=total;
@@ -124,6 +131,7 @@ for i=1:N
             % j=(1-win)*Ret(1,i)+win*j;
         else
             C(1,j,i)=0;
+            %%%%%%%%%%%%%%%Need to match with first stage specification
             X_=[1,w_I_,ST_(1,1),ST_(2,1),Same_,Same_*ST_(2,1),Ten_,X_Knot1,w_I^2,(ST_(1,1))^2, (ST_(2,1)^2)*Same_,Ten_^2];
             spending=X_*coefspend;
             total=X_*coeffund;

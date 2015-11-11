@@ -818,9 +818,9 @@ coefprobwin=Est3;
 
    thetaQ2=Est2(9:numel(Est2));
     if numel(thetaQ2)==3
-        XQEV2=[RTotDE_VCT,RTotDE_VCT.^2,RTotDE_VCT.^3]*thetaQ2; % q_I
+        XQEV2=[RTotDE_V,RTotDE_V.^2,RTotDE_V.^3]*thetaQ2; % q_I
         XQEVCT2=XQEV2;
-        %XQEVCT2(E_VContestFUL,:)=[];
+        XQEVCT2(E_VContestFUL,:)=[];
         XQEVCTwnxt2=XQEVCT2;
         XQEVCTwnxt2(IND5,:)=[];
     else
