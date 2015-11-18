@@ -17,12 +17,16 @@ global LOGW_E_VCT
 global SameE_VCT
 global XS_EVCT_
 global PartyE_VCT
+global PresdumE_VCT
+global MidtermE_VCT
 
 global LOGW_NXT_E_VCTwnxt
 global LOGW_E_VCTwnxt
 global SameE_VCTwnxt
 global XS_EVCTwnxt_
 global PartyE_VCTwnxt
+global PresdumE_VCTwnxt
+global MidtermE_VCTwnxt
 
 global RTotDE_VCT
 global X_KnotEV1
@@ -118,6 +122,13 @@ Partisan=Estimation_OP(:,63);
 
 Unempsame=Unemployment.*Same;
 Partdemo=Partisan.*Party;
+Presdum=Estimation_OP(:,64);
+Presdumsame=Presdum.*Same;
+Unemppresdumsame=Unemployment.*Presdumsame;
+Midterm=Estimation_OP(:,65);
+%Midtermsame=Midterm.*Same;
+%Unempmidtermsame=Unemployment.*Midtermsame;
+
 
 %%B-Spline for q_I(LOGLOGD_NC, LOGLOGTot_NC)  %%
 % take knots to be between 0.88 to 1.025 with 9 knots (8 basis functions). (Almost all lie
@@ -213,6 +224,12 @@ UnempsameAC=UnemploymentAC.*SameAC;
 UnempsqsameAC=UnemploymentsqAC.*SameAC;
 PartdemoAC=PartisanAC.*PartyAC;
 
+PresdumAC=AC(:,64);
+PresdumsameAC=PresdumAC.*SameAC;
+UnemppresdumsameAC=UnemploymentAC.*PresdumsameAC;
+MidtermAC=AC(:,65);
+%MidtermsameAC=MidtermAC.*SameAC;
+%UnempmidtermsameAC=UnemploymentAC.*MidtermsameAC;
 
 %Variables used in number=3, estimation of winning probability
 Win_AC=(AC(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
@@ -305,6 +322,22 @@ SameE_VCTwnxt(IND5,:)=[];
 SameE_VNCT=PartyE_V;
 SameE_VNCT(E_VNContestFUL,:)=[];    %SameE_VNCT is the same indicator when there is NO entry next period.
 
+
+PresdumE_V=E_V_july8(:,64); %Presdum=1 if president's incumbency is on second period
+PresdumE_VCT=PresdumE_V;
+PresdumE_VCT(E_VContestFUL,:)=[];     
+PresdumE_VCTwnxt=PresdumE_VCT;
+PresdumE_VCTwnxt(IND5,:)=[];
+PresdumE_VNCT=PresdumE_V;
+PresdumE_VNCT(E_VNContestFUL,:)=[]; 
+
+MidtermE_V=E_V_july8(:,65);
+MidtermE_VCT=MidtermE_V;
+MidtermE_VCT(E_VContestFUL,:)=[];     
+MidtermE_VCTwnxt=MidtermE_VCT;
+MidtermE_VCTwnxt(IND5,:)=[];
+MidtermE_VNCT=MidtermE_V;
+MidtermE_VNCT(E_VNContestFUL,:)=[]; 
 % YEARE_V=E_V_july8(:,2);           % YEARE_V is the year of the election.
 % YEARE_VCT=YEARE_V;
 % YEARE_VCT(E_VContestFUL,:)=[];
@@ -720,14 +753,16 @@ X_KnotE_VNCT(E_VNContestFUL,:)=[];
 %%%%%%%%%%%%%%%%%
 
 
-Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),X_Knot1];
+Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),Presdum,Presdumsame,Unemppresdumsame,Midterm,X_Knot1];
 coefentry=Xentry\Contest;
 coefprimaryN=Xentry\Primary_N;
 
-%  Xentry2=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),X_Knot1,X_Knot1.*(LOGW_I*ones(1,fineness-1))];
+%  Xentry2=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),Presdum,Presdumsame,Unemppresdumsame,Midterm,X_Knot1,X_Knot1.*(LOGW_I*ones(1,fineness-1))];
 %  coefentry2=Xentry2\Contest;
 %  coefprimaryN2=Xentry2\Primary_N;
 
+%%%%%%%%%%
+%Result of specification check: available on dropbox.
 
 %%
 %%%%%%%%%%%%%%%%%
@@ -735,20 +770,20 @@ coefprimaryN=Xentry\Primary_N;
 %Number=2
 %%%%%%%%%%%%%%%%%
 
-Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry;
-EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefprimaryN;
+Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC,X_KnotAC1]*coefentry;
+EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC,X_KnotAC1]*coefprimaryN;
 
 Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN,Eentry,EprimaryN.*Eentry,RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3];
-IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))];
+IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1)),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC];
 IVvar=IVvoteshare.'*IVvoteshare;
 
 coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*(VSAC-0.5));
 
 
-% Eentry2=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefentry2;
-% EprimaryN2=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefprimaryN2;
+% Eentry2=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefentry2;
+% EprimaryN2=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefprimaryN2;
 % Xvoteshare2=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN2,Eentry2,EprimaryN2.*Eentry2,(EprimaryN2).^2,X_KnotAC1];
-% IVvoteshare2=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))];
+% IVvoteshare2=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1)),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC];
 % IVvar2=IVvoteshare2.'*IVvoteshare2;
 % 
 % coefvoteshare2=inv(Xvoteshare2.'*IVvoteshare2*inv(IVvar2)*IVvoteshare2.'*Xvoteshare2)*(Xvoteshare2.'*IVvoteshare2*inv(IVvar2)*IVvoteshare2.'*(VSAC-0.5));
@@ -759,7 +794,8 @@ coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*
 %Number=3
 %%%%%%%%%%%%%%%%%%
 Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,UnempsqsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1),log(TenureAC+1).^2,log(TenureAC+1).*LOGW_IAC,...
-    X_KnotAC1.*(LOGW_IAC*ones(1,8)),X_KnotAC1.*(UnempsameAC*ones(1,8)),X_KnotAC1.*(PartdemoAC*ones(1,8)),X_KnotAC1.*(log(TenureAC+1)*ones(1,8))];
+    X_KnotAC1.*(LOGW_IAC*ones(1,8)),X_KnotAC1.*(UnempsameAC*ones(1,8)),X_KnotAC1.*(PartdemoAC*ones(1,8)),X_KnotAC1.*(log(TenureAC+1)*ones(1,8)),...
+    PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC];
 %Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1)];
 
 coefprobwin=Xprobwin\Win_AC;
@@ -772,7 +808,7 @@ coefprobwin=Xprobwin\Win_AC;
 predprobwin=Xprobwin*coefprobwin;
 errorprobwin=sum((Win_AC-Xprobwin*coefprobwin).^2)/(var(Win_AC)*length(Win_AC));
 plotprobwin=sortrows([Win_AC,predprobwin]);
-scatter(plotprobwin(:,1),plotprobwin(:,2));
+%scatter(plotprobwin(:,1),plotprobwin(:,2));
 
 %%
 %%%%%%%%%%%%%%%%%%
@@ -790,18 +826,18 @@ Est2=coefvoteshare;
 %contested
 %Number=4
 %%%%%%%%%%%%%%%%%%
-Sofarbest=10^8;
+%Sofarbest=10^8;
 %bestiter=0;
 %iterate=1;
 %Delt=0.5;
 
   OPTIONS=optimset('MaxIter',500000,'MaxFunEvals',1000000,'Display','iter');
-load ('./inittheta.mat');
-theta0=Est4;
+load ('./theta0.txt');
+%theta0=Est4;
 
 for sss=1:10
     [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,4),theta0,OPTIONS);
-    theta0=mintheta+0.2*(rand(size(mintheta,1),1)-0.5).*mintheta;
+    theta0=mintheta+1.3*(rand(size(mintheta,1),1)-0.5).*mintheta;
     
     if SRR<Sofarbest
         Sofarbest=SRR;
@@ -814,6 +850,9 @@ end
 load ('Est42.mat');
 Est4=mintheta;
 %%
+%when not computing number=4
+load('Est4.mat');
+%%
 %%%%%%%%%%%%%%%%%%
 %Estimation of distribution of spending, saving and fund-raising when
 %not contested
@@ -823,8 +862,9 @@ Est4=mintheta;
 
 %Each actions
 Xaction=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2).*PartyE_VNCT,SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,1),TenureE_VNCT,X_KnotE_VNCT,...
-        LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,(XS_EVNCT_(:,1)).^2.*PartyE_VNCT,SameE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,...
-        X_KnotE_VNCT.*(LOGW_E_VNCT*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,1).*SameE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,2).*PartyE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((TenureE_VNCT)*ones(1,8))];
+        LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,(XS_EVNCT_(:,1)).^2.*SameE_VNCT,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,...
+        X_KnotE_VNCT.*(LOGW_E_VNCT*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,1).*SameE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,2).*PartyE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((TenureE_VNCT)*ones(1,8)),...
+        PresdumE_VNCT,PresdumE_VNCT.*SameE_VNCT,PresdumE_VNCT.*SameE_VNCT.*XS_EVNCT_(:,1),MidtermE_VNCT];
 
 coefspend=Xaction\LOGD_E_VNCT;
 coeffund=Xaction\LOGTotal_E_VNCT;
@@ -842,7 +882,7 @@ predsave=Xaction*coefsave;
 errorspend=(sum((LOGD_E_VNCT-predspend).^2))/(var(LOGD_E_VNCT)*length(LOGD_E_VNCT));
 errorfund=(sum((LOGTotal_E_VNCT-predfund).^2))/(var(LOGTotal_E_VNCT)*length(LOGTotal_E_VNCT));
 errorsave=(sum((LOGW_NXT_E_VNCT-predsave).^2))/(var(LOGW_NXT_E_VNCT)*length(LOGW_NXT_E_VNCT));
-[exp(LOGD_E_VNCT),exp(predspend)];
+%[exp(LOGD_E_VNCT),exp(predspend)];
 scatter(LOGD_E_VNCT,predspend);
 
 %%

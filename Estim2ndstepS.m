@@ -412,13 +412,29 @@ SameE_VCTwnxt(IND5,:)=[];
 SameE_VNCT=PartyE_V;
 SameE_VNCT(E_VNContestFUL,:)=[];    %SameE_VNCT is the same indicator when there is NO entry next period.
 
+PresdumE_V=E_V_july8(:,64); %Presdum=1 if president's incumbency is on second period
+PresdumE_VCT=PresdumE_V;
+PresdumE_VCT(E_VContestFUL,:)=[];     
+PresdumE_VCTwnxt=PresdumE_VCT;
+PresdumE_VCTwnxt(IND5,:)=[];
+PresdumE_VNCT=PresdumE_V;
+PresdumE_VNCT(E_VNContestFUL,:)=[]; 
+
+MidtermE_V=E_V_july8(:,65);
+MidtermE_VCT=MidtermE_V;
+MidtermE_VCT(E_VContestFUL,:)=[];     
+MidtermE_VCTwnxt=MidtermE_VCT;
+MidtermE_VCTwnxt(IND5,:)=[];
+MidtermE_VNCT=MidtermE_V;
+MidtermE_VNCT(E_VNContestFUL,:)=[]; 
+
 YEARE_V=E_V_july8(:,2);           % YEARE_V is the year of the election.
-YEARE_VCT=YEARE_V;
-YEARE_VCT(E_VContestFUL,:)=[];
-YEARE_VCTwnxt=YEARE_VCT;
-YEARE_VCTwnxt(IND5,:)=[];
-YEARE_VNCT=YEARE_V;
-YEARE_VNCT(E_VNContestFUL,:)=[];
+% YEARE_VCT=YEARE_V;
+% YEARE_VCT(E_VContestFUL,:)=[];
+% YEARE_VCTwnxt=YEARE_VCT;
+% YEARE_VCTwnxt(IND5,:)=[];
+% YEARE_VNCT=YEARE_V;
+% YEARE_VNCT(E_VNContestFUL,:)=[];
 % 
 % XSNCEV_=[E_V_july8(:,30),E_V_july8(:,27)];       % E_V(:,30)=unemployment_NC (%), E_V(:,27)=pctwhite_NC
 % XSNCEVCT_=XSNCEV_;
@@ -748,72 +764,25 @@ ben2=0.001;
 % sig in [0.001,1]
 sig=0.3;
 
-% theta0=[thetaS;thetaQ;theta;B_I;B_C;Q_C1;Q_C2;B_T;E_VCTa;E_VCTt;gammaCT;...
-%     thetadNC;thetatNC;thetanxtNC;thetawin;cost1;ben1;sig;cost2;ben2];
-% theta0(1:23,1)=initialvalue(1:23,1);
-% theta0(24:42,1)=initialvalue(24:42,1);  %ACDa
-% theta0(43:61,1)=initialvalue(43:61,1);  %ACDt
-% theta0(62:80,1)=initialvalue(62:80,1);  %gammaACD
-% theta0(81:86,1)=initialvalue(81:86,1); %ACdqea
-% theta0(87:92,1)=initialvalue(87:92,1); %ACdqet
-% theta0(93:98,1)=initialvalue(93:98,1); % gammadqe
-% theta0(99:113,1)=initialvalue(99:113,1); % E_VCTa
-% theta0(114:128,1)=initialvalue(114:128,1); %E_VCTt
-% theta0(129:143,1)=initialvalue(129:143,1); %gammaCT
-% theta0(144:158,1)=initialvalue(144:158,1); % E_VNCTa
-% theta0(159:173,1)=initialvalue(159:173,1); % E_VNCTt
-% theta0(174:188,1)=initialvalue(174:188,1); % gammaNCT
-% theta0(189:194,1)=initialvalue(189:194,1);  % ACwqea
-% theta0(195:200,1)=initialvalue(195:200,1);  % ACwqet
-% theta0(201:206,1)=initialvalue(201:206,1);  % gammawqe
-% theta0(207:213,1)=initialvalue(207:213,1);  %ACvqea
-% theta0(214:220,1)=initialvalue(214:220,1);   %ACvqet
-% theta0(221:227,1)=initialvalue(221:227,1);  %gammavqe
-% theta0(228:234,1)=initialvalue(228:234,1);  % thetawin
-% theta0(235,1)=initialvalue(235,1);  % beta_1
-% theta0(236,1)=initialvalue(236,1);  % beta_2
-% theta0(237,1)=initialvalue(237,1);  % sig
 
 
-
-% thetaS=thetain1step(1:2,1);
-% thetaS(1,1)=1;
-% thetaS2=thetain1step(22:23,1);
-
-% B_T=thetain1step(11,1);
-% theta=thetain1step(12:16,1);
-% theta2=thetain1step(17:21,1);
-% menc=32;
-% B_I=thetain1step(menc+1,1);
-% B_C=thetain1step(menc+2,1);
-% Q_C1=thetain1step(menc+3,1);
-% Q_C2=thetain1step(menc+4,1);
-% Q_C3=thetain1step(menc+5,1);
-
+%Estimated parameters in the first stage
 coefentry=Est1(1:(length(Est1)/2));
-    E_VCTa(:,1)=Est4(1:18,1);
-    E_VCTa(:,2)=Est4(19:36,1);
-    E_VCTa(:,3)=Est4(37:54,1);
-    E_VCTt(:,1)=Est4(55:72,1);
-    E_VCTt(:,2)=Est4(73:90,1);
-    E_VCTt(:,3)=Est4(91:108,1);
-    gammaCT(:,1)=Est4(109:126,1);
-    gammaCT(:,2)=Est4(127:144,1);
-    gammaCT(:,3)=Est4(145:162,1);
+    E_VCTa(:,1)=Est4(1:24,1);
+    E_VCTa(:,2)=Est4(25:48,1);
+    E_VCTa(:,3)=Est4(49:72,1);
+    E_VCTt(:,1)=Est4(73:96,1);
+    E_VCTt(:,2)=Est4(97:120,1);
+    E_VCTt(:,3)=Est4(121:144,1);
+    gammaCT(:,1)=Est4(145:168,1);
+    gammaCT(:,2)=Est4(169:192,1);
+    gammaCT(:,3)=Est4(193:216,1);
+    
 
-%     E_VCTa(:,1)=theta0(1:18,1);
-%     E_VCTa(:,2)=theta0(19:36,1);
-%     E_VCTa(:,3)=theta0(37:54,1);
-%     E_VCTt(:,1)=theta0(55:72,1);
-%     E_VCTt(:,2)=theta0(73:90,1);
-%     E_VCTt(:,3)=theta0(91:108,1);
-%     gammaCT(:,1)=theta0(109:126,1);
-%     gammaCT(:,2)=theta0(127:144,1);
-%     gammaCT(:,3)=theta0(145:162,1);
 
-coefspend(:,1)=Est5(1:19);
-coeffund(:,1)=Est5(20:38);
-coefsave(:,1)=Est5(39:57);
+coefspend(:,1)=Est5(1:(1/3*length(Est5)));
+coeffund(:,1)=Est5((1/3*length(Est5)+1):(2/3*length(Est5)));
+coefsave(:,1)=Est5((2/3*length(Est5)+1):length(Est5));
 coefprobwin=Est3;
 
    thetaQ2=Est2(9:numel(Est2));
@@ -1106,7 +1075,7 @@ presseq(:,:,begtwo)=presseqbegtwo;
  C=zeros(5,T,N,length(NCE_V));
 % DC=zeros(5,T,N,length(NCE_V));
 for i=1:length(NCE_V)
-         C(:,:,:,i)=Actions(i,XSEV_(i,:)',SameE_V(i,1), XQEV2(i,1),X_KnotEV1(i,:), TenureE_V(i,1),LOGW_NXT_E_V(i,1),PartyE_V(i,1),...
+         C(:,:,:,i)=Actions(i,XSEV_(i,:)',SameE_V(i,1), XQEV2(i,1),X_KnotEV1(i,:), TenureE_V(i,1),LOGW_NXT_E_V(i,1),PartyE_V(i,1),PresdumE_V(i,1),MidtermE_V(i,1),...
          Shockpartisan(:,:,i), Shockump(:,:,i), presseq(:,:,i),Entry(:,:,i), coefentry, E_VCTa, E_VCTt, gammaCT, coefspend, coeffund,coefsave, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
         dF_nxt_nxt_ct(:,:,i), Winrnd(:,:,i),coefprobwin,Ret(:,i)',Betapartisan,Betaump);
     squeeze(C(:,:,:,i))
