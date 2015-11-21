@@ -1,4 +1,4 @@
-function C=Actions2(num,ST,Same, q_I, X_Knot1,rtotd, Ten,w_I,demo,Presdum,Midterm,shockpartisan, shockump, presseq, Entry, coefentry, E_VCTa, E_VCTt, gammact, coefspend, coeffund,coefsave, dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,coefprobwin,Ret,Betapartisan,Betaump)
+function C=Actions(num,ST,Same, q_I, X_Knot1,rtotd, Ten,w_I,demo,Presdum,Midterm,shockpartisan, shockump, presseq, Entry, coefentry, E_VCTa, E_VCTt, gammact, coefspend, coeffund,coefsave, dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,coefprobwin,Ret,Betapartisan,Betaump)
 %options = optimset();
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %Make sure that specification chosen at the first stage and "entryprob",
