@@ -38,10 +38,10 @@ for i=1:N
         
         %Calculate probability of entry given updated state
         %%%%%%%%%%%%%%%Need to match with first stage specification
-        if length(coefentry)==17
-            entryprob=[1,w_I_,ST_(1,1)*Same_,ST_(2,1)*demo,log(Ten_+1),Presdum,Presdum*Same_,Presdum*Same_*ST_(1,1),Midterm,X_Knot1]*coefentry;
+        if length(coefentry)==13
+            entryprob=[1,w_I_,ST_(1,1)*Same_,ST_(2,1)*demo,log(Ten_+1),X_Knot1]*coefentry;
         else
-            entryprob=[1,w_I_,ST_(1,1)*Same_,ST_(2,1)*demo,log(Ten_+1),Presdum,Presdum*Same_,Presdum*Same_*ST_(1,1),Midterm,X_Knot1,X_Knot1.*(w_I*ones(1,8))]*coefentry;
+            entryprob=[1,w_I_,ST_(1,1)*Same_,ST_(2,1)*demo,log(Ten_+1),X_Knot1,X_Knot1.*(w_I*ones(1,8))]*coefentry;
         end
             
         if (Entry(j,i)<entryprob)  %% CONTEST.
@@ -121,10 +121,10 @@ for i=1:N
 
 
 
-%%%%%%%%%%%%%%%Need to match with first stage specification
+%%%%%%%%%%%%%%%Need to match with first stage specification 
              win=(Winrnd(j,i)<=[1,w_I_,ST_(1,1)*Same_,ST_(1,1).^2.*Same_,ST_(2,1)*demo,w_I_.^2,X_Knot1,log(Ten_+1),(log(Ten_+1)).^2,log(Ten_+1).*w_I_,...
-                 X_Knot1.*(w_I_*ones(1,8)),X_Knot1.*((ST_(1,1)*Same_)*ones(1,8)),X_Knot1.*((ST_(2,1)*demo)*ones(1,8)),X_Knot1.*(log(Ten_+1)*ones(1,8)),...
-                 Presdum,Presdum.*Same_,ST_(1,1).*Presdum.*Same_,Midterm]*coefprobwin);        %% win if Winrnd<probability of winning
+                 X_Knot1.*(w_I_*ones(1,8)),X_Knot1.*((ST_(1,1)*Same_)*ones(1,8)),X_Knot1.*((ST_(2,1)*demo)*ones(1,8)),X_Knot1.*(log(Ten_+1)*ones(1,8)) ]*coefprobwin); %% win if Winrnd<probability of winning
+               
              C(2,j,i)=spending;
              C(3,j,i)=total;
              C(4,j,i)=savings;
@@ -135,8 +135,8 @@ for i=1:N
         else
             C(1,j,i)=0;
             %%%%%%%%%%%%%%%Need to match with first stage specification
-            X_=[1,w_I_,ST_(1,1),ST_(2,1).*demo,Same_,Same_*ST_(2,1),Ten_,X_Knot1,w_I^2,(ST_(1,1))^2,(ST_(1,1))^2.*Same_, (ST_(2,1)^2)*demo,Ten_^2,...
-                 X_Knot1.*(w_I_*ones(1,8)),X_Knot1.*((ST_(1,1)*Same_)*ones(1,8)),X_Knot1.*((ST_(2,1)*demo)*ones(1,8)),X_Knot1.*(log(Ten_+1)*ones(1,8)),...
+            X_=[1,w_I_,ST_(1,1),ST_(2,1).*demo,Same_,Same_*ST_(1,1),Ten_,X_Knot1,w_I^2,(ST_(1,1))^2,(ST_(1,1))^2.*Same_, (ST_(2,1)^2)*demo,Ten_^2,...
+                 X_Knot1.*(w_I_*ones(1,8)),X_Knot1.*((ST_(1,1)*Same_)*ones(1,8)),X_Knot1.*((ST_(2,1)*demo)*ones(1,8)),X_Knot1.*(Ten_*ones(1,8)),...
                  Presdum,Presdum.*Same_,ST_(1,1).*Presdum.*Same_,Midterm];     
             spending=X_*coefspend;
             total=X_*coeffund;

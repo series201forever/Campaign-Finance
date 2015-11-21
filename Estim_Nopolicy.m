@@ -76,11 +76,16 @@ E_V_july8(174:177,:)=[]; %Drop an Rtotd outlier
 
 
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Defining Variables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%
+%OP_INC_july 8 to estimate entry probability
+%%%%%%%%%%%%%%%
 
 Estimation_OP=OP_INC_july8; %Sample to estimate entry probability
 
@@ -284,6 +289,7 @@ X_KnotAC1=[X_KnotAC1,PLUS];
 
 %First column: redundant
 X_KnotAC1=X_KnotAC1(:,2:fineness);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%               E_V               %%%%
@@ -505,6 +511,7 @@ LOGTot_E_VC(E_VContestFUL,:)=[];
 % X_KnotEV2=[X_KnotEV2,PLUS];
 
 %mesh=quantile(RTotDE_V,linspace(0,1,fineness).');
+
 X_KnotEV1=(RTotDE_V<mesh(2,1)).*(1-(RTotDE_V-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
 for i=0:(numel(mesh)-3)
     PLUS=(RTotDE_V>=mesh(i+1,1)).*(RTotDE_V<mesh(i+2,1)).*((RTotDE_V-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
@@ -519,7 +526,6 @@ X_KnotEV1=X_KnotEV1(:,2:fineness);
 
 X_KnotE_VNCT=X_KnotEV1;
 X_KnotE_VNCT(E_VNContestFUL,:)=[];
-
 %%%%%%%%%%%%%%%%%%%%%%%% 
 % Defining variables: done
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -753,7 +759,7 @@ X_KnotE_VNCT(E_VNContestFUL,:)=[];
 %%%%%%%%%%%%%%%%%
 
 
-Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),Presdum,Presdumsame,Unemppresdumsame,Midterm,X_Knot1];
+Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),X_Knot1];
 coefentry=Xentry\Contest;
 coefprimaryN=Xentry\Primary_N;
 
@@ -770,8 +776,8 @@ coefprimaryN=Xentry\Primary_N;
 %Number=2
 %%%%%%%%%%%%%%%%%
 
-Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC,X_KnotAC1]*coefentry;
-EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC,X_KnotAC1]*coefprimaryN;
+Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry;
+EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefprimaryN;
 
 Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN,Eentry,EprimaryN.*Eentry,RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3];
 IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1)),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC];
@@ -794,10 +800,10 @@ coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*
 %Number=3
 %%%%%%%%%%%%%%%%%%
 Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,UnempsqsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1),log(TenureAC+1).^2,log(TenureAC+1).*LOGW_IAC,...
-    X_KnotAC1.*(LOGW_IAC*ones(1,8)),X_KnotAC1.*(UnempsameAC*ones(1,8)),X_KnotAC1.*(PartdemoAC*ones(1,8)),X_KnotAC1.*(log(TenureAC+1)*ones(1,8)),...
-    PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC];
-%Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1)];
-
+    X_KnotAC1.*(UnempsameAC*ones(1,8)),X_KnotAC1.*(PartdemoAC*ones(1,8)),X_KnotAC1.*(log(TenureAC+1)*ones(1,8)),...;
+   RTotD_NCAC.*LOGW_IAC,LOGW_IAC.^3];%X_KnotAC1.*(LOGW_IAC*ones(1,8)),
+    %Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1)];X_KnotAC1.*(LOGW_IAC*ones(1,8)),
+%LOGW_IAC.^3,
 coefprobwin=Xprobwin\Win_AC;
 
 %If modifying Xprobwin, make sure the corresponding part on "actions.m" is
@@ -808,7 +814,16 @@ coefprobwin=Xprobwin\Win_AC;
 predprobwin=Xprobwin*coefprobwin;
 errorprobwin=sum((Win_AC-Xprobwin*coefprobwin).^2)/(var(Win_AC)*length(Win_AC));
 plotprobwin=sortrows([Win_AC,predprobwin]);
-%scatter(plotprobwin(:,1),plotprobwin(:,2));
+scatter(plotprobwin(:,1),plotprobwin(:,2));
+
+%%
+%Specification check: if probability of winning is increasing in beginning
+%cash(logW_IAC)
+derivprobwin=@(x,logtenure,rtotd) [zeros(numel(x),1),ones(numel(x),1),zeros(numel(x),3),2*x,zeros(numel(x),10),logtenure*ones(numel(x),1),...
+    zeros(numel(x),24),rtotd*ones(numel(x),1),3*x.^2]*coefprobwin;
+xspace=linspace(5,14.3,1000).';
+
+scatter(xspace,derivprobwin(xspace,max(log(TenureAC+1)),quantile(RTotD_NCAC,0.9)));
 
 %%
 %%%%%%%%%%%%%%%%%%
@@ -826,23 +841,23 @@ Est2=coefvoteshare;
 %contested
 %Number=4
 %%%%%%%%%%%%%%%%%%
-%Sofarbest=10^8;
+Sofarbest=10^8;
 %bestiter=0;
 %iterate=1;
 %Delt=0.5;
 
-  OPTIONS=optimset('MaxIter',500000,'MaxFunEvals',1000000,'Display','iter');
-load ('./theta0.txt');
-%theta0=Est4;
+  OPTIONS=optimset('MaxIter',20,'MaxFunEvals',1000000,'Display','iter');
+load('./inittheta.mat');
+theta0=Est4;
 
-for sss=1:10
+for sss=1:500
     [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,4),theta0,OPTIONS);
-    theta0=mintheta+1.3*(rand(size(mintheta,1),1)-0.5).*mintheta;
+    theta0=mintheta;
     
     if SRR<Sofarbest
         Sofarbest=SRR;
         %    bestiter=iterate;
-        %save Est4.txt mintheta SRR -ASCII
+        %save Est4.txt mintheta -ASCII
         save Est42 mintheta
     end
 end
@@ -851,7 +866,12 @@ load ('Est42.mat');
 Est4=mintheta;
 %%
 %when not computing number=4
-load('Est4.mat');
+%load('Est4.mat');
+
+%Specification check: See if actions have right derivative
+spendderiv=[Est4(1),Est4(3);Est4(25),Est4(27);Est4(49),Est4(51)];
+fundderiv=[Est4(9),Est4(11);Est4(33),Est4(35);Est4(57),Est4(59)];
+savederiv=[Est4(17),Est4(19);Est4(41),Est4(43);Est4(65),Est4(67)];
 %%
 %%%%%%%%%%%%%%%%%%
 %Estimation of distribution of spending, saving and fund-raising when
@@ -861,13 +881,33 @@ load('Est4.mat');
 
 
 %Each actions
-Xaction=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2).*PartyE_VNCT,SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,1),TenureE_VNCT,X_KnotE_VNCT,...
-        LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,(XS_EVNCT_(:,1)).^2.*SameE_VNCT,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,...
-        X_KnotE_VNCT.*(LOGW_E_VNCT*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,1).*SameE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,2).*PartyE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((TenureE_VNCT)*ones(1,8)),...
-        PresdumE_VNCT,PresdumE_VNCT.*SameE_VNCT,PresdumE_VNCT.*SameE_VNCT.*XS_EVNCT_(:,1),MidtermE_VNCT];
 
+%X_Knot version...Derivative not necessarily positive
+% Xaction=[ones(size(LOGD_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2).*PartyE_VNCT,SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,1),TenureE_VNCT,X_KnotE_VNCT,...
+%        LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,(XS_EVNCT_(:,1)).^2.*SameE_VNCT,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,...
+%        X_KnotE_VNCT.*(LOGW_E_VNCT*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,1).*SameE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,2).*PartyE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((TenureE_VNCT)*ones(1,8)),...
+%        PresdumE_VNCT,PresdumE_VNCT.*SameE_VNCT,PresdumE_VNCT.*SameE_VNCT.*XS_EVNCT_(:,1),MidtermE_VNCT,LOGW_E_VNCT.*TenureE_VNCT,LOGW_E_VNCT.^3,X_KnotE_VNCT.*(LOGW_E_VNCT.^2*ones(1,8))];
+
+%Rtotd version... Derivative of spend+fund positive
+Xaction=[ones(size(LOGW_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2).*PartyE_VNCT,SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,1),TenureE_VNCT,X_KnotE_VNCT,...
+        LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,(XS_EVNCT_(:,1)).^2.*SameE_VNCT,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,...
+        RTotDE_VNCT.*LOGW_E_VNCT,X_KnotE_VNCT.*((XS_EVNCT_(:,1).*SameE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,2).*PartyE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((TenureE_VNCT)*ones(1,8)),...
+        PresdumE_VNCT,PresdumE_VNCT.*SameE_VNCT,PresdumE_VNCT.*SameE_VNCT.*XS_EVNCT_(:,1),MidtermE_VNCT,LOGW_E_VNCT.*TenureE_VNCT,LOGW_E_VNCT.^3,RTotDE_VNCT.^2.*LOGW_E_VNCT];
+
+Xaction2=[ones(size(LOGW_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2).*PartyE_VNCT,SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,1),TenureE_VNCT,X_KnotE_VNCT,...
+        LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,(XS_EVNCT_(:,1)).^2.*SameE_VNCT,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,...
+        RTotDE_VNCT.*LOGW_E_VNCT,X_KnotE_VNCT.*((XS_EVNCT_(:,1).*SameE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,2).*PartyE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((TenureE_VNCT)*ones(1,8)),...
+        PresdumE_VNCT,PresdumE_VNCT.*SameE_VNCT,PresdumE_VNCT.*SameE_VNCT.*XS_EVNCT_(:,1),MidtermE_VNCT,LOGW_E_VNCT.*TenureE_VNCT,LOGW_E_VNCT.^3,RTotDE_VNCT.^2.*LOGW_E_VNCT,RTotDE_VNCT.*LOGW_E_VNCT.^2,RTotDE_VNCT.^2.*LOGW_E_VNCT.^2];
+
+    Xaction(LOGW_E_VNCT<1,:)=[]; %Drop outliers   
+    Xaction2(LOGW_E_VNCT<1,:)=[]; %Drop outliers
+if size(LOGD_E_VNCT)==size(LOGW_E_VNCT)
+LOGD_E_VNCT(LOGW_E_VNCT<1,:)=[];
+LOGTotal_E_VNCT(LOGW_E_VNCT<1,:)=[];
+LOGW_NXT_E_VNCT(LOGW_E_VNCT<1,:)=[];
+end
 coefspend=Xaction\LOGD_E_VNCT;
-coeffund=Xaction\LOGTotal_E_VNCT;
+coeffund=Xaction2\LOGTotal_E_VNCT;
 coefsave=Xaction\LOGW_NXT_E_VNCT;
 
 %If modifying Xaction, make sure the corresponding part on "actions.m" is
@@ -884,6 +924,24 @@ errorfund=(sum((LOGTotal_E_VNCT-predfund).^2))/(var(LOGTotal_E_VNCT)*length(LOGT
 errorsave=(sum((LOGW_NXT_E_VNCT-predsave).^2))/(var(LOGW_NXT_E_VNCT)*length(LOGW_NXT_E_VNCT));
 %[exp(LOGD_E_VNCT),exp(predspend)];
 scatter(LOGD_E_VNCT,predspend);
+%%
+
+derivactions=@(x,tenure,rtotd,coef) [zeros(numel(x),1),ones(numel(x),1),zeros(numel(x),13),2*x,zeros(numel(x),4),ones(numel(x),1)*rtotd,...
+    zeros(numel(x),28),tenure*ones(numel(x),1),3*x.^2,rtotd.^2*ones(numel(x),1)]*coef;
+derivactions2=@(x,tenure,rtotd,coef) [zeros(numel(x),1),ones(numel(x),1),zeros(numel(x),13),2*x,zeros(numel(x),4),ones(numel(x),1)*rtotd,...
+    zeros(numel(x),28),tenure*ones(numel(x),1),3*x.^2,rtotd.^2*ones(numel(x),1),rtotd*2*x,rtotd.^2*2*x]*coef;
+
+xspace=linspace(5,14.3,1000).';
+
+%X_Knot version
+%scatter(xspace,derivactions(xspace,min(TenureE_VNCT),[max(X_KnotE_VNCT).*[0,1,0,0,0,0,0,0]],coefspend)+derivactions(xspace,min(TenureE_VNCT),[max(X_KnotE_VNCT).*[0,1,0,0,0,0,0,0]],coefsave));
+%Rtotd version
+figure(1)
+scatter(xspace,derivactions(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coefspend)+derivactions(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coefsave));
+figure(2)
+scatter(xspace,derivactions2(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coeffund));
+figure(3)
+scatter(xspace,derivactions(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coefspend)+derivactions(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coefsave)-derivactions2(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coeffund));
 
 %%
 %Define coefficients

@@ -14,7 +14,7 @@ global LOGW_E_VCT
 global SameE_VCT
 global XS_EVCT_
 global PartyE_VCT
-global PresseqE_VCT
+global PresdumE_VCT
 global MidtermE_VCT
 
 global LOGW_NXT_E_VCTwnxt
@@ -22,7 +22,7 @@ global LOGW_E_VCTwnxt
 global SameE_VCTwnxt
 global XS_EVCTwnxt_
 global PartyE_VCTwnxt
-global PresseqE_VCTwnxt
+global PresdumE_VCTwnxt
 global MidtermE_VCTwnxt
 
 global RTotDE_VCT
@@ -105,7 +105,7 @@ if num==4
         PartisanE_VCTi=XS_EVCT_(TAU,2);
         PartyE_VCTi=PartyE_VCT(TAU); 
         
-        PresseqE_VCTi=PresseqE_VCT(TAU);     
+        PresdumE_VCTi=PresdumE_VCT(TAU);     
         MidtermE_VCTi=MidtermE_VCT(TAU);      
         
         loglikeE_VDI1iP=[];
@@ -119,10 +119,10 @@ if num==4
         E_VCTa01iM=(-1)*(max(0,1-(E_VCTa(1:8,i).^2)'*gammaCT(1:8,i).^2))^(1/2);
         loglikeE_VDI1iP(:,1)=2*log(abs(E_VCTa01iP+E_VCTa(1,i)*(LOGD_E_VCTi-E_VCTt(1,i))+E_VCTa(2,i)*(XQEVCTi2-E_VCTt(2,i))+E_VCTa(3,i)*(LOGW_E_VCTi-E_VCTt(3,i))+...
             E_VCTa(4,i)*(UnemploymentE_VCTi-E_VCTt(4,i))+E_VCTa(5,i)*(PartisanE_VCTi.*PartyE_VCTi-E_VCTt(5,i))+E_VCTa(6,i)*(SameE_VCTi-E_VCTt(6,i))+...
-            E_VCTa(7,i)*(PresseqE_VCTi-E_VCTt(7,i))+E_VCTa(8,i)*(MidtermE_VCTi-E_VCTt(8,i))));
+            E_VCTa(7,i)*(PresdumE_VCTi-E_VCTt(7,i))+E_VCTa(8,i)*(MidtermE_VCTi-E_VCTt(8,i))));
         loglikeE_VDI1iM(:,1)=2*log(abs(E_VCTa01iM+E_VCTa(1,i)*(LOGD_E_VCTi-E_VCTt(1,i))+E_VCTa(2,i)*(XQEVCTi2-E_VCTt(2,i))+E_VCTa(3,i)*(LOGW_E_VCTi-E_VCTt(3,i))+...
             E_VCTa(4,i)*(UnemploymentE_VCTi-E_VCTt(4,i))+E_VCTa(5,i)*(PartisanE_VCTi.*PartyE_VCTi-E_VCTt(5,i))+E_VCTa(6,i)*(SameE_VCTi-E_VCTt(6,i))+...
-            E_VCTa(7,i)*(PresseqE_VCTi-E_VCTt(7,i))+E_VCTa(8,i)*(MidtermE_VCTi-E_VCTt(8,i))));
+            E_VCTa(7,i)*(PresdumE_VCTi-E_VCTt(7,i))+E_VCTa(8,i)*(MidtermE_VCTi-E_VCTt(8,i))));
         
         loglikeE_VDI2i(:,1)=(-1/2)*(((1/gammaCT(1,i))*(LOGD_E_VCTi-E_VCTt(1,i))).^2);
         
@@ -130,12 +130,12 @@ if num==4
         
         loglikeE_VDI4iP(:,1)=(-1)*log((E_VCTa01iP+E_VCTa(2,i)*(XQEVCTi2-E_VCTt(2,i))+E_VCTa(3,i)*(LOGW_E_VCTi-E_VCTt(3,i))+...
             E_VCTa(4,i)*(UnemploymentE_VCTi-E_VCTt(4,i))+E_VCTa(5,i)*(PartisanE_VCTi.*PartyE_VCTi-E_VCTt(5,i))+E_VCTa(6,i)*(SameE_VCTi-E_VCTt(6,i))+...
-        E_VCTa(7,i)*(PresseqE_VCTi-E_VCTt(7,i))+E_VCTa(8,i)*(MidtermE_VCTi-E_VCTt(8,i))).^2+...
+        E_VCTa(7,i)*(PresdumE_VCTi-E_VCTt(7,i))+E_VCTa(8,i)*(MidtermE_VCTi-E_VCTt(8,i))).^2+...
         (E_VCTa(1,i)^2)*(gammaCT(1,i)^2));
         
         loglikeE_VDI4iM(:,1)=(-1)*log((E_VCTa01iM+E_VCTa(2,i)*(XQEVCTi2-E_VCTt(2,i))+E_VCTa(3,i)*(LOGW_E_VCTi-E_VCTt(3,i))+...
             E_VCTa(4,i)*(UnemploymentE_VCTi-E_VCTt(4,i))+E_VCTa(5,i)*(PartisanE_VCTi.*PartyE_VCTi-E_VCTt(5,i))+E_VCTa(6,i)*(SameE_VCTi-E_VCTt(6,i))+...
-            E_VCTa(7,i)*(PresseqE_VCTi-E_VCTt(7,i))+E_VCTa(8,i)*(MidtermE_VCTi-E_VCTt(8,i))).^2+...
+            E_VCTa(7,i)*(PresdumE_VCTi-E_VCTt(7,i))+E_VCTa(8,i)*(MidtermE_VCTi-E_VCTt(8,i))).^2+...
             (E_VCTa(1,i)^2)*(gammaCT(1,i)^2));
         
         loglikeE_VDIi=max(sum(loglikeE_VDI1iP+loglikeE_VDI2i+loglikeE_VDI4iP)+loglikeE_VDI3i,...
@@ -174,7 +174,7 @@ if num==4
         PartisanE_VCTi=XS_EVCT_(TAU,2);
         PartyE_VCTi=PartyE_VCT(TAU);        
 
-        PresseqE_VCTi=PresseqE_VCT(TAU);     
+        PresdumE_VCTi=PresdumE_VCT(TAU);     
         MidtermE_VCTi=MidtermE_VCT(TAU);     
         
         loglikeE_VTotI1iP=[];
@@ -188,11 +188,11 @@ if num==4
         
         loglikeE_VTotI1iP(:,1)=2*log(abs(E_VCTa02iP+E_VCTa(9,i)*(LOGTotal_E_VCTi-E_VCTt(9,i))+E_VCTa(10,i)*(XQEVCTi2-E_VCTt(10,i))+E_VCTa(11,i)*(LOGW_E_VCTi-E_VCTt(11,i))+...
             E_VCTa(12,i)*(UnemploymentE_VCTi-E_VCTt(12,i))+E_VCTa(13,i)*(PartisanE_VCTi.*PartyE_VCTi-E_VCTt(13,i))+E_VCTa(14,i)*(SameE_VCTi-E_VCTt(14,i))+...
-            E_VCTa(15,i)*(PresseqE_VCTi-E_VCTt(15,i))+E_VCTa(16,i)*(MidtermE_VCTi-E_VCTt(16,i))));
+            E_VCTa(15,i)*(PresdumE_VCTi-E_VCTt(15,i))+E_VCTa(16,i)*(MidtermE_VCTi-E_VCTt(16,i))));
         
         loglikeE_VTotI1iM(:,1)=2*log(abs(E_VCTa02iM+E_VCTa(9,i)*(LOGTotal_E_VCTi-E_VCTt(9,i))+E_VCTa(10,i)*(XQEVCTi2-E_VCTt(10,i))+E_VCTa(11,i)*(LOGW_E_VCTi-E_VCTt(11,i))+...
             E_VCTa(12,i)*(UnemploymentE_VCTi-E_VCTt(12,i))+E_VCTa(13,i)*(PartisanE_VCTi.*PartyE_VCTi-E_VCTt(13,i))+E_VCTa(14,i)*(SameE_VCTi-E_VCTt(14,i))+...
-            E_VCTa(15,i)*(PresseqE_VCTi-E_VCTt(15,i))+E_VCTa(16,i)*(MidtermE_VCTi-E_VCTt(16,i))));
+            E_VCTa(15,i)*(PresdumE_VCTi-E_VCTt(15,i))+E_VCTa(16,i)*(MidtermE_VCTi-E_VCTt(16,i))));
         
         loglikeE_VTotI2i(:,1)=(-1/2)*(((1/gammaCT(9,i))*(LOGTotal_E_VCTi-E_VCTt(9,i))).^2);
         
@@ -200,12 +200,12 @@ if num==4
         
         loglikeE_VTotI4iP(:,1)=(-1)*log((E_VCTa02iP+E_VCTa(10,i)*(XQEVCTi2-E_VCTt(10,i))+E_VCTa(11,i)*(LOGW_E_VCTi-E_VCTt(11,i))+...
             E_VCTa(12,i)*(UnemploymentE_VCTi-E_VCTt(12,i))+E_VCTa(13,i)*(PartisanE_VCTi.*PartyE_VCTi-E_VCTt(13,i))+E_VCTa(14,i)*(SameE_VCTi-E_VCTt(14,i))+...
-            E_VCTa(15,i)*(PresseqE_VCTi-E_VCTt(15,i))+E_VCTa(16,i)*(MidtermE_VCTi-E_VCTt(16,i))).^2+...
+            E_VCTa(15,i)*(PresdumE_VCTi-E_VCTt(15,i))+E_VCTa(16,i)*(MidtermE_VCTi-E_VCTt(16,i))).^2+...
         (E_VCTa(9,i)^2)*(gammaCT(9,i)^2));
         
         loglikeE_VTotI4iM(:,1)=(-1)*log((E_VCTa02iM+E_VCTa(10,i)*(XQEVCTi2-E_VCTt(10,i))+E_VCTa(11,i)*(LOGW_E_VCTi-E_VCTt(11,i))+...
             E_VCTa(12,i)*(UnemploymentE_VCTi-E_VCTt(12,i))+E_VCTa(13,i)*(PartisanE_VCTi.*PartyE_VCTi-E_VCTt(13,i))+E_VCTa(14,i)*(SameE_VCTi-E_VCTt(14,i))+...
-             E_VCTa(15,i)*(PresseqE_VCTi-E_VCTt(15,i))+E_VCTa(16,i)*(MidtermE_VCTi-E_VCTt(16,i))).^2+...
+             E_VCTa(15,i)*(PresdumE_VCTi-E_VCTt(15,i))+E_VCTa(16,i)*(MidtermE_VCTi-E_VCTt(16,i))).^2+...
         (E_VCTa(9,i)^2)*(gammaCT(9,i)^2));
         
         loglikeE_VTotIi=max(sum(loglikeE_VTotI1iP+loglikeE_VTotI2i+loglikeE_VTotI4iP)+loglikeE_VTotI3i,...
@@ -237,7 +237,7 @@ if num==4
         PartisanE_VCTwnxti=XS_EVCTwnxt_(TAU,2);
         PartyE_VCTwnxti=PartyE_VCTwnxt(TAU);
         
-        PresseqE_VCTwnxti=PresseqE_VCTwnxt(TAU);
+        PresdumE_VCTwnxti=PresdumE_VCTwnxt(TAU);
         MidtermE_VCTwnxti=MidtermE_VCTwnxt(TAU);
         loglikeE_VWnxtnxtI1iP=[];
         loglikeE_VWnxtnxtI1iM=[];
@@ -251,11 +251,11 @@ if num==4
         
         loglikeE_VWnxtnxtI1iP(:,1)=2*log(abs(E_VCTa03iP+E_VCTa(17,i)*(LOGW_NXT_E_VCTwnxti-E_VCTt(17,i))+E_VCTa(18,i)*(XQEVCTwnxti2-E_VCTt(18,i))+E_VCTa(19,i)*(LOGW_E_VCTwnxti-E_VCTt(19,i))+...
             E_VCTa(20,i)*(UnemploymentE_VCTwnxti-E_VCTt(20,i))+E_VCTa(21,i)*(PartisanE_VCTwnxti.*PartyE_VCTwnxti-E_VCTt(21,i))+E_VCTa(22,i)*(SameE_VCTwnxti-E_VCTt(22,i))+...
-            E_VCTa(23,i)*(PresseqE_VCTwnxti-E_VCTt(23,i))+E_VCTa(24,i)*(MidtermE_VCTwnxti-E_VCTt(24,i))));
+            E_VCTa(23,i)*(PresdumE_VCTwnxti-E_VCTt(23,i))+E_VCTa(24,i)*(MidtermE_VCTwnxti-E_VCTt(24,i))));
         
         loglikeE_VWnxtnxtI1iM(:,1)=2*log(abs(E_VCTa03iM+E_VCTa(17,i)*(LOGW_NXT_E_VCTwnxti-E_VCTt(17,i))+E_VCTa(18,i)*(XQEVCTwnxti2-E_VCTt(18,i))+E_VCTa(19,i)*(LOGW_E_VCTwnxti-E_VCTt(19,i))+...
             E_VCTa(20,i)*(UnemploymentE_VCTwnxti-E_VCTt(20,i))+E_VCTa(21,i)*(PartisanE_VCTwnxti.*PartyE_VCTwnxti-E_VCTt(21,i))+E_VCTa(22,i)*(SameE_VCTwnxti-E_VCTt(22,i))+...
-             E_VCTa(23,i)*(PresseqE_VCTwnxti-E_VCTt(23,i))+E_VCTa(24,i)*(MidtermE_VCTwnxti-E_VCTt(24,i))));
+             E_VCTa(23,i)*(PresdumE_VCTwnxti-E_VCTt(23,i))+E_VCTa(24,i)*(MidtermE_VCTwnxti-E_VCTt(24,i))));
         
         loglikeE_VWnxtnxtI2i(:,1)=(-1/2)*(((1/gammaCT(17,i))*(LOGW_NXT_E_VCTwnxti-E_VCTt(17,i))).^2);
         
@@ -263,12 +263,12 @@ if num==4
         
         loglikeE_VWnxtnxtI4iP(:,1)=(-1)*log((E_VCTa03iP+E_VCTa(18,i)*(XQEVCTwnxti2-E_VCTt(18,i))+E_VCTa(19,i)*(LOGW_E_VCTwnxti-E_VCTt(19,i))+...
             E_VCTa(20,i)*(UnemploymentE_VCTwnxti-E_VCTt(20,i))+E_VCTa(21,i)*(PartisanE_VCTwnxti.*PartyE_VCTwnxti-E_VCTt(21,i))+E_VCTa(22,i)*(SameE_VCTwnxti-E_VCTt(22,i))+...
-             E_VCTa(23,i)*(PresseqE_VCTwnxti-E_VCTt(23,i))+E_VCTa(24,i)*(MidtermE_VCTwnxti-E_VCTt(24,i))).^2+...
+             E_VCTa(23,i)*(PresdumE_VCTwnxti-E_VCTt(23,i))+E_VCTa(24,i)*(MidtermE_VCTwnxti-E_VCTt(24,i))).^2+...
         (E_VCTa(17,i)^2)*(gammaCT(17,i)^2));
         
         loglikeE_VWnxtnxtI4iM(:,1)=(-1)*log((E_VCTa03iM+E_VCTa(18,i)*(XQEVCTwnxti2-E_VCTt(18,i))+E_VCTa(19,i)*(LOGW_E_VCTwnxti-E_VCTt(19,i))+...
             E_VCTa(20,i)*(UnemploymentE_VCTwnxti-E_VCTt(20,i))+E_VCTa(21,i)*(PartisanE_VCTwnxti.*PartyE_VCTwnxti-E_VCTt(21,i))+E_VCTa(22,i)*(SameE_VCTwnxti-E_VCTt(22,i))+...
-             E_VCTa(23,i)*(PresseqE_VCTwnxti-E_VCTt(23,i))+E_VCTa(24,i)*(MidtermE_VCTwnxti-E_VCTt(24,i))).^2+...
+             E_VCTa(23,i)*(PresdumE_VCTwnxti-E_VCTt(23,i))+E_VCTa(24,i)*(MidtermE_VCTwnxti-E_VCTt(24,i))).^2+...
             (E_VCTa(17,i)^2)*(gammaCT(17,i)^2));
         
         loglikeE_VWnxtnxtIi=max(sum(loglikeE_VWnxtnxtI1iP+loglikeE_VWnxtnxtI2i+loglikeE_VWnxtnxtI4iP)+loglikeE_VWnxtnxtI3i,...

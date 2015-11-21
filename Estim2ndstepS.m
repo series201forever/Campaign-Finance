@@ -265,7 +265,7 @@ Partdemo=Partisan.*Party;
 % X_Knot2=[X_Knot2,PLUS];
 
 fineness=9;
-mesh=quantile(RTotD_NC,linspace(0,1,fineness).');
+mesh=quantile(RTotDE_V,linspace(0,1,fineness).');
 X_Knot1=(RTotD_NC<mesh(2,1)).*(1-(RTotD_NC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
 for i=0:(numel(mesh)-3)
     PLUS=(RTotD_NC>=mesh(i+1,1)).*(RTotD_NC<mesh(i+2,1)).*((RTotD_NC-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
