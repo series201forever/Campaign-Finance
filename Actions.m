@@ -1,4 +1,4 @@
-function C=Actions(num,ST,Same, q_I, X_Knot1, Ten,w_I,demo,Presdum,Midterm,shockpartisan, shockump, presseq, Entry, coefentry, E_VCTa, E_VCTt, gammact, coefspend, coeffund,coefsave, dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,coefprobwin,Ret,Betapartisan,Betaump)
+function C=Actions2(num,ST,Same, q_I, X_Knot1,rtotd, Ten,w_I,demo,Presdum,Midterm,shockpartisan, shockump, presseq, Entry, coefentry, E_VCTa, E_VCTt, gammact, coefspend, coeffund,coefsave, dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,coefprobwin,Ret,Betapartisan,Betaump)
 %options = optimset();
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %Make sure that specification chosen at the first stage and "entryprob",
@@ -6,6 +6,8 @@ function C=Actions(num,ST,Same, q_I, X_Knot1, Ten,w_I,demo,Presdum,Midterm,shock
 
 global N;  % the number of simulations
 global interest
+
+options=optimoptions('fsolve','display','none');
 
 
 C=zeros(5,10,N);
@@ -41,7 +43,7 @@ for i=1:N
         if length(coefentry)==13
             entryprob=[1,w_I_,ST_(1,1)*Same_,ST_(2,1)*demo,log(Ten_+1),X_Knot1]*coefentry;
         else
-            entryprob=[1,w_I_,ST_(1,1)*Same_,ST_(2,1)*demo,log(Ten_+1),X_Knot1,X_Knot1.*(w_I*ones(1,8))]*coefentry;
+            entryprob=[1,w_I_,ST_(1,1)*Same_,ST_(2,1)*demo,log(Ten_+1),X_Knot1,X_Knot1.*(w_I_*ones(1,8))]*coefentry;
         end
             
         if (Entry(j,i)<entryprob)  %% CONTEST.
@@ -56,8 +58,11 @@ for i=1:N
             Jsp=(sqrt(1-(E_VCTa(1:8,iK).^2)'*(gammact(1:8,iK).^2))+E_VCTa(2:8,iK)'*(X_-E_VCTt(2:8,iK)))^2+E_VCTa(1,iK)^2*gammact(1,iK)^2;
 %             spending=fminsearch(@(X) PHI([E_VCTa(1:5,iK);sqrt(1-(E_VCTa(1:5,iK).^2)'*(gammact(1:5,iK).^2))],E_VCTt(1:5,iK)...
 %                    ,gammact(1:5,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',X,qtile1),E_VCTt(1,iK));
-            spending=fminsearch(@(X) PHI_improve(A1sp,A2sp,Jsp,(1/sqrt(2*pi)),E_VCTa(1,iK),E_VCTt(1,iK)...
-                   ,gammact(1,iK),X,qtile1),E_VCTt(1,iK));     %% Computes F^(-1)(dF_gamma_ct) where
+            spending=fsolve(@(X) PHI_improve(A1sp,A2sp,Jsp,(1/sqrt(2*pi)),E_VCTa(1,iK),E_VCTt(1,iK)...
+                   ,gammact(1,iK),X,qtile1),E_VCTt(1,iK),options); 
+
+               
+              %% Computes F^(-1)(dF_gamma_ct) where
                                                              %% F^(-1) is the inverse cdf of
                                                              %% LOGD_NXT_E_VCT
                                                                                                         
@@ -77,8 +82,8 @@ for i=1:N
             Jtot=(sqrt(1-(E_VCTa(9:16,iK).^2)'*(gammact(9:16,iK).^2))+E_VCTa(10:16,iK)'*(X_-E_VCTt(10:16,iK)))^2+E_VCTa(9,iK)^2*gammact(9,iK)^2;
 %             total=fminsearch(@(X) PHI([E_VCTa(6:10,iK);sqrt(1-(E_VCTa(6:10,iK).^2)'*(gammact(6:10,iK).^2))],E_VCTt(6:10,iK)...
 %                     ,gammact(6:10,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',X,qtile2),E_VCTt(6,iK));   %% Computes F^(-1)(dF_total_ct) where
-            total=fminsearch(@(X) PHI_improve(A1tot,A2tot,Jtot,(1/sqrt(2*pi)),E_VCTa(9,iK),E_VCTt(9,iK)...
-                   ,gammact(9,iK),X,qtile2),E_VCTt(9,iK));     %% Computes F^(-1)(dF_gamma_ct) where
+            total=fsolve(@(X) PHI_improve(A1tot,A2tot,Jtot,(1/sqrt(2*pi)),E_VCTa(9,iK),E_VCTt(9,iK)...
+                   ,gammact(9,iK),X,qtile2),E_VCTt(9,iK),options);     %% Computes F^(-1)(dF_gamma_ct) where
                                                              %% F^(-1) is the inverse cdf of
                                                              %% LOGTotal_NXT_E_VCT
     %         total2=fminunc(@(X) PHI([E_VCTa(6:10,iK);sqrt(1-(E_VCTa(6:10,iK).^2)'*(gamma(6:10).^2))],E_VCTt(6:10,iK)...
@@ -96,8 +101,8 @@ for i=1:N
 %                  gammact(11:15,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',X,qtile3),E_VCTt(11,iK));     %% Computes F^(-1)(dF_nxt_nxt) where
                                                                                                          %% F^(-1) is the inverse cdf of
                                                                                                          %% LOGWNXT_NXT_E_VCT
-            savings=fminsearch(@(X) PHI_improve(A1nxt,A2nxt,Jnxt,(1/sqrt(2*pi)),E_VCTa(17,iK),E_VCTt(17,iK)...
-                   ,gammact(17,iK),X,qtile3),E_VCTt(17,iK));
+            savings=fsolve(@(X) PHI_improve(A1nxt,A2nxt,Jnxt,(1/sqrt(2*pi)),E_VCTa(17,iK),E_VCTt(17,iK)...
+                   ,gammact(17,iK),X,qtile3),E_VCTt(17,iK),options);
     %         savings2=fminunc(@(X) PHI([E_VCTa(11:15,iK);sqrt(1-(E_VCTa(11:15,iK).^2)'*(gamma(11:15).^2))],E_VCTt(11:15,iK),...
     %             gamma(11:15,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',X,dF_nxt_nxt(j,i)),6,options);
     %            Check3=PHI([E_VCTa(11:15,iK);sqrt(1-(E_VCTa(11:15,iK).^2)'*(gammact(11:15).^2))],E_VCTt(11:15,iK),...
@@ -123,8 +128,8 @@ for i=1:N
 
 %%%%%%%%%%%%%%%Need to match with first stage specification 
              win=(Winrnd(j,i)<=[1,w_I_,ST_(1,1)*Same_,ST_(1,1).^2.*Same_,ST_(2,1)*demo,w_I_.^2,X_Knot1,log(Ten_+1),(log(Ten_+1)).^2,log(Ten_+1).*w_I_,...
-                 X_Knot1.*(w_I_*ones(1,8)),X_Knot1.*((ST_(1,1)*Same_)*ones(1,8)),X_Knot1.*((ST_(2,1)*demo)*ones(1,8)),X_Knot1.*(log(Ten_+1)*ones(1,8)) ]*coefprobwin); %% win if Winrnd<probability of winning
-               
+                 X_Knot1.*((ST_(1,1)*Same_)*ones(1,8)),X_Knot1.*((ST_(2,1)*demo)*ones(1,8)),X_Knot1.*(log(Ten_+1)*ones(1,8)),...
+                 rtotd.*w_I_,w_I_.^3]*coefprobwin); %% win if Winrnd<probability of winning           
              C(2,j,i)=spending;
              C(3,j,i)=total;
              C(4,j,i)=savings;
@@ -135,12 +140,17 @@ for i=1:N
         else
             C(1,j,i)=0;
             %%%%%%%%%%%%%%%Need to match with first stage specification
-            X_=[1,w_I_,ST_(1,1),ST_(2,1).*demo,Same_,Same_*ST_(1,1),Ten_,X_Knot1,w_I^2,(ST_(1,1))^2,(ST_(1,1))^2.*Same_, (ST_(2,1)^2)*demo,Ten_^2,...
-                 X_Knot1.*(w_I_*ones(1,8)),X_Knot1.*((ST_(1,1)*Same_)*ones(1,8)),X_Knot1.*((ST_(2,1)*demo)*ones(1,8)),X_Knot1.*(Ten_*ones(1,8)),...
-                 Presdum,Presdum.*Same_,ST_(1,1).*Presdum.*Same_,Midterm];     
-            spending=X_*coefspend;
-            total=X_*coeffund;
-            savings=X_*coefsave;
+            X_1=[1,w_I_,ST_(1,1),ST_(2,1).*demo,Same_,Same_*ST_(1,1),Ten_,X_Knot1,w_I_^2,(ST_(1,1))^2,(ST_(1,1))^2.*Same_, (ST_(2,1)^2)*demo,Ten_^2,...
+                 rtotd.*w_I_,X_Knot1.*((ST_(1,1)*Same_)*ones(1,8)),X_Knot1.*((ST_(2,1)*demo)*ones(1,8)),X_Knot1.*(Ten_*ones(1,8)),...
+                 Presdum,Presdum.*Same_,ST_(1,1).*Presdum.*Same_,Midterm, w_I_.*Ten_,w_I_.^3,rtotd.^2.*w_I_];
+            X_2=[1,w_I_,ST_(1,1),ST_(2,1).*demo,Same_,Same_*ST_(1,1),Ten_,X_Knot1,w_I_^2,(ST_(1,1))^2,(ST_(1,1))^2.*Same_, (ST_(2,1)^2)*demo,Ten_^2,...
+                 rtotd.*w_I_,X_Knot1.*((ST_(1,1)*Same_)*ones(1,8)),X_Knot1.*((ST_(2,1)*demo)*ones(1,8)),X_Knot1.*(Ten_*ones(1,8)),...
+                 Presdum,Presdum.*Same_,ST_(1,1).*Presdum.*Same_,Midterm, w_I_.*Ten_,w_I_.^3,rtotd.^2.*w_I_,rtotd.*w_I_.^2,rtotd.^2.*w_I_.^2];
+              
+
+            spending=X_1*coefspend;
+            total=X_2*coeffund;
+            savings=X_1*coefsave;
              C(2,j,i)=spending;
              C(3,j,i)=total;
              C(4,j,i)=savings;
@@ -148,5 +158,6 @@ for i=1:N
             w_I_=log(1+interest)+savings;
             j=j+1;
         end
+  
     end
 end

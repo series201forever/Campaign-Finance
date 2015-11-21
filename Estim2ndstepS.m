@@ -3,6 +3,8 @@ clear all
 % make sure you get the sign of q_e right. Also note that f_d_qe, f_w_qe have the PARTY of Challenger.
 % **
 
+rng(958)
+
 global iterate
 global results
 global LOGW_I
@@ -100,7 +102,7 @@ global LOGW_E_VNCT
 global LOGW_E_VCTwnxt
 global LOGD_E_VCT
 global LOGD_E_VNCT
-global N
+
 global Sofarbest
 global bestiter
 global NCE_VCTwnxt
@@ -142,6 +144,10 @@ global Tenure_INCCT
 global VSEVCT;
 global XXX
 global incr
+
+
+%Global used to construct C.mat
+global N
 global interest
 
 %load ('./E_V_july8.mat')
@@ -265,7 +271,7 @@ Partdemo=Partisan.*Party;
 % X_Knot2=[X_Knot2,PLUS];
 
 fineness=9;
-mesh=quantile(RTotDE_V,linspace(0,1,fineness).');
+mesh=quantile(RTotD_NC,linspace(0,1,fineness).');
 X_Knot1=(RTotD_NC<mesh(2,1)).*(1-(RTotD_NC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
 for i=0:(numel(mesh)-3)
     PLUS=(RTotD_NC>=mesh(i+1,1)).*(RTotD_NC<mesh(i+2,1)).*((RTotD_NC-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
@@ -780,9 +786,9 @@ coefentry=Est1(1:(length(Est1)/2));
     
 
 
-coefspend(:,1)=Est5(1:(1/3*length(Est5)));
-coeffund(:,1)=Est5((1/3*length(Est5)+1):(2/3*length(Est5)));
-coefsave(:,1)=Est5((2/3*length(Est5)+1):length(Est5));
+coefspend(:,1)=Est5(1:52);
+coeffund(:,1)=Est5(53:106);
+coefsave(:,1)=Est5(107:158);
 coefprobwin=Est3;
 
    thetaQ2=Est2(9:numel(Est2));
@@ -854,17 +860,17 @@ RetirerndR(T,:,:)=1;
 
 for i=1:N
     for j=1:length(E_V_july8)
-        Ret(i,j)=min(find(Retirernd(:,i,j)==1));
+        Ret(i,j)=find(Retirernd(:,i,j)==1,1,'first');
     end
 end
 for i=1:N
     for j=1:length(E_V_july8)
-        RetC(i,j)=min(find(RetirerndC(:,i,j)==1));
+        RetC(i,j)=find(RetirerndC(:,i,j)==1,1,'first');
     end
 end
 for i=1:N
     for j=1:length(E_V_july8)
-        RetR(i,j)=min(find(RetirerndR(:,i,j)==1));
+        RetR(i,j)=find(RetirerndR(:,i,j)==1,1,'first');
     end
 end
 
@@ -1075,7 +1081,7 @@ presseq(:,:,begtwo)=presseqbegtwo;
  C=zeros(5,T,N,length(NCE_V));
 % DC=zeros(5,T,N,length(NCE_V));
 for i=1:length(NCE_V)
-         C(:,:,:,i)=Actions(i,XSEV_(i,:)',SameE_V(i,1), XQEV2(i,1),X_KnotEV1(i,:), TenureE_V(i,1),LOGW_NXT_E_V(i,1),PartyE_V(i,1),PresdumE_V(i,1),MidtermE_V(i,1),...
+         C(:,:,:,i)=Actions(i,XSEV_(i,:)',SameE_V(i,1), XQEV2(i,1),X_KnotEV1(i,:),RTotDE_V(i,:), TenureE_V(i,1),LOGW_NXT_E_V(i,1),PartyE_V(i,1),PresdumE_V(i,1),MidtermE_V(i,1),...
          Shockpartisan(:,:,i), Shockump(:,:,i), presseq(:,:,i),Entry(:,:,i), coefentry, E_VCTa, E_VCTt, gammaCT, coefspend, coeffund,coefsave, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
         dF_nxt_nxt_ct(:,:,i), Winrnd(:,:,i),coefprobwin,Ret(:,i)',Betapartisan,Betaump);
     squeeze(C(:,:,:,i))
