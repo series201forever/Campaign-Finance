@@ -162,7 +162,9 @@ OP_INC_IV_july8=csvread('OP_INC_IV_july8partisan.csv',1,0);
 load('./Est1.mat');
 load('./Est2.mat');
 load('./Est3.mat');
-load('./Est4.mat');
+load('./Est41.mat');
+load('./Est42.mat');
+load('./Est43.mat');
 load('./Est5.mat');
 
 load ('./retire.txt');
@@ -774,15 +776,15 @@ sig=0.3;
 
 %Estimated parameters in the first stage
 coefentry=Est1(1:(length(Est1)/2));
-    E_VCTa(:,1)=Est4(1:24,1);
-    E_VCTa(:,2)=Est4(25:48,1);
-    E_VCTa(:,3)=Est4(49:72,1);
-    E_VCTt(:,1)=Est4(73:96,1);
-    E_VCTt(:,2)=Est4(97:120,1);
-    E_VCTt(:,3)=Est4(121:144,1);
-    gammaCT(:,1)=Est4(145:168,1);
-    gammaCT(:,2)=Est4(169:192,1);
-    gammaCT(:,3)=Est4(193:216,1);
+    E_VCTa(:,1)=[Est41(1:8);Est42(1:8);Est43(1:8)];
+    E_VCTa(:,2)=[Est41(9:16);Est42(9:16);Est43(9:16)];
+    E_VCTa(:,3)=[Est41(17:24);Est42(17:24);Est43(17:24)];
+    E_VCTt(:,1)=[Est41(25:32);Est42(25:32);Est43(25:32)];
+    E_VCTt(:,2)=[Est41(33:40);Est42(33:40);Est43(33:40)];
+    E_VCTt(:,3)=[Est41(41:48);Est42(41:48);Est43(41:48)];
+    gammaCT(:,1)=[Est41(49:56);Est42(49:56);Est43(49:56)];
+    gammaCT(:,2)=[Est41(57:64);Est42(57:64);Est43(57:64)];
+    gammaCT(:,3)=[Est41(65:72);Est42(65:72);Est43(65:72)];
     
 
 
@@ -842,7 +844,7 @@ coefprobwin=Est3;
 
 Sofarbest=10^8;
 bestiter=0;
-N=20;                      % N is the number of simulations.
+N=10;                      % N is the number of simulations.
 NumSim=50;              %NumSim is the number of simulations in the 1st step to obtain f(.,q_e)
 
 T=10;                      % T is the number of periods that we move the simlation forward.

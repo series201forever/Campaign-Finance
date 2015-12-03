@@ -846,32 +846,158 @@ Sofarbest=10^8;
 %iterate=1;
 %Delt=0.5;
 
-  OPTIONS=optimset('MaxIter',20,'MaxFunEvals',1000000,'Display','iter');
-load('./inittheta.mat');
-theta0=Est4;
+  OPTIONS=optimset('MaxIter',10000,'MaxFunEvals',1000000,'Display','iter');
+  
+  
+  %%%%%%%%%%
+  %4-1: spending
+  %%%%%%%%%%
+load('./inittheta1.mat');
+theta0=inittheta1;
 
-for sss=1:500
-    [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,4),theta0,OPTIONS);
+for sss=1:1000
+    [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,1),theta0,OPTIONS);
     theta0=mintheta;
     
     if SRR<Sofarbest
         Sofarbest=SRR;
         %    bestiter=iterate;
         %save Est4.txt mintheta -ASCII
-        save Est42 mintheta
+        save aux1 mintheta
     end
 end
 
-load ('Est42.mat');
-Est4=mintheta;
+load ('aux1.mat');
+Est41=mintheta;
+save Est41 Est41
+
+  %%%%%%%%%%
+  %4-2: fundraising
+  %%%%%%%%%%
+  Sofarbest=10^8;
+  OPTIONS=optimset('MaxIter',10000,'MaxFunEvals',1000000,'Display','iter');
+  
+load('./inittheta2.mat');
+theta0=inittheta2;
+
+for sss=1:1000
+    [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,2),theta0,OPTIONS);
+    theta0=mintheta;
+    
+    if SRR<Sofarbest
+        Sofarbest=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        save aux2 mintheta
+    end
+end
+
+load ('aux2.mat');
+Est42=mintheta;
+save Est42 Est42
+%%
+  %%%%%%%%%%
+  %4-3: saving
+  %%%%%%%%%%
+  %Sofarbest=10^8;
+  OPTIONS=optimset('MaxIter',10000,'MaxFunEvals',1000000);
+  %%
+%load('./inittheta3.mat');
+
+for j=1:500
+
+theta0=Est43;
+theta0([1,3,9,11,17,19])=2*rand(6,1);
+theta0(49:72)=rand(24,1);
+%Find initial value for E_VCTt
+Cutoff=[-1;3;7;100];
+thetaQ2=Est2(9:numel(Est2));
+if numel(thetaQ2)==3
+    XQEV2=[RTotDE_VCT,RTotDE_VCT.^2,RTotDE_VCT.^3]*thetaQ2; % q_I
+    XQEVCT2=XQEV2;
+    %XQEVCT2(E_VContestFUL,:)=[]; Already VCT
+    XQEVCTwnxt2=XQEVCT2;
+    XQEVCTwnxt2(IND5,:)=[];
+else
+    XQEV2=X_KnotEV1*thetaQ2;  % q_I
+    XQEVCT2=XQEV2;
+    XQEVCT2(E_VContestFUL,:)=[];
+    XQEVCTwnxt2=XQEVCT2;
+    XQEVCTwnxt2(IND5,:)=[];
+end
+for i=1:3
+TAU=find((TenureE_VCTwnxt<=Cutoff(i+1,1))&(TenureE_VCTwnxt>Cutoff(i,1))); %
+
+LOGW_NXT_E_VCTwnxti=LOGW_NXT_E_VCTwnxt(TAU);
+XQEVCTwnxti2=XQEVCTwnxt2(TAU);
+LOGW_E_VCTwnxti=LOGW_E_VCTwnxt(TAU);
+SameE_VCTwnxti=SameE_VCTwnxt(TAU);
+UnemploymentE_VCTwnxti=XS_EVCTwnxt_(TAU,1);
+PartisanE_VCTwnxti=XS_EVCTwnxt_(TAU,2);
+PartyE_VCTwnxti=PartyE_VCTwnxt(TAU);
+PresdumE_VCTwnxti=PresdumE_VCTwnxt(TAU);
+MidtermE_VCTwnxti=MidtermE_VCTwnxt(TAU);
+
+
+theta0(25+((i-1)*8))=mean(LOGW_NXT_E_VCTwnxti);
+theta0(26+((i-1)*8))=mean(XQEVCTwnxti2);
+theta0(27+((i-1)*8))=mean(LOGW_E_VCTwnxti);
+theta0(28+((i-1)*8))=mean(UnemploymentE_VCTwnxti);
+theta0(29+((i-1)*8))=mean(PartisanE_VCTwnxti.*PartyE_VCTwnxti);
+theta0(30+((i-1)*8))=mean(SameE_VCTwnxti);
+theta0(31+((i-1)*8))=mean(PresdumE_VCTwnxti);
+theta0(32+((i-1)*8))=mean(MidtermE_VCTwnxti);
+end
+
+
+
+funvalue=Minimize_Apr2013(theta0,3);
+funvalueend=0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta0,3);
+    [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,3),theta0,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta,3);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta0=mintheta;
+%     end
+    
+    if SRR<Sofarbest
+        Sofarbest=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        save aux3 mintheta
+    end
+end
+
+load ('aux3.mat');
+Est43=mintheta;
+save Est43 Est43
+end
+
+
 %%
 %when not computing number=4
-%load('Est4.mat');
+load('Est41.mat');
+load('Est42.mat');
+load('Est43.mat');
 
 %Specification check: See if actions have right derivative
-spendderiv=[Est4(1),Est4(3);Est4(25),Est4(27);Est4(49),Est4(51)];
-fundderiv=[Est4(9),Est4(11);Est4(33),Est4(35);Est4(57),Est4(59)];
-savederiv=[Est4(17),Est4(19);Est4(41),Est4(43);Est4(65),Est4(67)];
+spendderiv=[Est41(1),Est41(3);Est41(9),Est41(11);Est41(17),Est41(19)];
+fundderiv=[Est42(1),Est42(3);Est42(9),Est42(11);Est42(17),Est42(19)];
+savederiv=[Est43(1),Est43(3);Est43(9),Est43(11);Est43(17),Est43(19)];
+
+%Correlations on data
+corr([LOGW_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGD_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGTotal_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGW_NXT_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7))])
+corr([LOGW_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3)),LOGD_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3)),LOGTotal_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3)),LOGW_NXT_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3))])
+
+corr([LOGW_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3)),LOGD_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3)),LOGTotal_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3)),LOGW_NXT_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3))])
+corr([LOGW_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8)),LOGD_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8)),LOGTotal_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8)),LOGW_NXT_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8))])
+
+corr([LOGW_E_VCT,LOGD_E_VCT,LOGTotal_E_VCT,LOGW_NXT_E_VCT])
+
 %%
 %%%%%%%%%%%%%%%%%%
 %Estimation of distribution of spending, saving and fund-raising when
@@ -892,23 +1018,28 @@ savederiv=[Est4(17),Est4(19);Est4(41),Est4(43);Est4(65),Est4(67)];
 Xaction=[ones(size(LOGW_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2).*PartyE_VNCT,SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,1),TenureE_VNCT,X_KnotE_VNCT,...
         LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,(XS_EVNCT_(:,1)).^2.*SameE_VNCT,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,...
         RTotDE_VNCT.*LOGW_E_VNCT,X_KnotE_VNCT.*((XS_EVNCT_(:,1).*SameE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,2).*PartyE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((TenureE_VNCT)*ones(1,8)),...
-        PresdumE_VNCT,PresdumE_VNCT.*SameE_VNCT,PresdumE_VNCT.*SameE_VNCT.*XS_EVNCT_(:,1),MidtermE_VNCT,LOGW_E_VNCT.*TenureE_VNCT,LOGW_E_VNCT.^3,RTotDE_VNCT.^2.*LOGW_E_VNCT];
+        PresdumE_VNCT,PresdumE_VNCT.*SameE_VNCT,PresdumE_VNCT.*SameE_VNCT.*XS_EVNCT_(:,1),MidtermE_VNCT,LOGW_E_VNCT.*TenureE_VNCT,RTotDE_VNCT.^2.*LOGW_E_VNCT];%
 
 Xaction2=[ones(size(LOGW_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2).*PartyE_VNCT,SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,1),TenureE_VNCT,X_KnotE_VNCT,...
         LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,(XS_EVNCT_(:,1)).^2.*SameE_VNCT,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,...
         RTotDE_VNCT.*LOGW_E_VNCT,X_KnotE_VNCT.*((XS_EVNCT_(:,1).*SameE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,2).*PartyE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((TenureE_VNCT)*ones(1,8)),...
-        PresdumE_VNCT,PresdumE_VNCT.*SameE_VNCT,PresdumE_VNCT.*SameE_VNCT.*XS_EVNCT_(:,1),MidtermE_VNCT,LOGW_E_VNCT.*TenureE_VNCT,LOGW_E_VNCT.^3,RTotDE_VNCT.^2.*LOGW_E_VNCT,RTotDE_VNCT.*LOGW_E_VNCT.^2,RTotDE_VNCT.^2.*LOGW_E_VNCT.^2];
+        PresdumE_VNCT,PresdumE_VNCT.*SameE_VNCT,PresdumE_VNCT.*SameE_VNCT.*XS_EVNCT_(:,1),MidtermE_VNCT,LOGW_E_VNCT.*TenureE_VNCT,RTotDE_VNCT.^2.*LOGW_E_VNCT];%,RTotDE_VNCT.*LOGW_E_VNCT.^2,RTotDE_VNCT.^2.*LOGW_E_VNCT.^2
 
-    Xaction(LOGW_E_VNCT<1,:)=[]; %Drop outliers   
-    Xaction2(LOGW_E_VNCT<1,:)=[]; %Drop outliers
-if size(LOGD_E_VNCT)==size(LOGW_E_VNCT)
-LOGD_E_VNCT(LOGW_E_VNCT<1,:)=[];
-LOGTotal_E_VNCT(LOGW_E_VNCT<1,:)=[];
-LOGW_NXT_E_VNCT(LOGW_E_VNCT<1,:)=[];
-end
+Xaction3=[ones(size(LOGW_E_VNCT,1),1),LOGW_E_VNCT,XS_EVNCT_(:,1),XS_EVNCT_(:,2).*PartyE_VNCT,SameE_VNCT,SameE_VNCT.*XS_EVNCT_(:,1),TenureE_VNCT,X_KnotE_VNCT,...
+        LOGW_E_VNCT.^2,(XS_EVNCT_(:,1)).^2,(XS_EVNCT_(:,1)).^2.*SameE_VNCT,PartyE_VNCT.*(XS_EVNCT_(:,2)).^2,TenureE_VNCT.^2,...
+        RTotDE_VNCT.*LOGW_E_VNCT,X_KnotE_VNCT.*((XS_EVNCT_(:,1).*SameE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((XS_EVNCT_(:,2).*PartyE_VNCT)*ones(1,8)),X_KnotE_VNCT.*((TenureE_VNCT)*ones(1,8)),...
+        PresdumE_VNCT,PresdumE_VNCT.*SameE_VNCT,PresdumE_VNCT.*SameE_VNCT.*XS_EVNCT_(:,1),MidtermE_VNCT,RTotDE_VNCT.^2.*LOGW_E_VNCT];
+
+%     Xaction(LOGW_E_VNCT<1,:)=[]; %Drop outliers   
+%     Xaction2(LOGW_E_VNCT<1,:)=[]; %Drop outliers
+% if size(LOGD_E_VNCT)==size(LOGW_E_VNCT)
+% LOGD_E_VNCT(LOGW_E_VNCT<1,:)=[];
+% LOGTotal_E_VNCT(LOGW_E_VNCT<1,:)=[];
+% LOGW_NXT_E_VNCT(LOGW_E_VNCT<1,:)=[];
+% end
 coefspend=Xaction\LOGD_E_VNCT;
 coeffund=Xaction2\LOGTotal_E_VNCT;
-coefsave=Xaction\LOGW_NXT_E_VNCT;
+coefsave=Xaction3\LOGW_NXT_E_VNCT;
 
 %If modifying Xaction, make sure the corresponding part on "actions.m" is
 %modified as well.
@@ -916,8 +1047,8 @@ coefsave=Xaction\LOGW_NXT_E_VNCT;
 %%
 %Specification check for actions
 predspend=Xaction*coefspend;
-predfund=Xaction*coeffund;
-predsave=Xaction*coefsave;
+predfund=Xaction2*coeffund;
+predsave=Xaction3*coefsave;
 
 errorspend=(sum((LOGD_E_VNCT-predspend).^2))/(var(LOGD_E_VNCT)*length(LOGD_E_VNCT));
 errorfund=(sum((LOGTotal_E_VNCT-predfund).^2))/(var(LOGTotal_E_VNCT)*length(LOGTotal_E_VNCT));
@@ -927,21 +1058,31 @@ scatter(LOGD_E_VNCT,predspend);
 %%
 
 derivactions=@(x,tenure,rtotd,coef) [zeros(numel(x),1),ones(numel(x),1),zeros(numel(x),13),2*x,zeros(numel(x),4),ones(numel(x),1)*rtotd,...
-    zeros(numel(x),28),tenure*ones(numel(x),1),3*x.^2,rtotd.^2*ones(numel(x),1)]*coef;
+    zeros(numel(x),28),tenure*ones(numel(x),1),rtotd.^2*ones(numel(x),1)]*coef;
 derivactions2=@(x,tenure,rtotd,coef) [zeros(numel(x),1),ones(numel(x),1),zeros(numel(x),13),2*x,zeros(numel(x),4),ones(numel(x),1)*rtotd,...
-    zeros(numel(x),28),tenure*ones(numel(x),1),3*x.^2,rtotd.^2*ones(numel(x),1),rtotd*2*x,rtotd.^2*2*x]*coef;
-
-xspace=linspace(5,14.3,1000).';
+    zeros(numel(x),28),tenure*ones(numel(x),1),rtotd.^2*ones(numel(x),1)]*coef;%,rtotd*2*x,rtotd.^2*2*x
+derivactions3=@(x,tenure,rtotd,coef) [zeros(numel(x),1),ones(numel(x),1),zeros(numel(x),13),2*x,zeros(numel(x),4),ones(numel(x),1)*rtotd,...
+    zeros(numel(x),28),rtotd.^2*ones(numel(x),1)]*coef;
+xspace=linspace(5,17,1000).';
 
 %X_Knot version
 %scatter(xspace,derivactions(xspace,min(TenureE_VNCT),[max(X_KnotE_VNCT).*[0,1,0,0,0,0,0,0]],coefspend)+derivactions(xspace,min(TenureE_VNCT),[max(X_KnotE_VNCT).*[0,1,0,0,0,0,0,0]],coefsave));
 %Rtotd version
 figure(1)
-scatter(xspace,derivactions(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coefspend)+derivactions(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coefsave));
+scatter(xspace,derivactions(xspace,quantile(TenureE_VNCT,0.95),quantile(RTotDE_VNCT,0.05),coefspend));
 figure(2)
-scatter(xspace,derivactions2(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coeffund));
+scatter(xspace,derivactions2(xspace,quantile(TenureE_VNCT,0.95),quantile(RTotDE_VNCT,0.05),coeffund));
 figure(3)
-scatter(xspace,derivactions(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coefspend)+derivactions(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coefsave)-derivactions2(xspace,min(TenureE_VNCT),quantile(RTotDE_VNCT,0.95),coeffund));
+scatter(xspace,derivactions3(xspace,quantile(TenureE_VNCT,0.95),quantile(RTotDE_VNCT,0.05),coefsave));
+figure(4)
+scatter(xspace,derivactions(xspace,quantile(TenureE_VNCT,0.95),quantile(RTotDE_VNCT,0.05),coefspend)+derivactions3(xspace,quantile(TenureE_VNCT,0.95),quantile(RTotDE_VNCT,0.05),coefsave)-derivactions2(xspace,quantile(TenureE_VNCT,0.95),quantile(RTotDE_VNCT,0.05),coeffund));
+
+%Correlations on data
+% corr([LOGW_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)),LOGD_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)),LOGTotal_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)),LOGW_NXT_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7))])
+% corr([LOGW_E_VNCT(TenureE_VNCT<quantile(TenureE_VNCT,0.3)),LOGD_E_VNCT(TenureE_VNCT<quantile(TenureE_VNCT,0.3)),LOGTotal_E_VNCT(TenureE_VNCT<quantile(TenureE_VNCT,0.3)),LOGW_NXT_E_VNCT(TenureE_VNCT<quantile(TenureE_VNCT,0.3))])
+% 
+% corr([LOGW_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)&RTotDE_VNCT<quantile(RTotDE_VNCT,0.3)),LOGD_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)&RTotDE_VNCT<quantile(RTotDE_VNCT,0.3)),LOGTotal_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)&RTotDE_VNCT<quantile(RTotDE_VNCT,0.3)),LOGW_NXT_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)&RTotDE_VNCT<quantile(RTotDE_VNCT,0.3))])
+% corr([LOGW_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)&RTotDE_VNCT>quantile(RTotDE_VNCT,0.8)),LOGD_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)&RTotDE_VNCT>quantile(RTotDE_VNCT,0.8)),LOGTotal_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)&RTotDE_VNCT>quantile(RTotDE_VNCT,0.8)),LOGW_NXT_E_VNCT(TenureE_VNCT>quantile(TenureE_VNCT,0.7)&RTotDE_VNCT>quantile(RTotDE_VNCT,0.8))])
 
 %%
 %Define coefficients
@@ -951,14 +1092,16 @@ Est5=[coefspend;coeffund;coefsave];
 
 
 %minthetaall=[Est1(1:10,1);Est2(12,1);Est1(11:20,1);Est2(1:11,1);Est2(13:17,1);Est4(1:135,1);Est5(1:33,1);Est3(1:7,1)];
-minthetaall2=[Est1;Est2;Est3;Est4;Est5]; %Est1,Est2length differ depending on specification
+minthetaall2=[Est1;Est2;Est3;Est41;Est42;Est43;Est5]; %Est1,Est2length differ depending on specification
 mintheta1=[Est1;Est2];
-mintheta2=[Est3;Est4;Est5];
+mintheta2=[Est3;Est41;Est42;Est43;Est5];
 
 save Est1 Est1
 save Est2 Est2
 save Est3 Est3
-save Est4 Est4
+save Est41 Est41
+save Est42 Est42
+save Est43 Est43
 save Est5 Est5
 
 %save minimizedtheta.txt minthetaall2 -ASCII
