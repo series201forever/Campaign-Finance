@@ -530,225 +530,6 @@ X_KnotE_VNCT(E_VNContestFUL,:)=[];
 % Defining variables: done
 %%%%%%%%%%%%%%%%%%%%%%%%
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %%%               q_e               %%%%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% 
-% 
-% %thetaS 2 X 1 [unemp,white]  mean of unemp is about 0.07, white is about
-% %0.81
-% %thetaQ 9 X 1 [ones,d_NC,w_NC,w'_NXT,d_NC^2,w_NC^2,w'_NXT^2,party.*s_NC,tenure]
-% %theta  7 X 1 [ones,LOGW_I,XQ,XS.*Party,LOGW_I.^2,XQ.^2,log(T
-% %             enure.+1)]  
-% %             mean(LOGD_NCE_V) is 12.4 mean(LOGW_NCE_V) is 11.0,
-% %             mean(LOGWNXT_NCE_V) is 11.7  mean(LOGD_NXT_E_V) is 12.61
-% % [QC1,QC2]   [PRENTAC,PRENTAC.^2]
-% % E_VCTa 15 X 1
-% % E_VCTt 15 X 1
-% % gammaCT 15 X 1
-% % thetawin 7 X 1 [ones,LOGW_NXT_E_VCT,XQEVCT,XS_NXT_EVCT.*PartyE_VCT,LOGW_NXT_E_VCT.^2,XQEVCT.^2,...
-% %    log(TenureE_VCT.+1)]
-% % thetadNC 7 X 1 LOGD_NXT_NCT=[1,XQNCT,XQNCT.^2,LOGW_NXT_NCT,LOGW_NXT_NCT.^2,Party_NCT.*XS_NXT_NCT,log(1+TenureNCT)]*thetadNC...
-% % mean(LOGD_NXT_NCT)==12.30 mean(LOGW_NXT_NCT)==11.25
-% % thetatNC 7 X 1 LOGTotal_NXT_NCT=[1,XQNCT,XQNCT.^2,LOGW_NXT_NCT,LOGW_NXT_NCT.^2,Party_NCT.*XS_NXT_NCT,log(1+TenureNCT)]*thetatNC
-% % mean(LOGTotal_NXT_NCT)=12.56  mean(LOGW_NXT_NCT)=11.2534
-% % thetanxtNC 7 X 1 LOGWNXT_NXT_NCT=[1,XQNCT,XQNCT.^2,LOGW_NXT_NCT,LOGW_NXT_NCT.^2,Party_NCT.*XS_NXT_NCT,log(1+TenureNCT)]*thetanxtNC
-% % mean(LOGWNXT_NXT_E_VNCT)=11.72, mean(LOGW_NXT_E_VNCT)==11.25
-% % win=cdfnorm([1,LOGW_NXT_E_VCT,XQEVCT,XS_NXT_EVCT.*PartyE_VCT,LOGW_NXT_E_VCT.^2,XQEVCT.^2,...
-% %    log(TenureE_VCT+1)]*thetawin)
-% 
-% 
-% % bdds: thetaS(1) in [-3,3], thetaS(2) in [-0.2,0.2]
-% % mean(unemployment)*thetaS(1)+mean(white)*thetaS(2) in [-0.35,0.35]
-% thetaS=[0.5,-0.05]';
-% % bdds: thetaQ(1) in [0.3,0.9] thetaQ(2) in [-0.03,0.03] thetaQ(3) in
-% % [-0.03,0.03] thetaQ(4) in [-0.03,0.03] thetaQ(5) in [-0.002,0.002]
-% % thetaQ(6) in [-0.002,0.002] thetaQ(7) in [-0.002,0.002] thetaQ(8) in
-% % [-0.8,0.8] thetaQ(9) in [-0.2,0.3]
-% % overall restriction
-% % [1,d_NC,w_NC,w'_NXT,d_NC^2,w_NC^2,w'_NXT^2,party.*s_NC,tenure]*thetaQ in
-% % [0.2,0.8]
-% thetaQ=[0.65,0.02,0.01,-0.01,-0.0002,-0.0002,0.0001,0.01,0.1]';
-% % thata (1) in [-1,2] thata(2) in [-0.3,0.2] theta(3) in [-2,2]
-% % theta(4) in [-2,2] theta(5) in [-0.007,0.007] theta(6) in  [-2,2]
-% % theta(7) in [-0.5,0.5]
-% % overall restriction
-% % [1,LOGW_I,XQ,XS.*Party,LOGW_I.^2,XQ.^2,log(Tenure.+1)]*theta in
-% % [0,2.5];
-% theta=[1.8,-0.015,-0.7,1,0.0001,0.2,-0.07]';
-% % 
-% E_VCTa=[0.5,0.3,0.1,0.01,0.2,0.5,0.3,0.1,0.01,0.2,0.5,0.3,0.1,0.01,0.2]';
-% 
-% % E_VCTt(i) in [mean(x_i)-3*std(x_i),mean(x_i)+3*std(x_i)]
-% E_VCTt=[mean(LOGD_E_VCT),0.6,mean(LOGW_E_VCT),0,mean(log(1+TenureE_VCT)),mean(LOGTotal_E_VCT),0.6,mean(LOGW_E_VCT),0,log(5)...
-%     ,mean(LOGW_NXT_E_VCTwnxt),0.6,mean(LOGW_E_VCT),0,mean(log(1+TenureE_VCT))]';
-% 
-% lbE_VCTt=E_VCTt-3*[std([LOGD_E_VCT,0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),...
-%     log(1+TenureE_VCT),LOGTotal_E_VCT,0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),log(1+TenureE_VCT)])';...
-%     std(LOGW_NXT_E_VCTwnxt);std([0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),log(1+TenureE_VCT)])'];
-% ubE_VCTt=E_VCTt+3*[std([LOGD_E_VCT,0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1)...
-%     ,log(1+TenureE_VCT),LOGTotal_E_VCT,0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),log(1+TenureE_VCT)])';...
-%     std(LOGW_NXT_E_VCTwnxt);std([0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),log(1+TenureE_VCT)])'];
-% lbE_VCTt(2,1)=0.2;
-% lbE_VCTt(4,1)=0.2;
-% lbE_VCTt(7,1)=0.2;
-% lbE_VCTt(9,1)=0.2;
-% lbE_VCTt(12,1)=0.2;
-% lbE_VCTt(14,1)=0.2;
-% ubE_VCTt(2,1)=0.9;
-% ubE_VCTt(4,1)=0.9;
-% ubE_VCTt(7,1)=0.9;
-% ubE_VCTt(9,1)=0.9;
-% ubE_VCTt(12,1)=0.9;
-% ubE_VCTt(14,1)=0.9;
-% 
-% 
-% 
-% % gammaCT(i) in [(1/5)*sigma(x_i),5*sigma(x_i)]
-% gammaCT=[0.1,0.14,0.1,0.1,0.2,0.1,0.14,0.1,0.1,0.2,0.1,0.14,0.1,0.1,0.2]';
-% 
-% lbgammaCT=(1/5)*[std([LOGD_E_VCT,0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),log(1+TenureE_VCT),...
-%     LOGTotal_E_VCT,0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),log(1+TenureE_VCT)])';...
-%     std(LOGW_NXT_E_VCTwnxt);std([0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),log(1+TenureE_VCT)])'];
-% ubgammaCT=5*[std([LOGD_E_VCT,0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),log(1+TenureE_VCT)...
-%     ,LOGTotal_E_VCT,0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),log(1+TenureE_VCT)])';...
-%     std(LOGW_NXT_E_VCTwnxt);std([0.6*ones(length(LOGD_E_VCT),1),LOGW_E_VCT,zeros(length(LOGD_E_VCT),1),log(1+TenureE_VCT)])'];
-% lbgammaCT(2,1)=0.05;
-% lbgammaCT(4,1)=0.05;
-% lbgammaCT(7,1)=0.05;
-% lbgammaCT(9,1)=0.05;
-% lbgammaCT(12,1)=0.05;
-% lbgammaCT(14,1)=0.05;
-% ubgammaCT(2,1)=0.9;
-% ubgammaCT(4,1)=0.9;
-% ubgammaCT(7,1)=0.9;
-% ubgammaCT(9,1)=0.9;
-% ubgammaCT(12,1)=0.9;
-% ubgammaCT(14,1)=0.9;
-% 
-% % E_VNCTa=[0.5,0.3,0.1,0.01,0.2,0.5,0.3,0.1,0.01,0.2,0.5,0.3,0.1,0.01,0.2]';
-% % E_VNCTt=[mean(LOGD_NXT_E_VNCT),0.6,mean(LOGW_NXT_E_VNCT),0,log(5),mean(LOGTotal_NXT_E_VNCT),0.6,mean(LOGW_NXT_E_VNCT),0,log(5)...
-% %     ,mean(LOGWNXT_NXT_E_VNCT),0.6,mean(LOGW_NXT_E_VNCT),0,log(5)]';
-% % gammaNCT=[0.1,0.14,0.1,0.1,0.2,0.1,0.14,0.1,0.1,0.2,0.1,0.14,0.1,0.1,0.2]';
-% 
-% % thetadNC(1) in [0,14] thetadNC(2) in [-5,5] thetadNC(3) in [-3,3]
-% % thetadNC(4) in [-0.5,1.5] thetadNC(5) in [-0.04,0.04] thetadNC(6) in [-5,5]
-% % thetadNC(7) in [-5,5]
-% thetadNC=[7,1,-0.1,0.3,0.001,1,0.7]';
-% 
-% % thetatNC(1) in [0,18] thetatNC(2) in [-5,5] thetatNC(3) in [-3,3]
-% % thetatNC(4) in [-1.5,0.5] thetaNC(5) in [-0.04,0.04] thetaNC(6) in [-5,5]
-% % thetatNC(7) in [-5,5]
-% thetatNC=[15,1,-0.1,-0.3,0.001,1,0.5]';
-% 
-% % thetanxtNC(1) in [0,18] thetanxtNC(2) in [-5,5] thetanxtNC(3) in [-3,3]
-% % thetanxtNC(4) in [-0.5,1.5] thetanxtNC(5) in [-0.04,0.04] thetanxtNC(6) in [-5,5]
-% % thetanxtNC(7) in [-5,5]
-% thetanxtNC=[9,1,-0.1,0.4,0.001,1,0.15]';
-% 
-% % win=cdfnorm([1,LOGW_NXT_E_VCT,XQEVCT,XS_NXT_EVCT.*PartyE_VCT,LOGW_NXT_E_VCT.^2,XQEVCT.^2,...
-% %    log(TenureE_VCT+1)]*thetawin)
-% 
-% % thetawin(1) in [-0.5,2] thetawin(2) in [-0.2,0.2] thetawin(3) in [-2,2]
-% % thetawin(4) in [-2,2] thetawin(5) in [-0.01,0.01] thetawin(6) in [-2,2]
-% % thetawin(7) in [-0.7,0.7]
-% % overall restriction [1,LOGW_NXT_E_VCT,XQEVCT,XS_NXT_EVCT.*PartyE_VCT,LOGW_NXT_E_VCT.^2,XQEVCT.^2,...
-% %    log(TenureE_VCT+1)]*thetawin in [0.5,0.99]
-% thetawin=[0.15,0.030,0.9,1,-0.001,-0.1,0.3]';
-% 
-% % B_I in [-0.01,0.05]
-% B_I=0.01;
-% % B_C in [-0.05,0.01]
-% B_C=-0.015;
-% % Q_C1 in [-0.5,0.5]
-% Q_C1=0.06;
-% % Q_C2 in [-0.5,0.5]
-% Q_C2=-0.01;
-% % B_T in [-0.1,0.3]
-% B_T=0.04;
-% % overall restriction
-% % B_I*LOGD_IAC+B_C*LOGD_CAC+XSAC.*PartyAC+XQAC+[PRENTAC,PRENTAC.^2]*[Q_C1,Q
-% % _C2]'+B_T*log(TenureAC+1) in [0,1.0]
-% 
-% % cost1 in [-0.004,0]
-% cost1=-0.0013;
-% % ben1 in [0,0.004]
-% ben1=0.0005;
-% % cost2 in [-0.004,0]
-% cost2=-0.0015;
-% % ben2 in [0,0.004]
-% ben2=0.001;
-% % sig in [0.001,1]
-% sig=0.3;
-% 
-% % theta0=[thetaS;thetaQ;theta;B_I;B_C;Q_C1;Q_C2;B_T;E_VCTa;E_VCTt;gammaCT;...
-% %     thetadNC;thetatNC;thetanxtNC;thetawin;cost1;ben1;sig;cost2;ben2];
-% 
-% % theta0(1:23,1)=initialvalue(1:23,1);
-% % theta0(24:42,1)=initialvalue(24:42,1);  %ACDa
-% % theta0(43:61,1)=initialvalue(43:61,1);  %ACDt
-% % theta0(62:80,1)=initialvalue(62:80,1);  %gammaACD
-% % theta0(81:86,1)=initialvalue(81:86,1); %ACdqea
-% % theta0(87:92,1)=initialvalue(87:92,1); %ACdqet
-% % theta0(93:98,1)=initialvalue(93:98,1); % gammadqe
-% % theta0(99:113,1)=initialvalue(99:113,1); % E_VCTa
-% % theta0(114:128,1)=initialvalue(114:128,1); %E_VCTt
-% % theta0(129:143,1)=initialvalue(129:143,1); %gammaCT
-% % theta0(144:158,1)=initialvalue(144:158,1); % E_VNCTa
-% % theta0(159:173,1)=initialvalue(159:173,1); % E_VNCTt
-% % theta0(174:188,1)=initialvalue(174:188,1); % gammaNCT
-% % theta0(189:194,1)=initialvalue(189:194,1);  % ACwqea
-% % theta0(195:200,1)=initialvalue(195:200,1);  % ACwqet
-% % theta0(201:206,1)=initialvalue(201:206,1);  % gammawqe
-% % theta0(207:213,1)=initialvalue(207:213,1);  %ACvqea
-% % theta0(214:220,1)=initialvalue(214:220,1);   %ACvqet
-% % theta0(221:227,1)=initialvalue(221:227,1);  %gammavqe
-% % theta0(228:234,1)=initialvalue(228:234,1);  % thetawin
-% % theta0(235,1)=initialvalue(235,1);  % beta_1
-% % theta0(236,1)=initialvalue(236,1);  % beta_2
-% % theta0(237,1)=initialvalue(237,1);  % sig
-% 
-% bddtheta0=zeros(length(theta0),2);
-% bddtheta0(1:2,:)=[-3,3;-0.2,0.2]; % thetaS
-% bddtheta0(3:11,:)=[0.3,0.9;-0.03,0.03;-0.03,0.03;-0.03,0.03;-0.002,0.002;-0.002,0.002;-0.002,0.002;-0.8,0.8;-0.2,0.3]; % thetaQ
-% bddtheta0(12:18,:)=[-1,2;-0.3,0.2;-2,2;-2,2;-0.007,0.007;-2,2;-0.5,0.5]; %theta
-% bddtheta0(19,:)=[-0.01,0.05]; %B_I
-% bddtheta0(20,:)=[-0.05,0.01]; % B_C
-% bddtheta0(21,:)=[-0.5,0.5]; %Q_C1
-% bddtheta0(22,:)=[-0.5,0.5]; %Q_C2
-% bddtheta0(23,:)=[-0.1,0.3]; % B_T
-% bddtheta0(24:38,:)=[(-1)./lbgammaCT,1./lbgammaCT]; % E_VCTa
-% bddtheta0(39:53,:)=[lbE_VCTt,ubE_VCTt]; % E_VCTt
-% bddtheta0(54:68,:)=[lbgammaCT,ubgammaCT]; % gammaCT
-% bddtheta0(69:75,:)=[0,14;-5,5;-3,3;-0.5,1.5;-0.04,0.04;-5,5;-5,5]; % thetadNC
-% bddtheta0(76:82,:)=[0,18;-5,5;-3,3;-1.5,0.5;-0.04,0.04;-5,5;-5,5]; % thetatNC
-% bddtheta0(83:89,:)=[0,18;-5,5;-3,3;-0.5,1.5;-0.04,0.04;-5,5;-5,5]; % thetanxtNC
-% bddtheta0(90:96,:)=[-0.5,2;-0.2,0.2;-2,2;-2,2;-0.01,0.01;-2,2;-0.7,0.7]; % thetawin
-% bddtheta0(98,:)=[-0.004,0]; %cost1
-% bddtheta0(98,:)=[0,0.004]; %ben1
-% bddtheta0(99,:)=[0.001,1]; %sig
-% bddtheta0(100,:)=[-0.004,0]; %cost2
-% bddtheta0(101,:)=[0,0.004]; %ben2
-% Aineq=zeros(6,101);
-% bineq=zeros(6,1);
-% Aineq(1,1:2)=[mean(Unemployment),mean(White)];
-% bineq(1,1)=0.35;
-% Aineq(2,:)=-Aineq(1,:);
-% bineq(1,1)=0.35;
-% 
-% Aineq(3,3:11)=[1,mean(LOGD_NC),mean(LOGW_NC),mean(LOGWNXT_NC),mean(LOGD_NC.^2),mean(LOGW_NC.^2)...
-%     ,mean(LOGWNXT_NC.^2),0,mean(log(Tenure+1))];
-% Aineq(4,:)=-Aineq(3,:);
-% bineq(3,1)=0.8;
-% bineq(4,1)=-0.2
-% Aineq(5,90:96)=[1,mean(LOGW_NXT_E_VCT),0.5,0.1,mean(LOGW_NXT_E_VCT.^2),mean(0.25),mean(log(TenureE_VCT+1))];
-% Aineq(6,:)=-Aineq(5,:);
-% bineq(5,1)=0.99;
-% bineq(6,1)=-0.5;
-% 
-
-
 
 
 
@@ -759,13 +540,18 @@ X_KnotE_VNCT(E_VNContestFUL,:)=[];
 %%%%%%%%%%%%%%%%%
 
 
-Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),X_Knot1];
-coefentry=Xentry\Contest;
-coefprimaryN=Xentry\Primary_N;
 
+%Specification 1
+ Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),X_Knot1];
+ coefentry=Xentry\Contest;
+ coefprimaryN=Xentry\Primary_N;
+
+%Specification 2
 %  Xentry2=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),Presdum,Presdumsame,Unemppresdumsame,Midterm,X_Knot1,X_Knot1.*(LOGW_I*ones(1,fineness-1))];
 %  coefentry2=Xentry2\Contest;
 %  coefprimaryN2=Xentry2\Primary_N;
+
+
 
 %%%%%%%%%%
 %Result of specification check: available on dropbox.
@@ -776,7 +562,9 @@ coefprimaryN=Xentry\Primary_N;
 %Number=2
 %%%%%%%%%%%%%%%%%
 
+
 Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry;
+Eentry2=min(1,[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry);
 EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefprimaryN;
 
 Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN,Eentry,EprimaryN.*Eentry,RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3];
@@ -799,31 +587,45 @@ coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*
 %Estimation of winning probability
 %Number=3
 %%%%%%%%%%%%%%%%%%
-Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,UnempsqsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1),log(TenureAC+1).^2,log(TenureAC+1).*LOGW_IAC,...
+Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,UnempsqsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1),log(TenureAC+1).^2,...
     X_KnotAC1.*(UnempsameAC*ones(1,8)),X_KnotAC1.*(PartdemoAC*ones(1,8)),X_KnotAC1.*(log(TenureAC+1)*ones(1,8)),...;
-   RTotD_NCAC.*LOGW_IAC,LOGW_IAC.^3];%X_KnotAC1.*(LOGW_IAC*ones(1,8)),
+  LOGW_IAC.^3];%X_KnotAC1.*(LOGW_IAC*ones(1,8)), ,log(TenureAC+1).*LOGW_IAC
+
+%X_KnotAC1.*(LOGW_IAC*ones(1,8)), RTotD_NCAC.*LOGW_IAC,LOGW_IAC.^2, LOGW_IAC.^3,log(TenureAC+1).*LOGW_IAC,
     %Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1)];X_KnotAC1.*(LOGW_IAC*ones(1,8)),
 %LOGW_IAC.^3,
 coefprobwin=Xprobwin\Win_AC;
+predprobwin=min(1,Xprobwin*coefprobwin);
 
 %If modifying Xprobwin, make sure the corresponding part on "actions.m" is
 %modified as well.
 
 %%
 %Specification check for winning probability
-predprobwin=Xprobwin*coefprobwin;
 errorprobwin=sum((Win_AC-Xprobwin*coefprobwin).^2)/(var(Win_AC)*length(Win_AC));
 plotprobwin=sortrows([Win_AC,predprobwin]);
 scatter(plotprobwin(:,1),plotprobwin(:,2));
 
 %%
-%Specification check: if probability of winning is increasing in beginning
-%cash(logW_IAC)
-derivprobwin=@(x,logtenure,rtotd) [zeros(numel(x),1),ones(numel(x),1),zeros(numel(x),3),2*x,zeros(numel(x),10),logtenure*ones(numel(x),1),...
-    zeros(numel(x),24),rtotd*ones(numel(x),1),3*x.^2]*coefprobwin;
+%Specification check2: if probability of winning is increasing in beginning
+%cash(logW_IAC) conditional on entry
+derivprobwin=@(x,logtenure,rtotd) [zeros(numel(x),1),ones(numel(x),1),zeros(numel(x),3),2*x,zeros(numel(x),10),...
+    zeros(numel(x),24),3*x.^2]*coefprobwin;%rtotd*ones(numel(x),1),
 xspace=linspace(5,14.3,1000).';
 
 scatter(xspace,derivprobwin(xspace,max(log(TenureAC+1)),quantile(RTotD_NCAC,0.9)));
+
+%%
+%Conditional winning probability negative w.r.t begcash.
+%Check if overall probability of winning increasing in begcash
+derivprobwin2=[zeros(numel(LOGW_IAC),1),ones(numel(LOGW_IAC),1),zeros(numel(LOGW_IAC),3),2*LOGW_IAC,zeros(numel(LOGW_IAC),10),...
+    zeros(numel(LOGW_IAC),24),3*LOGW_IAC.^2]*coefprobwin;%2*LOGW_IAC,,3*LOGW_IAC.^2
+
+derivprobwinall1=(coefentry(2)).*predprobwin+Eentry2.*derivprobwin2-(coefentry(2))*ones(numel(LOGW_IAC),1);
+hist(derivprobwinall1(derivprobwinall1>-0.01),50)
+
+test1=find(derivprobwinall1<0);
+test=[derivprobwinall1(test1),test1,RTotD_NCAC(test1),LOGW_IAC(test1)];
 
 %%
 %%%%%%%%%%%%%%%%%%
@@ -841,36 +643,143 @@ Est2=coefvoteshare;
 %contested
 %Number=4
 %%%%%%%%%%%%%%%%%%
-Sofarbest=10^8;
-%bestiter=0;
-%iterate=1;
-%Delt=0.5;
 
-  OPTIONS=optimset('MaxIter',10000,'MaxFunEvals',1000000,'Display','iter');
-  
   
   %%%%%%%%%%
   %4-1: spending
   %%%%%%%%%%
 load('./inittheta1.mat');
-theta0=inittheta1;
-
-for sss=1:1000
-    [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,1),theta0,OPTIONS);
-    theta0=mintheta;
+Sofarbest1=10^8;
+Sofarbest2=10^8;
+Sofarbest3=10^8;
+  OPTIONS=optimset('MaxIter',10000,'MaxFunEvals',1000000,'Display','iter');
+  
+%%
+for j=1:500
     
-    if SRR<Sofarbest
-        Sofarbest=SRR;
+%Find initial theta0
+    thetaQ2=Est2(9:numel(Est2));
+if numel(thetaQ2)==3
+    XQEV2=[RTotDE_VCT,RTotDE_VCT.^2,RTotDE_VCT.^3]*thetaQ2; % q_I
+    XQEVCT2=XQEV2;
+    %XQEVCT2(E_VContestFUL,:)=[]; Already VCT
+    XQEVCTwnxt2=XQEVCT2;
+    XQEVCTwnxt2(IND5,:)=[];
+else
+    XQEV2=X_KnotEV1*thetaQ2;  % q_I
+    XQEVCT2=XQEV2;
+    XQEVCT2(E_VContestFUL,:)=[];
+    XQEVCTwnxt2=XQEVCT2;
+    XQEVCTwnxt2(IND5,:)=[];
+end
+
+theta0=zeros(24,1);    
+theta0(1:8)=5*rand(8,1);
+theta0(9)=mean(LOGD_E_VCT);
+theta0(10)=mean(XQEVCT2);
+theta0(11)=mean(LOGW_E_VCT);
+theta0(12)=mean(XS_EVCT_(:,1));
+theta0(13)=mean(XS_EVCT_(:,2).*PartyE_VCT);
+theta0(14)=mean(SameE_VCT);
+theta0(15)=mean(PresdumE_VCT);
+theta0(16)=mean(MidtermE_VCT);
+theta0(17:24)=rand(8,1);
+
+
+%Saving for young
+
+funvalue=Minimize_Apr2013(theta0,11);
+funvalueend=0;
+theta411=theta0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta411,11);
+    [mintheta11,SRR]=fminsearch(@(x) Minimize_Apr2013(x,11),theta411,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta11,11);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta411=mintheta11;
+%     end
+    
+    if SRR<Sofarbest1
+        Sofarbest1=SRR;
         %    bestiter=iterate;
         %save Est4.txt mintheta -ASCII
-        save aux1 mintheta
+        aux11=mintheta11;
     end
 end
 
-load ('aux1.mat');
-Est41=mintheta;
-save Est41 Est41
+Est411=aux11;
+save Est411 Est411
 
+funvalue=Minimize_Apr2013(theta0,12);
+funvalueend=0;
+theta412=theta0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta412,12);
+    [mintheta12,SRR]=fminsearch(@(x) Minimize_Apr2013(x,12),theta412,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta12,12);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta412=mintheta12;
+%     end
+    
+    if SRR<Sofarbest2
+        Sofarbest2=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        aux12=mintheta12;
+    end
+end
+
+Est412=mintheta12;
+save Est412 Est412
+
+funvalue=Minimize_Apr2013(theta0,13);
+funvalueend=0;
+theta413=theta0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta413,13);
+    [mintheta13,SRR]=fminsearch(@(x) Minimize_Apr2013(x,13),theta413,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta13,13);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta413=mintheta13;
+%     end
+    
+    if SRR<Sofarbest3
+        Sofarbest3=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        aux13=mintheta13;
+    end
+end
+
+Est413=mintheta13;
+save Est413 Est413
+end
+
+% for sss=1:1000
+%     [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,1),theta0,OPTIONS);
+%     theta0=mintheta;
+%     
+%     if SRR<Sofarbest
+%         Sofarbest=SRR;
+%         %    bestiter=iterate;
+%         %save Est4.txt mintheta -ASCII
+%         save aux1 mintheta
+%     end
+% end
+% 
+% load ('aux1.mat');
+% Est41=mintheta;
+% save Est41 Est41
+%%
   %%%%%%%%%%
   %4-2: fundraising
   %%%%%%%%%%
@@ -899,19 +808,18 @@ save Est42 Est42
   %%%%%%%%%%
   %4-3: saving
   %%%%%%%%%%
-  %Sofarbest=10^8;
+  load('inittheta431.mat');
+    load('inittheta432.mat');
+      load('inittheta433.mat');
+  Sofarbest1=Minimize_Apr2013(inittheta431,31);
+   Sofarbest2=Minimize_Apr2013(inittheta432,32);
+    Sofarbest3=Minimize_Apr2013(inittheta433,33);
   OPTIONS=optimset('MaxIter',10000,'MaxFunEvals',1000000);
-  %%
-%load('./inittheta3.mat');
 
 for j=1:500
-
-theta0=Est43;
-theta0([1,3,9,11,17,19])=2*rand(6,1);
-theta0(49:72)=rand(24,1);
-%Find initial value for E_VCTt
-Cutoff=[-1;3;7;100];
-thetaQ2=Est2(9:numel(Est2));
+    
+%Find initial theta0
+    thetaQ2=Est2(9:numel(Est2));
 if numel(thetaQ2)==3
     XQEV2=[RTotDE_VCT,RTotDE_VCT.^2,RTotDE_VCT.^3]*thetaQ2; % q_I
     XQEVCT2=XQEV2;
@@ -925,56 +833,99 @@ else
     XQEVCTwnxt2=XQEVCT2;
     XQEVCTwnxt2(IND5,:)=[];
 end
-for i=1:3
-TAU=find((TenureE_VCTwnxt<=Cutoff(i+1,1))&(TenureE_VCTwnxt>Cutoff(i,1))); %
 
-LOGW_NXT_E_VCTwnxti=LOGW_NXT_E_VCTwnxt(TAU);
-XQEVCTwnxti2=XQEVCTwnxt2(TAU);
-LOGW_E_VCTwnxti=LOGW_E_VCTwnxt(TAU);
-SameE_VCTwnxti=SameE_VCTwnxt(TAU);
-UnemploymentE_VCTwnxti=XS_EVCTwnxt_(TAU,1);
-PartisanE_VCTwnxti=XS_EVCTwnxt_(TAU,2);
-PartyE_VCTwnxti=PartyE_VCTwnxt(TAU);
-PresdumE_VCTwnxti=PresdumE_VCTwnxt(TAU);
-MidtermE_VCTwnxti=MidtermE_VCTwnxt(TAU);
-
-
-theta0(25+((i-1)*8))=mean(LOGW_NXT_E_VCTwnxti);
-theta0(26+((i-1)*8))=mean(XQEVCTwnxti2);
-theta0(27+((i-1)*8))=mean(LOGW_E_VCTwnxti);
-theta0(28+((i-1)*8))=mean(UnemploymentE_VCTwnxti);
-theta0(29+((i-1)*8))=mean(PartisanE_VCTwnxti.*PartyE_VCTwnxti);
-theta0(30+((i-1)*8))=mean(SameE_VCTwnxti);
-theta0(31+((i-1)*8))=mean(PresdumE_VCTwnxti);
-theta0(32+((i-1)*8))=mean(MidtermE_VCTwnxti);
-end
+theta0=zeros(24,1);    
+theta0(1:8)=5*rand(8,1);
+theta0(9)=mean(LOGW_NXT_E_VCTwnxt);
+theta0(10)=mean(XQEVCTwnxt2);
+theta0(11)=mean(LOGW_E_VCTwnxt);
+theta0(12)=mean(XS_EVCTwnxt_(:,1));
+theta0(13)=mean(XS_EVCTwnxt_(:,2).*PartyE_VCTwnxt);
+theta0(14)=mean(SameE_VCTwnxt);
+theta0(15)=mean(PresdumE_VCTwnxt);
+theta0(16)=mean(MidtermE_VCTwnxt);
+theta0(17:24)=rand(8,1);
 
 
+%Saving for young
 
-funvalue=Minimize_Apr2013(theta0,3);
+funvalue=Minimize_Apr2013(theta0,31);
 funvalueend=0;
+theta431=theta0;
 while abs(funvalue-funvalueend)>0.001
-    funvalue=Minimize_Apr2013(theta0,3);
-    [mintheta,SRR]=fminsearch(@(x) Minimize_Apr2013(x,3),theta0,OPTIONS);
-    funvalueend=Minimize_Apr2013(mintheta,3);
+    funvalue=Minimize_Apr2013(theta431,31);
+    [mintheta31,SRR]=fminsearch(@(x) Minimize_Apr2013(x,31),theta431,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta31,31);
 %      if mod(sss,30)==1
 %      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
 %      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
 %      else
-        theta0=mintheta;
+        theta431=mintheta31;
 %     end
     
-    if SRR<Sofarbest
-        Sofarbest=SRR;
+    if SRR<Sofarbest1
+        Sofarbest1=SRR;
         %    bestiter=iterate;
         %save Est4.txt mintheta -ASCII
-        save aux3 mintheta
+        save aux31 mintheta31
     end
 end
 
-load ('aux3.mat');
-Est43=mintheta;
-save Est43 Est43
+load ('aux31.mat');
+Est431=mintheta31;
+save Est431 Est431
+
+funvalue=Minimize_Apr2013(theta0,32);
+funvalueend=0;
+theta432=theta0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta432,32);
+    [mintheta32,SRR]=fminsearch(@(x) Minimize_Apr2013(x,32),theta432,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta32,32);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta432=mintheta32;
+%     end
+    
+    if SRR<Sofarbest2
+        Sofarbest2=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        save aux32 mintheta32
+    end
+end
+
+load ('aux32.mat');
+Est432=mintheta32;
+save Est432 Est432
+
+funvalue=Minimize_Apr2013(theta0,33);
+funvalueend=0;
+theta433=theta0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta433,33);
+    [mintheta33,SRR]=fminsearch(@(x) Minimize_Apr2013(x,33),theta433,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta33,33);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta433=mintheta33;
+%     end
+    
+    if SRR<Sofarbest3
+        Sofarbest3=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        save aux33 mintheta33
+    end
+end
+
+load ('aux33.mat');
+Est433=mintheta33;
+save Est433 Est433
 end
 
 
@@ -982,12 +933,14 @@ end
 %when not computing number=4
 load('Est41.mat');
 load('Est42.mat');
-load('Est43.mat');
+load('Est431.mat');
+load('Est432.mat');
+load('Est433.mat');
 
 %Specification check: See if actions have right derivative
 spendderiv=[Est41(1),Est41(3);Est41(9),Est41(11);Est41(17),Est41(19)];
 fundderiv=[Est42(1),Est42(3);Est42(9),Est42(11);Est42(17),Est42(19)];
-savederiv=[Est43(1),Est43(3);Est43(9),Est43(11);Est43(17),Est43(19)];
+savederiv=[Est431(1),Est431(3);Est42(1),Est432(3);Est433(1),Est433(3)];
 
 %Correlations on data
 corr([LOGW_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGD_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGTotal_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGW_NXT_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7))])
@@ -1056,7 +1009,7 @@ errorsave=(sum((LOGW_NXT_E_VNCT-predsave).^2))/(var(LOGW_NXT_E_VNCT)*length(LOGW
 %[exp(LOGD_E_VNCT),exp(predspend)];
 scatter(LOGD_E_VNCT,predspend);
 %%
-
+%Specification check: see if actions are increasing in begcash
 derivactions=@(x,tenure,rtotd,coef) [zeros(numel(x),1),ones(numel(x),1),zeros(numel(x),13),2*x,zeros(numel(x),4),ones(numel(x),1)*rtotd,...
     zeros(numel(x),28),tenure*ones(numel(x),1),rtotd.^2*ones(numel(x),1)]*coef;
 derivactions2=@(x,tenure,rtotd,coef) [zeros(numel(x),1),ones(numel(x),1),zeros(numel(x),13),2*x,zeros(numel(x),4),ones(numel(x),1)*rtotd,...
@@ -1067,6 +1020,7 @@ xspace=linspace(5,17,1000).';
 
 %X_Knot version
 %scatter(xspace,derivactions(xspace,min(TenureE_VNCT),[max(X_KnotE_VNCT).*[0,1,0,0,0,0,0,0]],coefspend)+derivactions(xspace,min(TenureE_VNCT),[max(X_KnotE_VNCT).*[0,1,0,0,0,0,0,0]],coefsave));
+
 %Rtotd version
 figure(1)
 scatter(xspace,derivactions(xspace,quantile(TenureE_VNCT,0.95),quantile(RTotDE_VNCT,0.05),coefspend));
@@ -1087,21 +1041,26 @@ scatter(xspace,derivactions(xspace,quantile(TenureE_VNCT,0.95),quantile(RTotDE_V
 %%
 %Define coefficients
 Est3=coefprobwin;
-Est5=[coefspend;coeffund;coefsave];
+Est51=coefspend;
+Est52=coeffund;
+Est53=coefsave;
 
 
 
 %minthetaall=[Est1(1:10,1);Est2(12,1);Est1(11:20,1);Est2(1:11,1);Est2(13:17,1);Est4(1:135,1);Est5(1:33,1);Est3(1:7,1)];
-minthetaall2=[Est1;Est2;Est3;Est41;Est42;Est43;Est5]; %Est1,Est2length differ depending on specification
-mintheta1=[Est1;Est2];
-mintheta2=[Est3;Est41;Est42;Est43;Est5];
+%minthetaall2=[Est1;Est2;Est3;Est41;Est42;Est43;Est51;Est52;Est53]; %Est1,Est2length differ depending on specification
+%mintheta1=[Est1;Est2];
+%mintheta2=[Est3;Est41;Est42;Est43;Est51;Est52;Est53];
 
 save Est1 Est1
 save Est2 Est2
 save Est3 Est3
 save Est41 Est41
 save Est42 Est42
-save Est43 Est43
-save Est5 Est5
-
+save Est431 Est431
+save Est432 Est432
+save Est433 Est433
+save Est51 Est51
+save Est52 Est52
+save Est53 Est53
 %save minimizedtheta.txt minthetaall2 -ASCII

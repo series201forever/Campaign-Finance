@@ -165,7 +165,9 @@ load('./Est3.mat');
 load('./Est41.mat');
 load('./Est42.mat');
 load('./Est43.mat');
-load('./Est5.mat');
+load('./Est51.mat');
+load('./Est52.mat');
+load('./Est53.mat');
 
 load ('./retire.txt');
 
@@ -788,9 +790,9 @@ coefentry=Est1(1:(length(Est1)/2));
     
 
 
-coefspend(:,1)=Est5(1:52);
-coeffund(:,1)=Est5(53:106);
-coefsave(:,1)=Est5(107:158);
+coefspend(:,1)=Est51;
+coeffund(:,1)=Est52;
+coefsave(:,1)=Est53;
 coefprobwin=Est3;
 
    thetaQ2=Est2(9:numel(Est2));
