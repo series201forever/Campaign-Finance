@@ -1,4 +1,4 @@
-function C=Actions(num,ST,Same, q_I, X_Knot1,rtotd, Ten,w_I,demo,Presdum,Midterm,shockpartisan, shockump, presseq, Entry, coefentry, E_VCTa, E_VCTt, gammact, coefspend, coeffund,coefsave, dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,coefprobwin,Ret,Betapartisan,Betaump)
+function C=Actions(num,ST,Same, q_I, X_Knot1,rtotd, Ten,w_I,demo,Presdum,Midterm,shockpartisan, shockump, presseq, Entry, coefentry, E_VCTa, E_VCTt, gammact, coefspend, coeffund,coefsave, dF_gamma_ct, dF_total_ct,dF_gammasv_ct,dF_totalsv_ct,Winrnd,coefprobwin,Ret,Betapartisan,Betaump)
 %options = optimset();
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %Make sure that specification chosen at the first stage and "entryprob",
@@ -52,12 +52,11 @@ for i=1:N
             %%%%%%%%%%%%%%%Need to match with first stage specification
             X_=[q_I ,w_I_,ST_(1,1),ST_(2,1).*demo,Same_,Presdum,Midterm]';
             %%%%%%%%%%%%%%%
-            A1sp=(sqrt(1-(E_VCTa(1:8,iK).^2)'*(gammact(1:8,iK).^2))+E_VCTa(2:8,iK)'*(X_-E_VCTt(2:8,iK)))^2;
-            A2sp=2*E_VCTa(1,iK)*(sqrt(1-(E_VCTa(1:8,iK).^2)'*(gammact(1:8,iK).^2))+E_VCTa(2:8,iK)'*(X_-E_VCTt(2:8,iK)));
+            A1sp=(sqrt(1/(((2*pi)^4)*prod(gammact(1:8,iK)))-(E_VCTa(1:8,iK).^2)'*(gammact(1:8,iK).^2))+E_VCTa(2:8,iK)'*(X_-E_VCTt(2:8,iK)))^2;
+            A2sp=2*E_VCTa(1,iK)*(sqrt(1/(((2*pi)^4)*prod(gammact(1:8,iK)))-(E_VCTa(1:8,iK).^2)'*(gammact(1:8,iK).^2))+E_VCTa(2:8,iK)'*(X_-E_VCTt(2:8,iK)));
 
-            Jsp=(sqrt(1-(E_VCTa(1:8,iK).^2)'*(gammact(1:8,iK).^2))+E_VCTa(2:8,iK)'*(X_-E_VCTt(2:8,iK)))^2+E_VCTa(1,iK)^2*gammact(1,iK)^2;
-%             spending=fminsearch(@(X) PHI([E_VCTa(1:5,iK);sqrt(1-(E_VCTa(1:5,iK).^2)'*(gammact(1:5,iK).^2))],E_VCTt(1:5,iK)...
-%                    ,gammact(1:5,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',X,qtile1),E_VCTt(1,iK));
+            Jsp=(sqrt(1/(((2*pi)^4)*prod(gammact(1:8,iK)))-(E_VCTa(1:8,iK).^2)'*(gammact(1:8,iK).^2))+E_VCTa(2:8,iK)'*(X_-E_VCTt(2:8,iK)))^2+E_VCTa(1,iK)^2*gammact(1,iK)^2;
+
             spending=fsolve(@(X) PHI_improve(A1sp,A2sp,Jsp,(1/sqrt(2*pi)),E_VCTa(1,iK),E_VCTt(1,iK)...
                    ,gammact(1,iK),X,qtile1),11.5,options); 
 
@@ -66,70 +65,70 @@ for i=1:N
                                                              %% F^(-1) is the inverse cdf of
                                                              %% LOGD_NXT_E_VCT
                                                                                                         
-    %         spending2=fminunc(@(X) PHI([E_VCTa(1:5,iK);sqrt(1-(E_VCTa(1:5,iK).^2)'*(gamma(1:5).^2))],E_VCTt(1:5,iK)...
-    %             ,gamma(1:5,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',X,dF_gamma_ct(j,i)),6,options);    %% Computes F^(-1)(dF_gamma_ct) where
-    %                                                                                                %% F^(-1) is the inverse cdf of
-    %                                                                                                %% LOGD_NXT_E_VCT
-    %                                                                                                
-    %          Check1=PHI([E_VCTa(1:5,iK);sqrt(1-(E_VCTa(1:5,iK).^2)'*(gammact(1:5).^2))],E_VCTt(1:5,iK)...
-    %              ,gammact(1:5,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',spending,dF_gamma_ct(j,i))   %% Check
-    %         
-    %        
             qtile2=dF_total_ct(j,i);
-            A1tot=(sqrt(1-(E_VCTa(9:16,iK).^2)'*(gammact(9:16,iK).^2))+E_VCTa(10:16,iK)'*(X_-E_VCTt(10:16,iK)))^2;
-            A2tot=2*E_VCTa(9,iK)*(sqrt(1-(E_VCTa(9:16,iK).^2)'*(gammact(9:16,iK).^2))+E_VCTa(10:16,iK)'*(X_-E_VCTt(10:16,iK)));
+            A1tot=(sqrt(1/(((2*pi)^4)*prod(gammact(9:16,iK)))-(E_VCTa(9:16,iK).^2)'*(gammact(9:16,iK).^2))+E_VCTa(10:16,iK)'*(X_-E_VCTt(10:16,iK)))^2;
+            A2tot=2*E_VCTa(9,iK)*(sqrt(1/(((2*pi)^4)*prod(gammact(9:16,iK)))-(E_VCTa(9:16,iK).^2)'*(gammact(9:16,iK).^2))+E_VCTa(10:16,iK)'*(X_-E_VCTt(10:16,iK)));
 
-            Jtot=(sqrt(1-(E_VCTa(9:16,iK).^2)'*(gammact(9:16,iK).^2))+E_VCTa(10:16,iK)'*(X_-E_VCTt(10:16,iK)))^2+E_VCTa(9,iK)^2*gammact(9,iK)^2;
-%             total=fminsearch(@(X) PHI([E_VCTa(6:10,iK);sqrt(1-(E_VCTa(6:10,iK).^2)'*(gammact(6:10,iK).^2))],E_VCTt(6:10,iK)...
-%                     ,gammact(6:10,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',X,qtile2),E_VCTt(6,iK));   %% Computes F^(-1)(dF_total_ct) where
+            Jtot=(sqrt(1/(((2*pi)^4)*prod(gammact(9:16,iK)))-(E_VCTa(9:16,iK).^2)'*(gammact(9:16,iK).^2))+E_VCTa(10:16,iK)'*(X_-E_VCTt(10:16,iK)))^2+E_VCTa(9,iK)^2*gammact(9,iK)^2;
+
             total=fsolve(@(X) PHI_improve(A1tot,A2tot,Jtot,(1/sqrt(2*pi)),E_VCTa(9,iK),E_VCTt(9,iK)...
-                   ,gammact(9,iK),X,qtile2),11.5,options);     %% Computes F^(-1)(dF_gamma_ct) where
+                   ,gammact(9,iK),X,qtile2),11.5,options);   
+ 
+%%%%%%               
+%Directly derive saving from nonparametrics
+%%%%%%
+% Computes F^(-1)(dF_gamma_ct) where
+                  % F^(-1) is the inverse cdf of
+                  % LOGTotal_NXT_E_VCT
+ 
+%             qtile3=dF_nxt_nxt(j,i);
+%             A1nxt=(sqrt(1/(((2*pi)^4)*prod(gammact(17:24,iK)))-(E_VCTa(17:24,iK).^2)'*(gammact(17:24,iK).^2))+E_VCTa(18:24,iK)'*(X_-E_VCTt(18:24,iK)))^2;
+%             A2nxt=2*E_VCTa(17,iK)*(sqrt(1/(((2*pi)^4)*prod(gammact(17:24,iK)))-(E_VCTa(17:24,iK).^2)'*(gammact(17:24,iK).^2))+E_VCTa(18:24,iK)'*(X_-E_VCTt(18:24,iK)));
+% 
+%             Jnxt=(sqrt(1/(((2*pi)^4)*prod(gammact(17:24,iK)))-(E_VCTa(17:24,iK).^2)'*(gammact(17:24,iK).^2))+E_VCTa(18:24,iK)'*(X_-E_VCTt(18:24,iK)))^2+E_VCTa(17,iK)^2*gammact(17,iK)^2;
+%             
+%                                                                                                          %% F^(-1) is the inverse cdf of
+%                                                                                                          %% LOGWNXT_NXT_E_VCT
+%             savings=fsolve(@(X) PHI_improve(A1nxt,A2nxt,Jnxt,(1/sqrt(2*pi)),E_VCTa(17,iK),E_VCTt(17,iK)...
+%                    ,gammact(17,iK),X,qtile3),E_VCTt(17,iK),options);
+% 
+
+
+
+%%%%%%%
+%indirectly derives saving from spending, fundraising and budget constraint
+         iK2=iK+3;
+         qtile3=dF_gammasv_ct(j,i);
+            A1spsv=(sqrt(1/(((2*pi)^4)*prod(gammact(1:8,iK2)))-(E_VCTa(1:8,iK2).^2)'*(gammact(1:8,iK2).^2))+E_VCTa(2:8,iK2)'*(X_-E_VCTt(2:8,iK2)))^2;
+            A2spsv=2*E_VCTa(1,iK2)*(sqrt(1/(((2*pi)^4)*prod(gammact(1:8,iK2)))-(E_VCTa(1:8,iK2).^2)'*(gammact(1:8,iK2).^2))+E_VCTa(2:8,iK2)'*(X_-E_VCTt(2:8,iK2)));
+
+            Jspsv=(sqrt(1/(((2*pi)^4)*prod(gammact(1:8,iK2)))-(E_VCTa(1:8,iK2).^2)'*(gammact(1:8,iK2).^2))+E_VCTa(2:8,iK2)'*(X_-E_VCTt(2:8,iK2)))^2+E_VCTa(1,iK2)^2*gammact(1,iK2)^2;
+
+            spendingsv=fsolve(@(X) PHI_improve(A1spsv,A2spsv,Jspsv,(1/sqrt(2*pi)),E_VCTa(1,iK2),E_VCTt(1,iK2)...
+                   ,gammact(1,iK2),X,qtile3),11.5,options); 
+
+               
+              %% Computes F^(-1)(dF_gamma_ct) where
                                                              %% F^(-1) is the inverse cdf of
-                                                             %% LOGTotal_NXT_E_VCT
-    %         total2=fminunc(@(X) PHI([E_VCTa(6:10,iK);sqrt(1-(E_VCTa(6:10,iK).^2)'*(gamma(6:10).^2))],E_VCTt(6:10,iK)...
-    %             ,gamma(6:10,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',X,dF_total_ct(j,i)),7,options);                                                                                               
-    %          CHeck2=PHI([E_VCTa(6:10,iK);sqrt(1-(E_VCTa(6:10,iK).^2)'*(gamma(6:10).^2))],E_VCTt(6:10,iK)...
-    %              ,gamma(6:10,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',total,dF_total_ct(j,i))
+                                                             %% LOGD_NXT_E_VCT
+                                                                                                        
+            qtile4=dF_totalsv_ct(j,i);
+            A1totsv=(sqrt(1/(((2*pi)^4)*prod(gammact(9:16,iK2)))-(E_VCTa(9:16,iK2).^2)'*(gammact(9:16,iK2).^2))+E_VCTa(10:16,iK2)'*(X_-E_VCTt(10:16,iK2)))^2;
+            A2totsv=2*E_VCTa(9,iK2)*(sqrt(1/(((2*pi)^4)*prod(gammact(9:16,iK2)))-(E_VCTa(9:16,iK2).^2)'*(gammact(9:16,iK2).^2))+E_VCTa(10:16,iK2)'*(X_-E_VCTt(10:16,iK2)));
 
-            qtile3=dF_nxt_nxt(j,i);
-            A1nxt=(sqrt(1-(E_VCTa(17:24,iK).^2)'*(gammact(17:24,iK).^2))+E_VCTa(18:24,iK)'*(X_-E_VCTt(18:24,iK)))^2;
-            A2nxt=2*E_VCTa(17,iK)*(sqrt(1-(E_VCTa(17:24,iK).^2)'*(gammact(17:24,iK).^2))+E_VCTa(18:24,iK)'*(X_-E_VCTt(18:24,iK)));
+            Jtotsv=(sqrt(1/(((2*pi)^4)*prod(gammact(9:16,iK2)))-(E_VCTa(9:16,iK2).^2)'*(gammact(9:16,iK2).^2))+E_VCTa(10:16,iK2)'*(X_-E_VCTt(10:16,iK2)))^2+E_VCTa(9,iK2)^2*gammact(9,iK2)^2;
 
-            Jnxt=(sqrt(1-(E_VCTa(17:24,iK).^2)'*(gammact(17:24,iK).^2))+E_VCTa(18:24,iK)'*(X_-E_VCTt(18:24,iK)))^2+E_VCTa(17,iK)^2*gammact(17,iK)^2;
-            
-%             savings=fminsearch(@(X) PHI([E_VCTa(11:15,iK);sqrt(1-(E_VCTa(11:15,iK).^2)'*(gammact(11:15,iK).^2))],E_VCTt(11:15,iK),...
-%                  gammact(11:15,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',X,qtile3),E_VCTt(11,iK));     %% Computes F^(-1)(dF_nxt_nxt) where
-                                                                                                         %% F^(-1) is the inverse cdf of
-                                                                                                         %% LOGWNXT_NXT_E_VCT
-            savings=fsolve(@(X) PHI_improve(A1nxt,A2nxt,Jnxt,(1/sqrt(2*pi)),E_VCTa(17,iK),E_VCTt(17,iK)...
-                   ,gammact(17,iK),X,qtile3),E_VCTt(17,iK),options);
-    %         savings2=fminunc(@(X) PHI([E_VCTa(11:15,iK);sqrt(1-(E_VCTa(11:15,iK).^2)'*(gamma(11:15).^2))],E_VCTt(11:15,iK),...
-    %             gamma(11:15,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',X,dF_nxt_nxt(j,i)),6,options);
-    %            Check3=PHI([E_VCTa(11:15,iK);sqrt(1-(E_VCTa(11:15,iK).^2)'*(gammact(11:15).^2))],E_VCTt(11:15,iK),...
-    %               gammact(11:15,iK),[q_I,w_I_,ST_'*thetaS*Party,log(1+Ten_)]',savings,dF_nxt_nxt(j,i))    
-    
-%     thetawin(1,1)
-%     thetawin(2,1)*w_I_
-%     thetawin(3,1)*q_I
-%     thetawin(4,1)*ST_'*thetaS*Party
-%     thetawin(5,1)*w_I_^2
-%     thetawin(6,1)*q_I^2
-%     thetawin(7,1)*log(1+Ten_)
-%             [1,w_I_,q_I,ST_'*thetaS*Party,w_I_^2,q_I^2,log(1+Ten_)]*thetawin
-%             if num==34
-%                 show1=[1,w_I_,q_I,ST_'*thetaS*Party,w_I_^2,q_I^2,log(1+Ten_)]
-%                 show2=Winrnd(j,i)
-%                 show3=thetawin
-%                 ai=i
-%                 jay=j
-%             end
-
+            totalsv=fsolve(@(X) PHI_improve(A1totsv,A2totsv,Jtotsv,(1/sqrt(2*pi)),E_VCTa(9,iK2),E_VCTt(9,iK2)...
+                   ,gammact(9,iK2),X,qtile4),11.5,options);  
+               
+           
+               savings=w_I_+totalsv-spendingsv;
 
 
 %%%%%%%%%%%%%%%Need to match with first stage specification 
              win=(Winrnd(j,i)<=[1,w_I_,ST_(1,1)*Same_,ST_(1,1).^2.*Same_,ST_(2,1)*demo,w_I_.^2,X_Knot1,log(Ten_+1),(log(Ten_+1)).^2,...
                  X_Knot1.*((ST_(1,1)*Same_)*ones(1,8)),X_Knot1.*((ST_(2,1)*demo)*ones(1,8)),X_Knot1.*(log(Ten_+1)*ones(1,8)),...
-                 w_I_.^3]*coefprobwin); %% win if Winrnd<probability of winning                 
+                 w_I_.^3]*coefprobwin); %% win if Winrnd<probability of winning          
              C(2,j,i)=spending;
              C(3,j,i)=total;
              C(4,j,i)=savings;
