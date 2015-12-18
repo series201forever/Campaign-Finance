@@ -62,12 +62,14 @@ deleA=find(OP_INC_IV_july8(:,16)==0);
 OP_INC_IV_july8(deleA,:)=[];%Drop if oppornent disburse=0
 OP_INC_IV_july8(102,:)=[];%Drop an Rtotd outlier
 
+ 
 dele2=find(sum(isnan(OP_INC_july8),2)>0);
 OP_INC_july8(dele2,:)=[]; %Drop NaN
 OP_INC_july8(OP_INC_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleB=find(((OP_INC_july8(:,16)==0).*OP_INC_july8(:,8))==1);
 OP_INC_july8(deleB,:)=[];%Drop if oppornent disburse=0 and contested
 OP_INC_july8(119:121,:)=[];%Drop an Rtotd outlier
+
 
 dele3=find(sum(isnan(E_V_july8),2)>0); 
 E_V_july8(dele3,:)=[]; %Drop NaN
@@ -76,6 +78,9 @@ deleC=find((E_V_july8(:,16)==0).*E_V_july8(:,8)==1);
 E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
 E_V_july8(174:177,:)=[]; %Drop an Rtotd outlier
 
+%DO NOT DROP SAMPLES WITH NONPOSITIVE BEGCASH/NONPOSITIVE ENDCASH.
+%ESTIMATION RESULTS CONSIDERABLY DIFFERENT.
+%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -106,7 +111,7 @@ LOGTot_NC=log(max(ones(Samplesize,1),Estimation_OP(:,31))); % Tot_INC
 LOGD_NC=log(max(ones(Samplesize,1),Estimation_OP(:,32))); % D_INC
 %LOGW_NC=log(max(ones(Samplesize,1),Estimation_OP(:,33))); % W_INC
 %LOGWNXT_NC=log(max(ones(Samplesize,1),Estimation_OP(:,34))); %W'_INC
-RTotD_NC=(max(0,LOGD_NC).^(-1/2))./LOGTot_NC;  %% ratio of spending over total. (modify)
+RTotD_NC=(max(0,LOGD_NC).^(-1/2))./LOGTot_NC;  %% ratio of spending over total.
 RTotD_NC=RTotD_NC.*(exp(LOGTot_NC)./exp(LOGD_NC));
 % LOGLOGD_NC=log(max(ones(Samplesize,1),LOGD_NC));
 % LOGLOGTot_NC=log(max(ones(Samplesize,1),LOGTot_NC));
@@ -143,28 +148,6 @@ Midterm=Estimation_OP(:,65);
 % the value of the B-Spline basis function evaluated at each of the 9
 % basis functions.
 %---------------------------------------------------------
-
-% mesh=quantile(LOGLOGD_NC,[.125;.25;.375;.5;.625;.75;.875]);
-% mesh=[min(LOGLOGD_NC);mesh;max(LOGLOGD_NC)];
-% X_Knot1=(LOGLOGD_NC<mesh(2,1)).*(1-(LOGLOGD_NC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-% for i=0:6
-%     PLUS=(LOGLOGD_NC>=mesh(i+1,1)).*(LOGLOGD_NC<mesh(i+2,1)).*((LOGLOGD_NC-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
-%         +(LOGLOGD_NC>mesh(i+2,1)).*(LOGLOGD_NC<mesh(i+3,1)).*(1-(LOGLOGD_NC-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
-%     X_Knot1=[X_Knot1,PLUS];
-% end
-% PLUS=(LOGLOGD_NC>=mesh(8,1)).*(LOGLOGD_NC-mesh(8,1))/(mesh(9,1)-mesh(8,1));
-% X_Knot1=[X_Knot1,PLUS];
-% 
-% mesh=quantile(LOGLOGTot_NC,[.125;.25;.375;.5;.625;.75;.875]);
-% mesh=[min(LOGLOGTot_NC);mesh;max(LOGLOGTot_NC)];
-% X_Knot2=(LOGLOGTot_NC<mesh(2,1)).*(1-(LOGLOGTot_NC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-% for i=0:6
-%     PLUS=(LOGLOGTot_NC>=mesh(i+1,1)).*(LOGLOGTot_NC<mesh(i+2,1)).*((LOGLOGTot_NC-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
-%         +(LOGLOGTot_NC>mesh(i+2,1)).*(LOGLOGTot_NC<mesh(i+3,1)).*(1-(LOGLOGTot_NC-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
-%     X_Knot2=[X_Knot2,PLUS];
-% end
-% PLUS=(LOGLOGTot_NC>=mesh(8,1)).*(LOGLOGTot_NC-mesh(8,1))/(mesh(9,1)-mesh(8,1));
-% X_Knot2=[X_Knot2,PLUS];
 fineness=9;
 mesh=quantile(RTotD_NC,linspace(0,1,fineness).');
 X_Knot1=(RTotD_NC<mesh(2,1)).*(1-(RTotD_NC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
@@ -242,39 +225,12 @@ MidtermAC=AC(:,65);
 Win_AC=(AC(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
 
 
-%Where do we use them?
-% EPS=randn(SamplesizeAC,NumSim);
-% EPS2=randn(SamplesizeAC,NumSim);
-% EPS3=randn(SamplesizeAC,NumSim);
-
-
 %%B-Spline for q_I(RTotD_NCAC), where RTotD_NCAC=(LOGD_NCAC./LOGTot_NCAC)  etc.%%
-%% take knots to be between 0.88 to 1.025 with 8 knots (8 basis functions). (Almost all lie
+% take knots to be between 0.88 to 1.025 with 8 knots (8 basis functions). (Almost all lie
 % within this range) Let X_Knot be the matrix with 8 columns that contain
 % the value of the B-Spline basis function evaluated at each of the 8
 % basis functions.
-% 
-% mesh=quantile(LOGLOGD_NCAC,[.125;.25;.375;.5;.625;.75;.875]);
-% mesh=[min(LOGLOGD_NCAC);mesh;max(LOGLOGD_NCAC)];
-% X_KnotAC1=(LOGLOGD_NCAC<mesh(2,1)).*(1-(LOGLOGD_NCAC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-% for i=0:6
-%     PLUS=(LOGLOGD_NCAC>=mesh(i+1,1)).*(LOGLOGD_NCAC<mesh(i+2,1)).*((LOGLOGD_NCAC-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
-%         +(LOGLOGD_NCAC>mesh(i+2,1)).*(LOGLOGD_NCAC<mesh(i+3,1)).*(1-(LOGLOGD_NCAC-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
-%     X_KnotAC1=[X_KnotAC1,PLUS];
-% end
-% PLUS=(LOGLOGD_NCAC>=mesh(8,1)).*(LOGLOGD_NCAC-mesh(8,1))/(mesh(9,1)-mesh(8,1));
-% X_KnotAC1=[X_KnotAC1,PLUS];
-% 
-% mesh=quantile(LOGLOGTot_NCAC,[.125;.25;.375;.5;.625;.75;.875]);
-% mesh=[min(LOGLOGTot_NCAC);mesh;max(LOGLOGTot_NCAC)];
-% X_KnotAC2=(LOGLOGTot_NCAC<mesh(2,1)).*(1-(LOGLOGTot_NCAC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-% for i=0:6
-%     PLUS=(LOGLOGTot_NCAC>=mesh(i+1,1)).*(LOGLOGTot_NCAC<mesh(i+2,1)).*((LOGLOGTot_NCAC-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
-%         +(LOGLOGTot_NCAC>mesh(i+2,1)).*(LOGLOGTot_NCAC<mesh(i+3,1)).*(1-(LOGLOGTot_NCAC-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
-%     X_KnotAC2=[X_KnotAC2,PLUS];
-% end
-% PLUS=(LOGLOGTot_NCAC>=mesh(8,1)).*(LOGLOGTot_NCAC-mesh(8,1))/(mesh(9,1)-mesh(8,1));
-% X_KnotAC2=[X_KnotAC2,PLUS];
+
 
 %Use the same quantile defined in OP_INC_july8. No need to re-define mesh
 %here.
@@ -487,36 +443,12 @@ LOGTot_E_VC=log(max(ones(length(E_V_july8),1),E_V_july8(:,4)));  % log(realtotal
 LOGTot_E_VC(E_VContestFUL,:)=[];
 
 %%B-Spline for q_I(RTotDE_VCT), where RTotDE_VCT=(NCE_VCT(:,1)./LOGTotal_E_VCT)  etc.%%
-%% take knots to be between 0.88 to 1.025 with 8 knots (8 basis functions). (Almost all lie
+% take knots to be between 0.88 to 1.025 with 8 knots (8 basis functions). (Almost all lie
 % within this range) Let X_Knot be the matrix with 8 columns that contain
 % the value of the B-Spline basis function evaluated at each of the 8
 % basis functions.
 
 
-% 
-% mesh=quantile(LOGLOGD_E_V,[.125;.25;.375;.5;.625;.75;.875]);
-% mesh=[min(LOGLOGD_E_V);mesh;max(LOGLOGD_E_V)];
-% X_KnotEV1=(LOGLOGD_E_V<mesh(2,1)).*(1-(LOGLOGD_E_V-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-% for i=0:6
-%     PLUS=(LOGLOGD_E_V>=mesh(i+1,1)).*(LOGLOGD_E_V<mesh(i+2,1)).*((LOGLOGD_E_V-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
-%         +(LOGLOGD_E_V>mesh(i+2,1)).*(LOGLOGD_E_V<mesh(i+3,1)).*(1-(LOGLOGD_E_V-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
-%     X_KnotEV1=[X_KnotEV1,PLUS];
-% end
-% PLUS=(LOGLOGD_E_V>=mesh(8,1)).*(LOGLOGD_E_V-mesh(8,1))/(mesh(9,1)-mesh(8,1));
-% X_KnotEV1=[X_KnotEV1,PLUS];
-% 
-% mesh=quantile(LOGLOGTot_E_V,[.125;.25;.375;.5;.625;.75;.875]);
-% mesh=[min(LOGLOGTot_E_V);mesh;max(LOGLOGTot_E_V)];
-% X_KnotEV2=(LOGLOGTot_E_V<mesh(2,1)).*(1-(LOGLOGTot_E_V-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-% for i=0:6
-%     PLUS=(LOGLOGTot_E_V>=mesh(i+1,1)).*(LOGLOGTot_E_V<mesh(i+2,1)).*((LOGLOGTot_E_V-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
-%         +(LOGLOGTot_E_V>mesh(i+2,1)).*(LOGLOGTot_E_V<mesh(i+3,1)).*(1-(LOGLOGTot_E_V-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
-%     X_KnotEV2=[X_KnotEV2,PLUS];
-% end
-% PLUS=(LOGLOGTot_E_V>=mesh(8,1)).*(LOGLOGTot_E_V-mesh(8,1))/(mesh(9,1)-mesh(8,1));
-% X_KnotEV2=[X_KnotEV2,PLUS];
-
-%mesh=quantile(RTotDE_V,linspace(0,1,fineness).');
 
 X_KnotEV1=(RTotDE_V<mesh(2,1)).*(1-(RTotDE_V-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
 for i=0:(numel(mesh)-3)
@@ -1404,11 +1336,6 @@ Est53=coefsave;
 
 
 
-%minthetaall=[Est1(1:10,1);Est2(12,1);Est1(11:20,1);Est2(1:11,1);Est2(13:17,1);Est4(1:135,1);Est5(1:33,1);Est3(1:7,1)];
-%minthetaall2=[Est1;Est2;Est3;Est41;Est42;Est43;Est51;Est52;Est53]; %Est1,Est2length differ depending on specification
-%mintheta1=[Est1;Est2];
-%mintheta2=[Est3;Est41;Est42;Est43;Est51;Est52;Est53];
-
 save Est1 Est1
 save Est2 Est2
 save Est3 Est3
@@ -1427,7 +1354,5 @@ save Est4323 Est4323
 save Est51 Est51
 save Est52 Est52
 save Est53 Est53
-%save minimizedtheta.txt minthetaall2 -ASCII
-
 
 
