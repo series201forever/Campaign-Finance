@@ -18,6 +18,7 @@ for i=1:N
     Same_=Same;
     w_I_=log(1+interest)+w_I;
     while j<Ret(i)
+        if j==1||C(5,j-1,i)==1
 %       Update state
         ST_=[Betaump'*[1;ST_(1,1)]+shockump(j,i);Betapartisan'*[1;ST_(2,1)]+shockpartisan(j,i)];
         %Update tenure
@@ -158,6 +159,9 @@ for i=1:N
             w_I_=log(1+interest)+savings;
             j=j+1;
         end
-  
+        else
+            C(:,j,i)=zeros(5,1);
+            j=j+1;
+        end
     end
 end

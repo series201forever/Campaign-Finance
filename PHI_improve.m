@@ -23,8 +23,10 @@ A4=cdf('norm',(X-tau)/gamma,0,1);
 Phi=A1*A4+A2*...
     (-gamma)*A3*C+alpha^2*((-1)*C*(X-tau)*gamma^2*...
     A3+gamma^3*A4);
-%Phi=(qtile-Phi/J).^2;
-Phi=qtile-Phi/J;
+
+    Phi=qtile-Phi/J;
+
+end
 
 %dPhi=(-2)*sqrt(Phi)*(1/(sqrt(2*pi)*gammas(1,1)))*((alphas(6,1)+alphas(1:5,
 %1)'*([X;X_]-taus))^2)*exp(((X-taus(1,1))^2)*(-1/(2*gammas(1,1)^2)))/J;

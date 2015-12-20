@@ -196,8 +196,8 @@ deleA=find(OP_INC_IV_july8(:,16)==0);
 OP_INC_IV_july8(deleA,:)=[];%Drop if oppornent disburse=0
 OP_INC_IV_july8(102,:)=[];%Drop an Rtotd outlier
 deleA2=find(OP_INC_IV_july8(:,12)<1);
-deleA3=find(OP_INC_IV_july8(:,11)<1);
 OP_INC_IV_july8(deleA2,:)=[];%Drop if nonpositive saving
+deleA3=find(OP_INC_IV_july8(:,11)<1);
 OP_INC_IV_july8(deleA3,:)=[];%Drop if nonpositive begcash
 
 dele2=find(sum(isnan(OP_INC_july8),2)>0);
@@ -207,8 +207,8 @@ deleB=find(((OP_INC_july8(:,16)==0).*OP_INC_july8(:,8))==1);
 OP_INC_july8(deleB,:)=[];%Drop if oppornent disburse=0 and contested
 OP_INC_july8(119:121,:)=[];%Drop an Rtotd outlier
 deleB2=find(OP_INC_july8(:,12)<1);
-deleB3=find(OP_INC_july8(:,11)<1);
 OP_INC_july8(deleB2,:)=[];%Drop if nonpositive saving
+deleB3=find(OP_INC_july8(:,11)<1);
 OP_INC_july8(deleB3,:)=[];%Drop if nonpositive begcash
 
 dele3=find(sum(isnan(E_V_july8),2)>0); 
@@ -218,8 +218,8 @@ deleC=find((E_V_july8(:,16)==0).*E_V_july8(:,8)==1);
 E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
 E_V_july8(174:177,:)=[]; %Drop an Rtotd outlier
 deleC2=find(E_V_july8(:,12)<1);
-deleC3=find(E_V_july8(:,11)<1);
 E_V_july8(deleC2,:)=[];%Drop if nonpositive saving
+deleC3=find(E_V_july8(:,11)<1);
 E_V_july8(deleC3,:)=[];%Drop if nonpositive begcash
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -886,7 +886,7 @@ coefprobwin=Est3;
 
 Sofarbest=10^8;
 bestiter=0;
-N=10;                      % N is the number of simulations.
+N=20;                      % N is the number of simulations.
 NumSim=50;              %NumSim is the number of simulations in the 1st step to obtain f(.,q_e)
 
 T=10;                      % T is the number of periods that we move the simlation forward.
