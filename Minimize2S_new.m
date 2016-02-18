@@ -86,15 +86,15 @@ ben2=ben1;
 % ben_c=theta2(6,1);  %% coefficient on the benefit funciton of challenger.
 % RES=theta2(7,1); %% reservation value
 
-alpha=1/2;
+alpha=abs(theta2(4,1));
 % alpha=cdf('norm',theta2(3,1),0,1);
 % beta=1+abs(theta2(4,1));
-beta=2;
+beta=abs(theta2(3,1));
 cost2=1;%abs(theta2(3,1));  %% coefficient on the cost function of the incumbent, uncontested >normalized to 1. Can be normalized
           % because we make C_I(x)=(x^alpha)*exp(f(q)) and we treat f(q)
           % non parametrically. If we set f(q)=C+f(q) then
           % C_I(x)=C*(x^alpha)*exp(f(q))
-sig=abs(theta2(3,1));
+sig=abs(theta2(5,1));
 
 
 
@@ -129,7 +129,7 @@ Continuation2=Continue;
 Continuation2(E_VNContestFUL,:)=[];          %%  Continuation1 is the Continuation value for periods in which incumebent is uncontested.
 
 %Regress Continue on State variables to find the derivative. %
-Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
+Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2,XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
 %Outlier=(LOGW_NXT_E_V<quantile(LOGW_NXT_E_V,.05));
 %Outlier=[];
 %Continue_san_OL=Continue;
@@ -140,8 +140,8 @@ coef=Regressand\Continue;
 %coef=(inv(Regressand_san_OL'*Regressand_san_OL))*Regressand_san_OL'*Continue_san_OL;
 
 %Use estimated derivative in computing FOC.
-Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),zeros(length(Continuation1),1),zeros(length(Continuation1),5)]*coef;
-DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),zeros(length(Continuation2),1),zeros(length(Continuation2),5)]*coef;
+Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT,zeros(length(Continuation1),1),zeros(length(Continuation1),5)]*coef;
+DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT,zeros(length(Continuation2),1),zeros(length(Continuation2),5)]*coef;
 Deriv=max(Deriv,0.00001);
 DerivNCT=max(DerivNCT,0.00001);
 % Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,XQEV,LOGW_NXT_E_V.^2,LOGW_NXT_E_V.*XQEV,XSEV.*PartyE_V,log(TenureE_V+1)];
@@ -152,10 +152,10 @@ DerivNCT=max(DerivNCT,0.00001);
 OUT=((beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
     ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
 
-SRR131=mean(100*(OUT-probwin).^2.*(OUT<probwin),1);
-SRR132=mean(0.3*(OUT-probwin).^2.*(OUT>probwin),1);
-SRR13=SRR131+SRR132;
+SRR13=mean(abs(OUT-probwin),1);
 std13=std(OUT-probwin);
+SRR14=(OUT>1);
+SRR15=(OUT<min(probwin));
 
 Pen=max(OUT-1,0)-min(OUT,0);
 Pen2=Pen;
@@ -267,7 +267,7 @@ std12P=std(FOC21);
 % % SRR11P
 % SRR12P
 
-SRR2step=SRR9+SRR10P/std10P+SRR11+SRR12P/std12P+SRR13/std13;%+sum(Pen2)/1000;
+SRR2step=SRR9+10^5*SRR10P/std10P+SRR11+10^5*SRR12P/std12P+sum(SRR15)+sum(SRR14)+0.0000*SRR13/std13;%+;%;%
 if SRR2step<Sofarbest
     Sofarbest=SRR2step;
     bestiter=iterate;
