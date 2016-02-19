@@ -838,7 +838,7 @@ thetain=Est2;
 
 
 theta2=mintheta;
-
+LOGD_E_VC(LOGD_E_VC<9.21)=9.21;
 
 
 vdelta=0.90;
@@ -952,6 +952,7 @@ BX1=norminv(ako);
 %     ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1))./(vdelta*Deriv))));  %%BX1=(1/sig)*(-0.5+B_I*d_I-B_C*d_C+...)=(K) in the paper.
 BX1sig=BX1;
 BX1sig(IND6CT,:)=[];
+LOGD_E_VC(LOGD_E_VC<9.21)=9.21;
 
 q_C_E_VCT=(-1)*(sig*BX1-B_I*LOGD_E_VCT-B_C*LOGD_E_VC-[XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,2).*PartyE_VCT]*thetaS2-B_T*log(TenureE_VCT+1)-XQEVCT2);
 
@@ -1059,9 +1060,17 @@ size(OUT(OUT>1))
 %%
 hist(DE,20)
 %%
+hist(q_C_E_VCT,20)
+%%
+
 bins=linspace(-0.5,0.5,100);
 [hist1,scale1]=hist(q_C_E_VCT,bins);
 [hist2,scale2]=hist(XQEV2,bins);
 bar(hist2)
 hold on;
 bar(hist1,'r')
+%%
+figure(1)
+hist(LOGW_NXT_E_VCT,20)
+figure(2)
+hist(LOGW_NXT_E_VCT(q_C_E_VCT>0.1),20)
