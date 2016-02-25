@@ -1,62 +1,53 @@
-function SRR2step=Minimize2S_new(thetain,theta2,probwin)
+function SRR2step=Minimize2S_new(thetain,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C)
 
 %% thetain : the estimated first step estimator.
 %% theta2 : the parameters that we estimate in the 2nd step.
 
+
 %Calculation of continuation payoff
-global NCE_V
-global N
-global C
-global LOGTot_NCE_V
-
-
-global E_VContestFUL
-global E_VNContestFUL
+NCE_V=datasetV(:,1:3);
+LOGTot_NCE_V=datasetV(:,4);
+E_VContestFUL=datasetVNCT(:,1);
+E_VNContestFUL=datasetVCT(:,1);
 
 %Calculation of derivative of payoff
-global XQEV2
-global LOGW_NXT_E_V
-global SameE_V
-global PartyE_V
-global TenureE_V
-global XSEV_
-global PresdumE_V
-global MidtermE_V
+XQEV2=datasetV(:,5);
+LOGW_NXT_E_V=datasetV(:,6);
+SameE_V=datasetV(:,7);
+PartyE_V=datasetV(:,8);
+TenureE_V=datasetV(:,9);
+XSEV_=datasetV(:,10:11);
+PresdumE_V=datasetV(:,12);
+MidtermE_V=datasetV(:,13);
+
+
 
 
 %Derivation of challenger quality and incumbent FOC contested
-global XQEVCT2
-global LOGTot_NCE_VCT
-global NCE_VCT
-global LOGW_NXT_E_VCT
-global LOGTotal_E_VCT
+XQEVCT2=datasetVCT(:,2);
+LOGTot_NCE_VCT=datasetVCT(:,3);
+NCE_VCT=datasetVCT(:,4:6);
+LOGW_NXT_E_VCT=datasetVCT(:,7);
+LOGTotal_E_VCT=datasetVCT(:,8);
 
-global VSEVCT
-global XS_EVCT_
-global TenureE_VCT
-global PartyE_VCT
-global SameE_VCT
-global LOGD_E_VCT
-global LOGD_E_VC
-
-global IND6CT
-
+VSEVCT=datasetVCT(:,9);
+XS_EVCT_=datasetVCT(:,10:11);
+TenureE_VCT=datasetVCT(:,12);
+PartyE_VCT=datasetVCT(:,13);
+SameE_VCT=datasetVCT(:,14);
+LOGD_E_VCT=datasetVCT(:,15);
+LOGD_E_VC=datasetVCT(:,16);
+XQEVCT2=datasetVCT(:,17);
 
 %Derication of incumbent FOC uncontested
-global LOGW_NXT_E_VNCT
-global LOGTotal_E_VNCT
-global NCE_VNCT
-global LOGTot_NCE_VNCT
-
-global IND6NCT
-
-
-global iterate
-global Sofarbest
-global bestiter
+LOGW_NXT_E_VNCT=datasetVNCT(:,2);
+LOGTotal_E_VNCT=datasetVNCT(:,3);
+NCE_VNCT=datasetVNCT(:,4:6);
+LOGTot_NCE_VNCT=datasetVNCT(:,7);
+XQEVNCT2=datasetVNCT(:,8);
 
 
-
+%LOGD_E_VC(LOGD_E_VC<9.21)=9.21;
 
 
 
@@ -90,7 +81,7 @@ alpha=abs(theta2(4,1));
 % alpha=cdf('norm',theta2(3,1),0,1);
 % beta=1+abs(theta2(4,1));
 beta=abs(theta2(3,1));
-cost2=1;%abs(theta2(3,1));  %% coefficient on the cost function of the incumbent, uncontested >normalized to 1. Can be normalized
+cost2=1;%abs(theta2(6,1));  %% coefficient on the cost function of the incumbent, uncontested >normalized to 1. Can be normalized
           % because we make C_I(x)=(x^alpha)*exp(f(q)) and we treat f(q)
           % non parametrically. If we set f(q)=C+f(q) then
           % C_I(x)=C*(x^alpha)*exp(f(q))
@@ -159,7 +150,7 @@ SRR15=(OUT<min(probwin));
 
 Pen=max(OUT-1,0)-min(OUT,0);
 Pen2=Pen;
-Pen2(IND6CT,:)=[];
+%Pen2(IND6CT,:)=[];
 DEL_Pen=find(Pen2>quantile(Pen2,.95));    %Cannot invert some observations:
 %DEL2=find(Pen2>0);
 %Pen2(DEL_Pen,:)=[];
@@ -170,7 +161,8 @@ BX1=norminv(ako);
 % BX1=norminv(max(0.01,min(0.99,(beta*(alpha/beta)*ben2*...
 %     ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1))./(vdelta*Deriv))));  %%BX1=(1/sig)*(-0.5+B_I*d_I-B_C*d_C+...)=(K) in the paper.
 BX1sig=BX1;
-BX1sig(IND6CT,:)=[];
+%BX1sig(IND6CT,:)=[];
+
 
 q_C_E_VCT=(-1)*(sig*BX1-B_I*LOGD_E_VCT-B_C*LOGD_E_VC-[XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,2).*PartyE_VCT]*thetaS2-B_T*log(TenureE_VCT+1)-XQEVCT2);
 
@@ -179,25 +171,25 @@ q_C_E_VCT=(-1)*(sig*BX1-B_I*LOGD_E_VCT-B_C*LOGD_E_VC-[XS_EVCT_(:,1).*SameE_VCT,X
 
 
 VV=VSEVCT-0.5-B_I*LOGD_E_VCT-B_C*LOGD_E_VC-[XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,2).*PartyE_VCT]*thetaS2-XQEVCT2+q_C_E_VCT-B_T*log(TenureE_VCT+1);
-VV(IND6CT,:)=[];
+%VV(IND6CT,:)=[];
 VV(DEL_Pen,:)=[];
 LOGD_E_VCT_m=LOGD_E_VCT;
-LOGD_E_VCT_m(IND6CT,:)=[];
+%LOGD_E_VCT_m(IND6CT,:)=[];
 LOGD_E_VCT_m(DEL_Pen,:)=[];
 LOGD_E_VC_m=LOGD_E_VC;
-LOGD_E_VC_m(IND6CT,:)=[];
+%LOGD_E_VC_m(IND6CT,:)=[];
 LOGD_E_VC_m(DEL_Pen,:)=[];
 XS_m=[XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,2).*PartyE_VCT];
-XS_m(IND6CT,:)=[];
+%XS_m(IND6CT,:)=[];
 XS_m(DEL_Pen,:)=[];
 XQEVCT_m=XQEVCT2;
-XQEVCT_m(IND6CT,:)=[];
+%XQEVCT_m(IND6CT,:)=[];
 XQEVCT_m(DEL_Pen,:)=[];
 q_C_E_VCT_m=q_C_E_VCT;
-q_C_E_VCT_m(IND6CT,:)=[];
+%q_C_E_VCT_m(IND6CT,:)=[];
 q_C_E_VCT_m(DEL_Pen,:)=[];
 TenureE_VCT_m=TenureE_VCT;
-TenureE_VCT_m(IND6CT,:)=[];
+%TenureE_VCT_m(IND6CT,:)=[];
 TenureE_VCT_m(DEL_Pen,:)=[];
 SRR11_1=mean(VV.^2);     %To estimate sigma.
 std11_1=std(VV);
@@ -233,7 +225,7 @@ FOC11=(beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))
     ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
     -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
 
-FOC11(IND6CT,:)=[];
+%FOC11(IND6CT,:)=[];
 FOC11(DEL_Pen,:)=[];
 %FOC11(DEL2,:)=[];
 SRR10P=mean(FOC11.^2,1);
@@ -254,7 +246,7 @@ std10P=std(FOC11);
 FOC21=vdelta*DerivNCT.*(1./exp(LOGW_NXT_E_VNCT))-... 
 (beta*cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_VNCT(:,1))./exp(NCE_VNCT(:,1))).*...
     ((max(0,NCE_VNCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VNCT(:,1)).^(beta-1))).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
-FOC21(IND6NCT,:)=[];
+%FOC21(IND6NCT,:)=[];
 
 % FOC21delta=0.9*(DContinuation2b2-Continuation2b2)-(ben2+incr)*RTotDE_VNCT.*((LOGTotal_E_VNCT+Delt).^2-LOGTotal_E_VNCT.^2);   %% delta*(d/dw_I)E_V-C_I'
 % FOC21delta(IND6NCT,:)=[];
@@ -268,12 +260,6 @@ std12P=std(FOC21);
 % SRR12P
 
 SRR2step=SRR9+10^5*SRR10P/std10P+SRR11+10^5*SRR12P/std12P+sum(SRR15)+sum(SRR14)+0.0000*SRR13/std13;%+;%;%
-if SRR2step<Sofarbest
-    Sofarbest=SRR2step;
-    bestiter=iterate;
-end
-
-iterate=iterate+1;
 
 %if bestiter==iterate-1
  %   save Best2step.txt theta2 SRR2step bestiter -ASCII
