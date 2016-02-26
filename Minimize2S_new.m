@@ -93,26 +93,61 @@ sig=abs(theta2(5,1));
 %Continuation(ST,q_I,Ten,w_I,epswh, epsump, E_VCTa, E_VCTt, gamma,dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,thetawin,Ret,Betawh,Betaump,cost,ben,thetaS,Party)
 %%%%%%%%          E_V         %%%%%%%%%
 %% Given State, Tenure, warchest, compute incumbent continuation value %%
-Continue1=zeros(length(NCE_V),N);
-%DContinue1=zeros(length(NCE_V),N);
-for i=1:length(NCE_V)  %% (all elements of E_V)
-    for k=1:N % simulation
-        for j=1:10 % number of periods
-            if C(1,j,k,i)==1 %Contest
-                Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben1*max(0,C(2,j,k,i))^alpha-cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
-                    ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
-            else
-                Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben2*max(0,C(2,j,k,i))^alpha-cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
-                    ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
-            end
-%             if DC(1,j,k,i)==1 %Contest
-%                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben1*max(0,DC(2,j,k,i))^(1/2)-cost1*(1/4)*(ben2/cost2)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
-%             else
-%                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben2*max(0,DC(2,j,k,i))^(1/2)-ben2*(1/4)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
-%             end
-        end
-    end
+%Contcontest=payoff if contested
+Contcontest=zeros(3,T,N,length(NCE_V));
+Contcontest(1,:,:,:)=ben1*(max(0,C(2,:,:,:))).^alpha.*C(1,:,:,:); %Benefit
+Contcontest(2,:,:,:)=-cost1*(alpha/beta)*ben2*permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
+                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]).*squeeze(C(3,:,:,:)).^beta.*squeeze(C(1,:,:,:)); %Cost
+Contcontest(3,:,:,:)=C(5,:,:,:).*C(1,:,:,:); %Return from winning
+
+%Discount
+for j=1:T
+    Contcontest(:,j,:,:)=((vdelta)^(j-1))*Contcontest(:,j,:,:);
 end
+%Sum over benefit+cost+winning and over t=1~T
+Contcontestpath=squeeze(sum(sum(Contcontest,1),2));
+
+%Contuncontest=payoff if uncontested
+Contuncontest=zeros(3,T,N,length(NCE_V));
+Contuncontest(1,:,:,:)=ben2*(max(0,C(2,:,:,:))).^alpha.*(1-C(1,:,:,:)); %Benefit
+Contuncontest(2,:,:,:)=-cost2*(alpha/beta)*ben2*permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
+                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]).*squeeze(C(3,:,:,:)).^beta.*squeeze(1-C(1,:,:,:)); %Cost
+Contuncontest(3,:,:,:)=C(5,:,:,:).*(1-C(1,:,:,:)); %Return from winning
+
+%Discount
+for j=1:T
+    Contuncontest(:,j,:,:)=((vdelta)^(j-1))*Contuncontest(:,j,:,:);
+end
+
+%Sum over benefit+cost+winning and over t=1~T
+Contuncontestpath=squeeze(sum(sum(Contuncontest,1),2));
+
+%Sum over contest and uncontest
+Continue1=(Contcontestpath+Contuncontestpath).';
+
+%This gives us sample size* number of simulation matrix of continuation
+%payoff
+
+% Continue1=zeros(length(NCE_V),N);
+% %DContinue1=zeros(length(NCE_V),N);
+% for i=1:length(NCE_V)  %% (all elements of E_V)
+%     for k=1:N % simulation
+%         for j=1:(min(find(C(5,:,k,i)==0))) % number of periods
+%             if C(1,j,k,i)==1 %Contest
+%                 Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben1*max(0,C(2,j,k,i))^alpha-cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
+%                     ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
+%             else
+%                 Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben2*max(0,C(2,j,k,i))^alpha-cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
+%                     ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
+%             end
+% %             if DC(1,j,k,i)==1 %Contest
+% %                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben1*max(0,DC(2,j,k,i))^(1/2)-cost1*(1/4)*(ben2/cost2)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
+% %             else
+% %                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben2*max(0,DC(2,j,k,i))^(1/2)-ben2*(1/4)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
+% %             end
+%         end
+%     end
+% end
 Continue=mean(Continue1,2);
 Continuation1=Continue;
 Continuation1(E_VContestFUL,:)=[];           %% Continuation1 is the Continuation value for periods in which incumebent is contested.

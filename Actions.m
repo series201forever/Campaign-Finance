@@ -1,11 +1,11 @@
-function C=Actions(num,ST,Same, q_I, X_Knot1,rtotd, Ten,w_I,demo,Presdum,Midterm,shockpartisan, shockump, presseq, Entry, coefentry, E_VCTa, E_VCTt, gammact, coefspend, coeffund,coefsave, dF_gamma_ct, dF_total_ct,dF_gammasv_ct,dF_totalsv_ct,Winrnd,coefprobwin,Ret,Betapartisan,Betaump)
+function C=Actions(num,ST,Same, q_I, X_Knot1,rtotd, Ten,w_I,demo,Presdum,Midterm,shockpartisan, shockump, presseq, Entry, coefentry, E_VCTa, E_VCTt, gammact, coefspend, coeffund,coefsave, dF_gamma_ct, dF_total_ct,dF_gammasv_ct,dF_totalsv_ct,Winrnd,coefprobwin,Ret,Betapartisan,Betaump,N,interest)
 %options = optimset();
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %Make sure that specification chosen at the first stage and "entryprob",
 %"X_(contested)", "X_(uncontested)", "win" matches.
 
-global N;  % the number of simulations
-global interest
+%global N;  % the number of simulations
+%global interest
 
 options=optimoptions('fsolve','display','none');
 
@@ -106,7 +106,7 @@ for i=1:N
             Jspsv=(sqrt(1/(((2*pi)^4)*prod(gammact(1:8,iK2)))-(E_VCTa(1:8,iK2).^2)'*(gammact(1:8,iK2).^2))+E_VCTa(2:8,iK2)'*(X_-E_VCTt(2:8,iK2)))^2+E_VCTa(1,iK2)^2*gammact(1,iK2)^2;
 
             spendingsv=fsolve(@(X) PHI_improve(A1spsv,A2spsv,Jspsv,(1/sqrt(2*pi)),E_VCTa(1,iK2),E_VCTt(1,iK2)...
-                   ,gammact(1,iK2),X,qtile3),11.5,options); 
+                   ,gammact(1,iK2),X,qtile3),18.5,options); 
 
                
               %% Computes F^(-1)(dF_gamma_ct) where
@@ -120,7 +120,7 @@ for i=1:N
             Jtotsv=(sqrt(1/(((2*pi)^4)*prod(gammact(9:16,iK2)))-(E_VCTa(9:16,iK2).^2)'*(gammact(9:16,iK2).^2))+E_VCTa(10:16,iK2)'*(X_-E_VCTt(10:16,iK2)))^2+E_VCTa(9,iK2)^2*gammact(9,iK2)^2;
 
             totalsv=fsolve(@(X) PHI_improve(A1totsv,A2totsv,Jtotsv,(1/sqrt(2*pi)),E_VCTa(9,iK2),E_VCTt(9,iK2)...
-                   ,gammact(9,iK2),X,qtile4),11.5,options);  
+                   ,gammact(9,iK2),X,qtile4),18.5,options);  
                
            
                savings=w_I_+totalsv-spendingsv;

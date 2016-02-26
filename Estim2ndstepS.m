@@ -8,8 +8,8 @@ rng(958)
 %Globals
 
 %Calculating C matrix
-global N
-global interest
+%global N
+%global interest
 
 
 
@@ -421,7 +421,7 @@ coefprobwin=Est3;
 Sofarbest=10^8;
 bestiter=0;
 iterate=1;
-N=20;                      % N is the number of simulations.
+N=500;                      % N is the number of simulations.
 NumSim=50;              %NumSim is the number of simulations in the 1st step to obtain f(.,q_e)
 
 T=10;                      % T is the number of periods that we move the simlation forward.
@@ -657,53 +657,53 @@ presseq(:,:,begtwo)=presseqbegtwo;
 
 
 %%
+
+%Continue1=zeros(length(NCE_V),N);
+%DContinue1=zeros(length(NCE_V),N);
+ C=zeros(5,T,N,length(NCE_V));
+% DC=zeros(5,T,N,length(NCE_V));
+parfor i=1:length(NCE_V)
+         C(:,:,:,i)=Actions(i,XSEV_(i,:)',SameE_V(i,1), XQEV2(i,1),X_KnotEV1(i,:),RTotDE_V(i,:), TenureE_V(i,1),LOGW_NXT_E_V(i,1),PartyE_V(i,1),PresdumE_V(i,1),MidtermE_V(i,1),...
+         Shockpartisan(:,:,i), Shockump(:,:,i), presseq(:,:,i),Entry(:,:,i), coefentry, E_VCTa, E_VCTt, gammaCT, coefspend, coeffund,coefsave, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
+       dF_gammasv_ct(:,:,i),dF_totalsv_ct(:,:,i),Winrnd(:,:,i),coefprobwin,Ret(:,i)',Betapartisan,Betaump,N,interest);
+    squeeze(C(:,:,:,i));
+    i
+%     DC(:,:,:,i)=Actions(i,XSEV_(i,:)',XQEV(i,1),RTotDE_V(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1)+Delt,...
+%         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
+%         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_nxt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,thetaS,PartyE_V(i,1));
+%         if (sum(squeeze(DC(5,1,:,i)-C(5,1,:,i)))<0)
+%             i
+%             C(:,:,:,i)
+%             DC(:,:,:,i)
 % 
-% %Continue1=zeros(length(NCE_V),N);
-% %DContinue1=zeros(length(NCE_V),N);
-%  C=zeros(5,T,N,length(NCE_V));
-% % DC=zeros(5,T,N,length(NCE_V));
-% for i=1:length(NCE_V)
-%          C(:,:,:,i)=Actions(i,XSEV_(i,:)',SameE_V(i,1), XQEV2(i,1),X_KnotEV1(i,:),RTotDE_V(i,:), TenureE_V(i,1),LOGW_NXT_E_V(i,1),PartyE_V(i,1),PresdumE_V(i,1),MidtermE_V(i,1),...
-%          Shockpartisan(:,:,i), Shockump(:,:,i), presseq(:,:,i),Entry(:,:,i), coefentry, E_VCTa, E_VCTt, gammaCT, coefspend, coeffund,coefsave, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
-%        dF_gammasv_ct(:,:,i),dF_totalsv_ct(:,:,i),Winrnd(:,:,i),coefprobwin,Ret(:,i)',Betapartisan,Betaump);
-%     squeeze(C(:,:,:,i))
-%     i
-% %     DC(:,:,:,i)=Actions(i,XSEV_(i,:)',XQEV(i,1),RTotDE_V(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1)+Delt,...
-% %         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
-% %         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_nxt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,thetaS,PartyE_V(i,1));
-% %         if (sum(squeeze(DC(5,1,:,i)-C(5,1,:,i)))<0)
-% %             i
-% %             C(:,:,:,i)
-% %             DC(:,:,:,i)
-% % 
-% %         end
-% %     for k=1:N
-% %         for j=1:10
-% %             if C(1,j,k,i)==1 %Contest
-% %                 Continue1(i,k)=Continue1(i,k)+0.9*(ben1*C(2,j,k,i).^2-cost1*C(3,j,k,i).^2+C(5,j,k,i));
-% %             else
-% %                 Continue1(i,k)=Continue1(i,k)+0.9*(ben2*C(2,j,k,i).^2-cost2*C(3,j,k,i).^2+C(5,j,k,i));
-% %             end
-% %             if DC(1,j,k,i)==1 %Contest
-% %                 DContinue1(i,k)=DContinue1(i,k)+0.9*(ben1*DC(2,j,k,i).^2-cost1*DC(3,j,k,i).^2+DC(5,j,k,i));
-% %             else
-% %                 DContinue1(i,k)=DContinue1(i,k)+0.9*(ben2*DC(2,j,k,i).^2-cost2*DC(3,j,k,i).^2+DC(5,j,k,i));
-% %             end
-% %         end
-% %     end
-% %     Continue(i,1)=Continuation(XSEV_(i,:)',XQEV(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1),...
-% %         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
-% %         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_nxt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,cost1,ben1,cost2,ben2,thetaS,PartyE_V(i,1));
-% %     DContinue(i,1)=Continuation(XSEV_(i,:)',XQEV(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1)+Delt,...
-% %         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
-% %         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_n
-% %         xt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,cost1,ben1,cost2,ben2,thetaS,PartyE_V(i,1));
-% end
-% 
-%   save C.mat C
-%   %save DC.mat DC
+%         end
+%     for k=1:N
+%         for j=1:10
+%             if C(1,j,k,i)==1 %Contest
+%                 Continue1(i,k)=Continue1(i,k)+0.9*(ben1*C(2,j,k,i).^2-cost1*C(3,j,k,i).^2+C(5,j,k,i));
+%             else
+%                 Continue1(i,k)=Continue1(i,k)+0.9*(ben2*C(2,j,k,i).^2-cost2*C(3,j,k,i).^2+C(5,j,k,i));
+%             end
+%             if DC(1,j,k,i)==1 %Contest
+%                 DContinue1(i,k)=DContinue1(i,k)+0.9*(ben1*DC(2,j,k,i).^2-cost1*DC(3,j,k,i).^2+DC(5,j,k,i));
+%             else
+%                 DContinue1(i,k)=DContinue1(i,k)+0.9*(ben2*DC(2,j,k,i).^2-cost2*DC(3,j,k,i).^2+DC(5,j,k,i));
+%             end
+%         end
+%     end
+%     Continue(i,1)=Continuation(XSEV_(i,:)',XQEV(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1),...
+%         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
+%         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_nxt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,cost1,ben1,cost2,ben2,thetaS,PartyE_V(i,1));
+%     DContinue(i,1)=Continuation(XSEV_(i,:)',XQEV(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1)+Delt,...
+%         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
+%         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_n
+%         xt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,cost1,ben1,cost2,ben2,thetaS,PartyE_V(i,1));
+end
+
+  save C.mat C
+  %save DC.mat DC
 %%
-load('./C.mat');
+load('./C2.mat');
 % load('./DC.mat');
 
 % LB(1)=-Inf; % normalized to 1, vacuous.
@@ -751,9 +751,9 @@ SRR=[];
  %theta0([1,2,3,5])=inittheta2step;
   %  theta0(4)=rand(1,1);
   theta0=rand(5,1);
-  theta0(1)=theta0(1)*10*rand(1,1);
-  theta0(2)=theta0(2)*10*rand(1,1);
-  theta0(3)=theta0(3)*15*rand(1,1);
+  theta0(1)=theta0(1)*12;
+  theta0(2)=theta0(2)*5;
+  theta0(3)=theta0(3)*15;
   theta0(5)=theta0(5)*0.01;
   %theta0(6)=theta0(3)*10*rand(1,1);     
   
@@ -836,31 +836,67 @@ cost2=1;%abs(theta2(6,1));  %% coefficient on the cost function of the incumbent
 sig=abs(theta2(5,1));
 
 
-
+%%
 
 %Continuation(ST,q_I,Ten,w_I,epswh, epsump, E_VCTa, E_VCTt, gamma,dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,thetawin,Ret,Betawh,Betaump,cost,ben,thetaS,Party)
 %%%%%%%%          E_V         %%%%%%%%%
-% Given State, Tenure, warchest, compute incumbent continuation value %%
-Continue1=zeros(length(NCE_V),N);
-%DContinue1=zeros(length(NCE_V),N);
-for i=1:length(NCE_V)  %% (all elements of E_V)
-    for k=1:N % simulation
-        for j=1:10 % number of periods
-            if C(1,j,k,i)==1 %Contest
-                Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben1*max(0,C(2,j,k,i))^alpha-cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
-                    ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
-            else
-                Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben2*max(0,C(2,j,k,i))^alpha-cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
-                    ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
-            end
-%             if DC(1,j,k,i)==1 %Contest
-%                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben1*max(0,DC(2,j,k,i))^(1/2)-cost1*(1/4)*(ben2/cost2)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
-%             else
-%                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben2*max(0,DC(2,j,k,i))^(1/2)-ben2*(1/4)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
-%             end
-        end
-    end
+%Contcontest=payoff if contested
+Contcontest=zeros(3,T,N,length(NCE_V));
+Contcontest(1,:,:,:)=ben1*(max(0,C(2,:,:,:))).^alpha.*C(1,:,:,:); %Benefit
+Contcontest(2,:,:,:)=-cost1*(alpha/beta)*ben2*permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
+                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]).*squeeze(C(3,:,:,:)).^beta.*squeeze(C(1,:,:,:)); %Cost
+Contcontest(3,:,:,:)=C(5,:,:,:).*C(1,:,:,:); %Return from winning
+
+%Discount
+for j=1:T
+    Contcontest(:,j,:,:)=((vdelta)^(j-1))*Contcontest(:,j,:,:);
 end
+%Sum over benefit+cost+winning and over t=1~T
+Contcontestpath=squeeze(sum(sum(Contcontest,1),2));
+
+%Contuncontest=payoff if uncontested
+Contuncontest=zeros(3,T,N,length(NCE_V));
+Contuncontest(1,:,:,:)=ben2*(max(0,C(2,:,:,:))).^alpha.*(1-C(1,:,:,:)); %Benefit
+Contuncontest(2,:,:,:)=-cost2*(alpha/beta)*ben2*permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
+                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]).*squeeze(C(3,:,:,:)).^beta.*squeeze(1-C(1,:,:,:)); %Cost
+Contuncontest(3,:,:,:)=C(5,:,:,:).*(1-C(1,:,:,:)); %Return from winning
+
+%Discount
+for j=1:T
+    Contuncontest(:,j,:,:)=((vdelta)^(j-1))*Contuncontest(:,j,:,:);
+end
+
+%Sum over benefit+cost+winning and over t=1~T
+Contuncontestpath=squeeze(sum(sum(Contuncontest,1),2));
+
+%Sum over contest and uncontest
+Continue1=(Contcontestpath+Contuncontestpath).';
+
+%This gives us sample size* number of simulation matrix of continuation
+%payoff
+
+
+% Given State, Tenure, warchest, compute incumbent continuation value %%
+%Continue1=zeros(length(NCE_V),N);
+%DContinue1=zeros(length(NCE_V),N);
+% for i=1:length(NCE_V)  %% (all elements of E_V)
+%     for k=1:N % simulation
+%         for j=1:(min(find(C(5,:,k,i)==0))) % number of periods
+%             if C(1,j,k,i)==1 %Contest
+%                 Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben1*max(0,C(2,j,k,i))^alpha-cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
+%                     ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
+%             else
+%                 Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben2*max(0,C(2,j,k,i))^alpha-cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
+%                     ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
+%             end
+% %             if DC(1,j,k,i)==1 %Contest
+% %                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben1*max(0,DC(2,j,k,i))^(1/2)-cost1*(1/4)*(ben2/cost2)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
+% %             else
+% %                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben2*max(0,DC(2,j,k,i))^(1/2)-ben2*(1/4)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
+% %             end
+%         end
+%     end
+% end
 Continue=mean(Continue1,2);
 Continuation1=Continue;
 Continuation1(E_VContestFUL,:)=[];           %% Continuation1 is the Continuation value for periods in which incumebent is contested.
