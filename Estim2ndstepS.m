@@ -662,45 +662,45 @@ presseq(:,:,begtwo)=presseqbegtwo;
 %DContinue1=zeros(length(NCE_V),N);
  C=zeros(5,T,N,length(NCE_V));
 % DC=zeros(5,T,N,length(NCE_V));
-parfor i=1:length(NCE_V)
-         C(:,:,:,i)=Actions(i,XSEV_(i,:)',SameE_V(i,1), XQEV2(i,1),X_KnotEV1(i,:),RTotDE_V(i,:), TenureE_V(i,1),LOGW_NXT_E_V(i,1),PartyE_V(i,1),PresdumE_V(i,1),MidtermE_V(i,1),...
-         Shockpartisan(:,:,i), Shockump(:,:,i), presseq(:,:,i),Entry(:,:,i), coefentry, E_VCTa, E_VCTt, gammaCT, coefspend, coeffund,coefsave, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
-       dF_gammasv_ct(:,:,i),dF_totalsv_ct(:,:,i),Winrnd(:,:,i),coefprobwin,Ret(:,i)',Betapartisan,Betaump,N,interest);
-    squeeze(C(:,:,:,i));
-    i
-%     DC(:,:,:,i)=Actions(i,XSEV_(i,:)',XQEV(i,1),RTotDE_V(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1)+Delt,...
-%         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
-%         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_nxt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,thetaS,PartyE_V(i,1));
-%         if (sum(squeeze(DC(5,1,:,i)-C(5,1,:,i)))<0)
-%             i
-%             C(:,:,:,i)
-%             DC(:,:,:,i)
+% parfor i=1:length(NCE_V)
+%          C(:,:,:,i)=Actions(i,XSEV_(i,:)',SameE_V(i,1), XQEV2(i,1),X_KnotEV1(i,:),RTotDE_V(i,:), TenureE_V(i,1),LOGW_NXT_E_V(i,1),PartyE_V(i,1),PresdumE_V(i,1),MidtermE_V(i,1),...
+%          Shockpartisan(:,:,i), Shockump(:,:,i), presseq(:,:,i),Entry(:,:,i), coefentry, E_VCTa, E_VCTt, gammaCT, coefspend, coeffund,coefsave, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
+%        dF_gammasv_ct(:,:,i),dF_totalsv_ct(:,:,i),Winrnd(:,:,i),coefprobwin,Ret(:,i)',Betapartisan,Betaump,N,interest);
+%     squeeze(C(:,:,:,i));
+%     i
+% %     DC(:,:,:,i)=Actions(i,XSEV_(i,:)',XQEV(i,1),RTotDE_V(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1)+Delt,...
+% %         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
+% %         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_nxt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,thetaS,PartyE_V(i,1));
+% %         if (sum(squeeze(DC(5,1,:,i)-C(5,1,:,i)))<0)
+% %             i
+% %             C(:,:,:,i)
+% %             DC(:,:,:,i)
+% % 
+% %         end
+% %     for k=1:N
+% %         for j=1:10
+% %             if C(1,j,k,i)==1 %Contest
+% %                 Continue1(i,k)=Continue1(i,k)+0.9*(ben1*C(2,j,k,i).^2-cost1*C(3,j,k,i).^2+C(5,j,k,i));
+% %             else
+% %                 Continue1(i,k)=Continue1(i,k)+0.9*(ben2*C(2,j,k,i).^2-cost2*C(3,j,k,i).^2+C(5,j,k,i));
+% %             end
+% %             if DC(1,j,k,i)==1 %Contest
+% %                 DContinue1(i,k)=DContinue1(i,k)+0.9*(ben1*DC(2,j,k,i).^2-cost1*DC(3,j,k,i).^2+DC(5,j,k,i));
+% %             else
+% %                 DContinue1(i,k)=DContinue1(i,k)+0.9*(ben2*DC(2,j,k,i).^2-cost2*DC(3,j,k,i).^2+DC(5,j,k,i));
+% %             end
+% %         end
+% %     end
+% %     Continue(i,1)=Continuation(XSEV_(i,:)',XQEV(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1),...
+% %         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
+% %         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_nxt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,cost1,ben1,cost2,ben2,thetaS,PartyE_V(i,1));
+% %     DContinue(i,1)=Continuation(XSEV_(i,:)',XQEV(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1)+Delt,...
+% %         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
+% %         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_n
+% %         xt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,cost1,ben1,cost2,ben2,thetaS,PartyE_V(i,1));
+% end
 % 
-%         end
-%     for k=1:N
-%         for j=1:10
-%             if C(1,j,k,i)==1 %Contest
-%                 Continue1(i,k)=Continue1(i,k)+0.9*(ben1*C(2,j,k,i).^2-cost1*C(3,j,k,i).^2+C(5,j,k,i));
-%             else
-%                 Continue1(i,k)=Continue1(i,k)+0.9*(ben2*C(2,j,k,i).^2-cost2*C(3,j,k,i).^2+C(5,j,k,i));
-%             end
-%             if DC(1,j,k,i)==1 %Contest
-%                 DContinue1(i,k)=DContinue1(i,k)+0.9*(ben1*DC(2,j,k,i).^2-cost1*DC(3,j,k,i).^2+DC(5,j,k,i));
-%             else
-%                 DContinue1(i,k)=DContinue1(i,k)+0.9*(ben2*DC(2,j,k,i).^2-cost2*DC(3,j,k,i).^2+DC(5,j,k,i));
-%             end
-%         end
-%     end
-%     Continue(i,1)=Continuation(XSEV_(i,:)',XQEV(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1),...
-%         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
-%         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_nxt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,cost1,ben1,cost2,ben2,thetaS,PartyE_V(i,1));
-%     DContinue(i,1)=Continuation(XSEV_(i,:)',XQEV(i,1),TenureE_V(i,1),LOGW_NXT_E_V(i,1)+Delt,...
-%         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
-%         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_n
-%         xt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,cost1,ben1,cost2,ben2,thetaS,PartyE_V(i,1));
-end
-
-  save C.mat C
+%   save C.mat C
   %save DC.mat DC
 %%
 load('./C2.mat');
@@ -751,21 +751,21 @@ SRR=[];
  %theta0([1,2,3,5])=inittheta2step;
   %  theta0(4)=rand(1,1);
   theta0=rand(5,1);
-  theta0(1)=theta0(1)*12;
+  theta0(1)=theta0(1)*10;
   theta0(2)=theta0(2)*5;
   theta0(3)=theta0(3)*15;
   theta0(5)=theta0(5)*0.01;
   %theta0(6)=theta0(3)*10*rand(1,1);     
   
-funvalue=Minimize2S_new(Est2,theta0,probwin,datasetV,datasetVCT,datasetVNCT,N,C);
+funvalue=Minimize2S_new(Est2,theta0,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
 funvalueend=0;
 thetaup=theta0;
 sss=1;
 while abs(funvalue-funvalueend)>0.001
    sss=sss+1;
-   funvalue=Minimize2S_new(Est2,thetaup,probwin,datasetV,datasetVCT,datasetVNCT,N,C);
-    [mintheta,SRR]=fminsearch(@(theta2) Minimize2S_new(Est2,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C),thetaup,options);
-   funvalueend=Minimize2S_new(Est2,mintheta,probwin,datasetV,datasetVCT,datasetVNCT,N,C);
+   funvalue=Minimize2S_new(Est2,thetaup,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
+    [mintheta,SRR]=fminsearch(@(theta2) Minimize2S_new(Est2,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T),thetaup,options);
+   funvalueend=Minimize2S_new(Est2,mintheta,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
       if mod(sss,30)==1
       thetaup=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
       else

@@ -1,4 +1,4 @@
-function SRR2step=Minimize2S_new(thetain,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C)
+function SRR2step=Minimize2S_new(thetain,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T)
 
 %% thetain : the estimated first step estimator.
 %% theta2 : the parameters that we estimate in the 2nd step.
