@@ -730,6 +730,7 @@ probwin=[ones(length(NCE_VCT),1),LOGW_E_VCT,XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,
     X_KnotE_VCT.*(XS_EVCT_(:,1).*SameE_VCT*ones(1,8)),X_KnotE_VCT.*(XS_EVCT_(:,2).*PartyE_VCT*ones(1,8)),X_KnotE_VCT.*(log(TenureE_VCT+1)*ones(1,8)),...;
   LOGW_E_VCT.^3]*Est3;
 
+
 %Input for the function evaluated
 datasetV=[NCE_V, LOGTot_NCE_V,XQEV2,LOGW_NXT_E_V, SameE_V,PartyE_V,TenureE_V, XSEV_,PresdumE_V,MidtermE_V];
 datasetVCT=[E_VNContestFUL,XQEVCT2,LOGTot_NCE_VCT, NCE_VCT,LOGW_NXT_E_VCT,LOGTotal_E_VCT,VSEVCT,XS_EVCT_,TenureE_VCT, PartyE_VCT,SameE_VCT, LOGD_E_VCT,LOGD_E_VC,XQEVCT2];
@@ -841,10 +842,11 @@ sig=abs(theta2(5,1));
 %Continuation(ST,q_I,Ten,w_I,epswh, epsump, E_VCTa, E_VCTt, gamma,dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,thetawin,Ret,Betawh,Betaump,cost,ben,thetaS,Party)
 %%%%%%%%          E_V         %%%%%%%%%
 %Contcontest=payoff if contested
+costpara=permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
+                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]);
 Contcontest=zeros(3,T,N,length(NCE_V));
 Contcontest(1,:,:,:)=ben1*(max(0,C(2,:,:,:))).^alpha.*C(1,:,:,:); %Benefit
-Contcontest(2,:,:,:)=-cost1*(alpha/beta)*ben2*permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
-                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]).*squeeze(C(3,:,:,:)).^beta.*squeeze(C(1,:,:,:)); %Cost
+Contcontest(2,:,:,:)=-cost1*(alpha/beta)*ben2*costpara.*squeeze(C(3,:,:,:)).^beta.*squeeze(C(1,:,:,:)); %Cost
 Contcontest(3,:,:,:)=C(5,:,:,:).*C(1,:,:,:); %Return from winning
 
 %Discount
@@ -857,8 +859,7 @@ Contcontestpath=squeeze(sum(sum(Contcontest,1),2));
 %Contuncontest=payoff if uncontested
 Contuncontest=zeros(3,T,N,length(NCE_V));
 Contuncontest(1,:,:,:)=ben2*(max(0,C(2,:,:,:))).^alpha.*(1-C(1,:,:,:)); %Benefit
-Contuncontest(2,:,:,:)=-cost2*(alpha/beta)*ben2*permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
-                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]).*squeeze(C(3,:,:,:)).^beta.*squeeze(1-C(1,:,:,:)); %Cost
+Contuncontest(2,:,:,:)=-cost2*(alpha/beta)*ben2*costpara.*squeeze(C(3,:,:,:)).^beta.*squeeze(1-C(1,:,:,:)); %Cost
 Contuncontest(3,:,:,:)=C(5,:,:,:).*(1-C(1,:,:,:)); %Return from winning
 
 %Discount

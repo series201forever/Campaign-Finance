@@ -94,10 +94,12 @@ sig=abs(theta2(5,1));
 %%%%%%%%          E_V         %%%%%%%%%
 %% Given State, Tenure, warchest, compute incumbent continuation value %%
 %Contcontest=payoff if contested
+costpara=permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
+                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]);
+                
 Contcontest=zeros(3,T,N,length(NCE_V));
 Contcontest(1,:,:,:)=ben1*(max(0,C(2,:,:,:))).^alpha.*C(1,:,:,:); %Benefit
-Contcontest(2,:,:,:)=-cost1*(alpha/beta)*ben2*permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
-                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]).*squeeze(C(3,:,:,:)).^beta.*squeeze(C(1,:,:,:)); %Cost
+Contcontest(2,:,:,:)=-cost1*(alpha/beta)*ben2*costpara.*squeeze(C(3,:,:,:)).^beta.*squeeze(C(1,:,:,:)); %Cost
 Contcontest(3,:,:,:)=C(5,:,:,:).*C(1,:,:,:); %Return from winning
 
 %Discount
@@ -110,8 +112,7 @@ Contcontestpath=squeeze(sum(sum(Contcontest,1),2));
 %Contuncontest=payoff if uncontested
 Contuncontest=zeros(3,T,N,length(NCE_V));
 Contuncontest(1,:,:,:)=ben2*(max(0,C(2,:,:,:))).^alpha.*(1-C(1,:,:,:)); %Benefit
-Contuncontest(2,:,:,:)=-cost2*(alpha/beta)*ben2*permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
-                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]).*squeeze(C(3,:,:,:)).^beta.*squeeze(1-C(1,:,:,:)); %Cost
+Contuncontest(2,:,:,:)=-cost2*(alpha/beta)*ben2*costpara.*squeeze(C(3,:,:,:)).^beta.*squeeze(1-C(1,:,:,:)); %Cost
 Contuncontest(3,:,:,:)=C(5,:,:,:).*(1-C(1,:,:,:)); %Return from winning
 
 %Discount
@@ -127,6 +128,7 @@ Continue1=(Contcontestpath+Contuncontestpath).';
 
 %This gives us sample size* number of simulation matrix of continuation
 %payoff
+
 
 % Continue1=zeros(length(NCE_V),N);
 % %DContinue1=zeros(length(NCE_V),N);
