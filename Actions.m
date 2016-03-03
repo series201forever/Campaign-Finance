@@ -1,5 +1,10 @@
 function C=Actions(num,ST,Same, q_I, X_Knot1,rtotd, Ten,w_I,demo,Presdum,Midterm,shockpartisan, shockump, presseq, Entry, coefentry, E_VCTa, E_VCTt, gammact, coefspend, coeffund,coefsave, dF_gamma_ct, dF_total_ct,dF_gammasv_ct,dF_totalsv_ct,Winrnd,coefprobwin,Ret,Betapartisan,Betaump,N,interest)
 %options = optimset();
+
+%Chigh generated with "11.5,11.5,18.5,18.5".
+%Clow generated with "14.5,14.5,18.5,18.5".
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %Make sure that specification chosen at the first stage and "entryprob",
 %"X_(contested)", "X_(uncontested)", "win" matches.
@@ -59,7 +64,7 @@ for i=1:N
             Jsp=(sqrt(1/(((2*pi)^4)*prod(gammact(1:8,iK)))-(E_VCTa(1:8,iK).^2)'*(gammact(1:8,iK).^2))+E_VCTa(2:8,iK)'*(X_-E_VCTt(2:8,iK)))^2+E_VCTa(1,iK)^2*gammact(1,iK)^2;
 
             spending=fsolve(@(X) PHI_improve(A1sp,A2sp,Jsp,(1/sqrt(2*pi)),E_VCTa(1,iK),E_VCTt(1,iK)...
-                   ,gammact(1,iK),X,qtile1),11.5,options); 
+                   ,gammact(1,iK),X,qtile1),14.5,options); 
 
                
               %% Computes F^(-1)(dF_gamma_ct) where
@@ -73,7 +78,7 @@ for i=1:N
             Jtot=(sqrt(1/(((2*pi)^4)*prod(gammact(9:16,iK)))-(E_VCTa(9:16,iK).^2)'*(gammact(9:16,iK).^2))+E_VCTa(10:16,iK)'*(X_-E_VCTt(10:16,iK)))^2+E_VCTa(9,iK)^2*gammact(9,iK)^2;
 
             total=fsolve(@(X) PHI_improve(A1tot,A2tot,Jtot,(1/sqrt(2*pi)),E_VCTa(9,iK),E_VCTt(9,iK)...
-                   ,gammact(9,iK),X,qtile2),11.5,options);   
+                   ,gammact(9,iK),X,qtile2),14.5,options);   
  
 %%%%%%               
 %Directly derive saving from nonparametrics

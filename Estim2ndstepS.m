@@ -48,6 +48,8 @@ load ('./stateevol.mat')
 % 
 % load ('./Fststage_kettei.txt')
  load ('./Sndstage_initial_long.txt')
+ 
+
 
 % rand('state',1000);
 % randn('state',10);
@@ -80,11 +82,12 @@ E_V_july8(E_V_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleC=find((E_V_july8(:,16)==0).*E_V_july8(:,8)==1);
 E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
 E_V_july8(174:177,:)=[]; %Drop an Rtotd outlier
-deleC2=find(E_V_july8(:,12)<1);
+deleC2=find(E_V_july8(:,12)<5000);
 E_V_july8(deleC2,:)=[];%Drop if nonpositive saving
 deleC3=find(E_V_july8(:,11)<1);
 E_V_july8(deleC3,:)=[];%Drop if nonpositive begcash
-
+deleC4=find(E_V_july8(:,16)<5000&E_V_july8(:,8)==1);
+E_V_july8(deleC4,:)=[];%Drop if nonpositive challenger spending
 
 E_VContestFUL=find(E_V_july8(:,8)==0);           %% E_VContestFUL is the elements in which contest==0 :277 distinct districts
 E_VNContestFUL=find(E_V_july8(:,8)==1);          %% E_VNContestFUL is the elements in which contest==1 :297 distinct districts
@@ -421,7 +424,7 @@ coefprobwin=Est3;
 Sofarbest=10^8;
 bestiter=0;
 iterate=1;
-N=500;                      % N is the number of simulations.
+N=100;                      % N is the number of simulations.
 NumSim=50;              %NumSim is the number of simulations in the 1st step to obtain f(.,q_e)
 
 T=10;                      % T is the number of periods that we move the simlation forward.
@@ -660,8 +663,8 @@ presseq(:,:,begtwo)=presseqbegtwo;
 
 %Continue1=zeros(length(NCE_V),N);
 %DContinue1=zeros(length(NCE_V),N);
- C=zeros(5,T,N,length(NCE_V));
-% DC=zeros(5,T,N,length(NCE_V));
+% C=zeros(5,T,N,length(NCE_V));
+% %DC=zeros(5,T,N,length(NCE_V));
 % parfor i=1:length(NCE_V)
 %          C(:,:,:,i)=Actions(i,XSEV_(i,:)',SameE_V(i,1), XQEV2(i,1),X_KnotEV1(i,:),RTotDE_V(i,:), TenureE_V(i,1),LOGW_NXT_E_V(i,1),PartyE_V(i,1),PresdumE_V(i,1),MidtermE_V(i,1),...
 %          Shockpartisan(:,:,i), Shockump(:,:,i), presseq(:,:,i),Entry(:,:,i), coefentry, E_VCTa, E_VCTt, gammaCT, coefspend, coeffund,coefsave, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
@@ -703,7 +706,9 @@ presseq(:,:,begtwo)=presseqbegtwo;
 %   save C.mat C
   %save DC.mat DC
 %%
-load('./C2.mat');
+ load('./C5000-1-5000.mat');
+ C=C(:,:,1:100,:);
+load('residstd.mat');
 % load('./DC.mat');
 
 % LB(1)=-Inf; % normalized to 1, vacuous.
@@ -741,7 +746,7 @@ datasetVNCT=[E_VContestFUL,LOGW_NXT_E_VNCT,LOGTotal_E_VNCT,NCE_VNCT,LOGTot_NCE_V
 mintheta=[];
 SRR=[];
  options=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
- iter=50;  
+ iter=11;  
  Sofarbest=10^8;
    minthetadist=zeros(5,iter);
    initthetadist=zeros(5,iter);
@@ -752,9 +757,9 @@ SRR=[];
  %theta0([1,2,3,5])=inittheta2step;
   %  theta0(4)=rand(1,1);
   theta0=rand(5,1);
-  theta0(1)=theta0(1)*10;
-  theta0(2)=theta0(2)*5;
-  theta0(3)=theta0(3)*15;
+  theta0(1)=theta0(1)*20;
+  theta0(2)=theta0(2)*20;
+  theta0(3)=theta0(3)*20;
   theta0(5)=theta0(5)*0.01;
   %theta0(6)=theta0(3)*10*rand(1,1);     
   
@@ -762,10 +767,10 @@ funvalue=Minimize2S_new(Est2,theta0,probwin,datasetV,datasetVCT,datasetVNCT,N,C,
 funvalueend=0;
 thetaup=theta0;
 sss=1;
-while abs(funvalue-funvalueend)>0.001
+while abs(funvalue-funvalueend)>0.01
    sss=sss+1;
    funvalue=Minimize2S_new(Est2,thetaup,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
-    [mintheta,SRR]=fminsearch(@(theta2) Minimize2S_new(Est2,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T),thetaup,options);
+    [mintheta,SRR]=fminsearch(@(theta2) Minimize2S_new(Est2,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd),thetaup,options);
    funvalueend=Minimize2S_new(Est2,mintheta,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
       if mod(sss,30)==1
       thetaup=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
@@ -837,7 +842,7 @@ cost2=1;%abs(theta2(6,1));  %% coefficient on the cost function of the incumbent
 sig=abs(theta2(5,1));
 
 
-%%
+
 
 %Continuation(ST,q_I,Ten,w_I,epswh, epsump, E_VCTa, E_VCTt, gamma,dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,thetawin,Ret,Betawh,Betaump,cost,ben,thetaS,Party)
 %%%%%%%%          E_V         %%%%%%%%%
@@ -905,7 +910,8 @@ Continuation2=Continue;
 Continuation2(E_VNContestFUL,:)=[];          %%  Continuation1 is the Continuation value for periods in which incumebent is uncontested.
 
 %Regress Continue on State variables to find the derivative. %
-Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2,XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
+%Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2,XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
+Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
 %Outlier=(LOGW_NXT_E_V<quantile(LOGW_NXT_E_V,.05));
 %Outlier=[];
 %Continue_san_OL=Continue;
@@ -916,14 +922,17 @@ coef=Regressand\Continue;
 %coef=(inv(Regressand_san_OL'*Regressand_san_OL))*Regressand_san_OL'*Continue_san_OL;
 
 %Use estimated derivative in computing FOC.
-Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT,zeros(length(Continuation1),1),zeros(length(Continuation1),5)]*coef;
-DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT,zeros(length(Continuation2),1),zeros(length(Continuation2),5)]*coef;
+%Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT,zeros(length(Continuation1),1),zeros(length(Continuation1),5)]*coef;
+%DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT,zeros(length(Continuation2),1),zeros(length(Continuation2),5)]*coef;
+Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT/10,3*LOGW_NXT_E_VCT.^2/100,4*LOGW_NXT_E_VCT.^3/1000,zeros(length(Continuation1),1),zeros(length(Continuation1),5)]*coef;
+DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT/10,3*LOGW_NXT_E_VNCT.^2/100,4*LOGW_NXT_E_VNCT.^3/1000,zeros(length(Continuation2),1),zeros(length(Continuation2),5)]*coef;
+%
 Deriv=max(Deriv,0.00001);
 DerivNCT=max(DerivNCT,0.00001);
 
 OUT=((beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
     ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
-
+DE=exp(LOGTotal_E_VCT(:,1)).*((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
 SRR13=mean(abs(OUT-probwin),1);
 std13=std(OUT-probwin);
 SRR14=(OUT>1);
@@ -932,10 +941,11 @@ SRR15=(OUT<min(probwin));
 Pen=max(OUT-1,0)-min(OUT,0);
 Pen2=Pen;
 Pen2(IND6CT,:)=[];
-DEL_Pen=find(Pen2>quantile(Pen2,.95));    %Cannot invert some observations:
+DEL_Pen=[find(Pen2<quantile(Pen2,.025));find(Pen2>quantile(Pen2,.975))];      %Cannot invert some observations:
 %DEL2=find(Pen2>0);
 %Pen2(DEL_Pen,:)=[];
-
+OUT_m=OUT;
+OUT_m(DEL_Pen,:)=[];
 %ako=1/2+(1/pi)*atan((OUT-0.5)*h);
 ako=min(max(OUT,0.000001),0.999999);
 BX1=norminv(ako);
@@ -1039,18 +1049,25 @@ std12P=std(FOC21);
 % % SRR11P
 % SRR12P
 
-SRR2step=SRR9+10^5*SRR10P/std10P+SRR11+10^5*SRR12P/std12P+sum(SRR15)+sum(SRR14)+0.0000*SRR13/std13;%+;%;%
+SRR2step=SRR9+10^7*SRR10P/std10P+SRR11+10^4*SRR12P/std12P+sum(SRR15)+sum(SRR14)+0.0000*SRR13/std13;%+;%;%
 %%
 figure(1)
 hist(OUT,20)
 figure(2)
 hist(OUT(OUT<2),20)
 %%
+hist(DE(OUT<2),20)
+
+%%
 size(OUT(OUT>1))
 %%
 hist(XQEV2,20)
 %%
 hist(q_C_E_VCT,20)
+%%
+hist(q_C_E_VCT(Deriv<0.001),20)
+%%
+hist(q_C_E_VCT(LOGW_NXT_E_VCT<10),20)
 %%
 
 bins=linspace(-0.5,0.5,100);
@@ -1062,6 +1079,21 @@ bar(hist1,'r')
 
 %%
 figure(1)
+hist(LOGW_NXT_E_VCT,20)
+figure(2)
+hist(LOGW_NXT_E_VCT(q_C_E_VCT>0.1),20)
+%%
+figure(1)
+hist(LOGW_E_VCT,20)
+figure(2)
+hist(LOGW_E_VCT(q_C_E_VCT>0.1),20)
+%%
+figure(1)
 hist(LOGD_E_VC,20)
 figure(2)
 hist(LOGD_E_VC(q_C_E_VCT>0.1),20)
+%%
+figure(1)
+hist(LOGD_E_VCT,20)
+figure(2)
+hist(LOGD_E_VCT(q_C_E_VCT>0.1),20)

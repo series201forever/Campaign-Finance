@@ -1,4 +1,4 @@
-function SRR2step=Minimize2S_new(thetain,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T)
+function SRR2step=Minimize2S_new(thetain,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd)
 
 %% thetain : the estimated first step estimator.
 %% theta2 : the parameters that we estimate in the 2nd step.
@@ -157,7 +157,7 @@ Continuation2=Continue;
 Continuation2(E_VNContestFUL,:)=[];          %%  Continuation1 is the Continuation value for periods in which incumebent is uncontested.
 
 %Regress Continue on State variables to find the derivative. %
-Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2,XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
+Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
 %Outlier=(LOGW_NXT_E_V<quantile(LOGW_NXT_E_V,.05));
 %Outlier=[];
 %Continue_san_OL=Continue;
@@ -168,8 +168,8 @@ coef=Regressand\Continue;
 %coef=(inv(Regressand_san_OL'*Regressand_san_OL))*Regressand_san_OL'*Continue_san_OL;
 
 %Use estimated derivative in computing FOC.
-Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT,zeros(length(Continuation1),1),zeros(length(Continuation1),5)]*coef;
-DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT,zeros(length(Continuation2),1),zeros(length(Continuation2),5)]*coef;
+Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT/10,3*LOGW_NXT_E_VCT.^2/100,4*LOGW_NXT_E_VCT.^3/1000,zeros(length(Continuation1),1),zeros(length(Continuation1),5)]*coef;
+DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT/10,3*LOGW_NXT_E_VNCT.^2/100,4*LOGW_NXT_E_VNCT.^3/1000,zeros(length(Continuation2),1),zeros(length(Continuation2),5)]*coef;
 Deriv=max(Deriv,0.00001);
 DerivNCT=max(DerivNCT,0.00001);
 % Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,XQEV,LOGW_NXT_E_V.^2,LOGW_NXT_E_V.*XQEV,XSEV.*PartyE_V,log(TenureE_V+1)];
@@ -188,7 +188,7 @@ SRR15=(OUT<min(probwin));
 Pen=max(OUT-1,0)-min(OUT,0);
 Pen2=Pen;
 %Pen2(IND6CT,:)=[];
-DEL_Pen=find(Pen2>quantile(Pen2,.95));    %Cannot invert some observations:
+DEL_Pen=[find(Pen2<quantile(Pen2,.025));find(Pen2>quantile(Pen2,.975))];    %Cannot invert some observations:
 %DEL2=find(Pen2>0);
 %Pen2(DEL_Pen,:)=[];
 
@@ -296,7 +296,7 @@ std12P=std(FOC21);
 % % SRR11P
 % SRR12P
 
-SRR2step=SRR9+10^5*SRR10P/std10P+SRR11+10^5*SRR12P/std12P+sum(SRR15)+sum(SRR14)+0.0000*SRR13/std13;%+;%;%
+SRR2step=SRR9+10^7*SRR10P/std10P+SRR11+10^4*SRR12P/std12P+sum(SRR15)+sum(SRR14)+0.0000*SRR13/std13;%+10000*(sigma>residstd);%+;%;%
 
 %if bestiter==iterate-1
  %   save Best2step.txt theta2 SRR2step bestiter -ASCII

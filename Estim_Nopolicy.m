@@ -509,16 +509,19 @@ IVvar=IVvoteshare.'*IVvoteshare;
 
 coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*(VSAC-0.5));
 
+residual=VSAC-0.5-Xvoteshare*coefvoteshare;
+residstd=sqrt(sum(residual.^2)./(SamplesizeAC-numel(coefvoteshare)-1));
 %Variant 1(to reduce coef of Logd_CAC and increase q_I)
-% Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry;
-% Eentry2=min(1,[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry);
-% EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefprimaryN;
-% Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN,Eentry,EprimaryN.*Eentry,RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3];
-% IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.^3,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1)),X_KnotAC1.*(LOGW_IAC.^2*ones(1,fineness-1)),PresdumAC,X_KnotAC1.*(PresdumAC*ones(1,fineness-1)),PresdumsameAC,X_KnotAC1.*(PresdumsameAC*ones(1,fineness-1)),UnemppresdumsameAC,MidtermAC];
-% IVvar=IVvoteshare.'*IVvoteshare;
-% 
-% coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*(VSAC-0.5));
-
+%  Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry;
+%  Eentry2=min(1,[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry);
+%  EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefprimaryN;
+%  Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN,Eentry,EprimaryN.*Eentry,RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3];
+%  IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.^3,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1)),X_KnotAC1.*(LOGW_IAC.^2*ones(1,fineness-1)),PresdumAC,X_KnotAC1.*(PresdumAC*ones(1,fineness-1)),PresdumsameAC,X_KnotAC1.*(PresdumsameAC*ones(1,fineness-1)),UnemppresdumsameAC,MidtermAC];
+%  IVvar=IVvoteshare.'*IVvoteshare;
+%  
+%  coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*(VSAC-0.5));
+%  residual=VSAC-0.5-Xvoteshare*coefvoteshare;
+%  residstd=sqrt(sum(residual.^2)./(SamplesizeAC-numel(coefvoteshare)-1));
 
 % Eentry2=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefentry2;
 % EprimaryN2=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1))]*coefprimaryN2;
