@@ -746,7 +746,7 @@ datasetVNCT=[E_VContestFUL,LOGW_NXT_E_VNCT,LOGTotal_E_VNCT,NCE_VNCT,LOGTot_NCE_V
 mintheta=[];
 SRR=[];
  options=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
- iter=11;  
+ iter=55;  
  Sofarbest=10^8;
    minthetadist=zeros(5,iter);
    initthetadist=zeros(5,iter);
@@ -910,8 +910,15 @@ Continuation2=Continue;
 Continuation2(E_VNContestFUL,:)=[];          %%  Continuation1 is the Continuation value for periods in which incumebent is uncontested.
 
 %Regress Continue on State variables to find the derivative. %
+
+
 %Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2,XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
-Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
+
+%quad
+%Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,XQEV2,LOGW_NXT_E_V.*XQEV2,LOGW_NXT_E_V.^2/10.*XQEV2,LOGW_NXT_E_V.^3/100.*XQEV2,LOGW_NXT_E_V.^4/1000.*XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
+%flex
+Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,XQEV2,LOGW_NXT_E_V.*XQEV2,LOGW_NXT_E_V.^2/10.*XQEV2,LOGW_NXT_E_V.^3/100.*XQEV2,LOGW_NXT_E_V.^4/1000.*XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
+
 %Outlier=(LOGW_NXT_E_V<quantile(LOGW_NXT_E_V,.05));
 %Outlier=[];
 %Continue_san_OL=Continue;
@@ -924,8 +931,15 @@ coef=Regressand\Continue;
 %Use estimated derivative in computing FOC.
 %Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT,zeros(length(Continuation1),1),zeros(length(Continuation1),5)]*coef;
 %DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT,zeros(length(Continuation2),1),zeros(length(Continuation2),5)]*coef;
-Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT/10,3*LOGW_NXT_E_VCT.^2/100,4*LOGW_NXT_E_VCT.^3/1000,zeros(length(Continuation1),1),zeros(length(Continuation1),5)]*coef;
-DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT/10,3*LOGW_NXT_E_VNCT.^2/100,4*LOGW_NXT_E_VNCT.^3/1000,zeros(length(Continuation2),1),zeros(length(Continuation2),5)]*coef;
+
+%quad
+%Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT/10,3*LOGW_NXT_E_VCT.^2/100,4*LOGW_NXT_E_VCT.^3/1000,zeros(length(Continuation1),1),XQEVCT2,2*LOGW_NXT_E_VCT/10.*XQEVCT2,3*LOGW_NXT_E_VCT.^2/100.*XQEVCT2,4*LOGW_NXT_E_VCT.^3/1000.*XQEVCT2,zeros(length(Continuation1),5)]*coef;
+%DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT/10,3*LOGW_NXT_E_VNCT.^2/100,4*LOGW_NXT_E_VNCT.^3/1000,zeros(length(Continuation2),1),XQEVNCT2,2*LOGW_NXT_E_VNCT/10.*XQEVNCT2,3*LOGW_NXT_E_VNCT.^2/100.*XQEVNCT2,4*LOGW_NXT_E_VNCT.^3/1000.*XQEVNCT2,zeros(length(Continuation2),5)]*coef;
+
+%flex
+Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT/10,3*LOGW_NXT_E_VCT.^2/100,4*LOGW_NXT_E_VCT.^3/1000,zeros(length(Continuation1),1),XQEVCT2,2*LOGW_NXT_E_VCT/10.*XQEVCT2,3*LOGW_NXT_E_VCT.^2/100.*XQEVCT2,4*LOGW_NXT_E_VCT.^3/1000.*XQEVCT2,zeros(length(Continuation1),5)]*coef;
+DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT/10,3*LOGW_NXT_E_VNCT.^2/100,4*LOGW_NXT_E_VNCT.^3/1000,zeros(length(Continuation2),1),XQEVNCT2,2*LOGW_NXT_E_VNCT/10.*XQEVNCT2,3*LOGW_NXT_E_VNCT.^2/100.*XQEVNCT2,4*LOGW_NXT_E_VNCT.^3/1000.*XQEVNCT2,zeros(length(Continuation2),5)]*coef;
+
 %
 Deriv=max(Deriv,0.00001);
 DerivNCT=max(DerivNCT,0.00001);
@@ -1054,9 +1068,9 @@ SRR2step=SRR9+10^7*SRR10P/std10P+SRR11+10^4*SRR12P/std12P+sum(SRR15)+sum(SRR14)+
 figure(1)
 hist(OUT,20)
 figure(2)
-hist(OUT(OUT<2),20)
+hist(OUT(q_C_E_VCT>0.1),20)
 %%
-hist(DE(OUT<2),20)
+hist(DE(q_C_E_VCT>0.1),20)
 
 %%
 size(OUT(OUT>1))
@@ -1073,20 +1087,22 @@ hist(q_C_E_VCT(LOGW_NXT_E_VCT<10),20)
 bins=linspace(-0.5,0.5,100);
 [hist1,scale1]=hist(q_C_E_VCT,bins);
 [hist2,scale2]=hist(XQEV2,bins);
-bar(hist2)
+bar(hist1)
 hold on;
-bar(hist1,'r')
+bar(hist2,'r')
 
 %%
+
 figure(1)
-hist(LOGW_NXT_E_VCT,20)
-figure(2)
 hist(LOGW_NXT_E_VCT(q_C_E_VCT>0.1),20)
-%%
-figure(1)
-hist(LOGW_E_VCT,20)
 figure(2)
+hist(LOGW_NXT_E_VCT,20)
+%%
+
+figure(1)
 hist(LOGW_E_VCT(q_C_E_VCT>0.1),20)
+figure(2)
+hist(LOGW_E_VCT,20)
 %%
 figure(1)
 hist(LOGD_E_VC,20)
@@ -1097,3 +1113,8 @@ figure(1)
 hist(LOGD_E_VCT,20)
 figure(2)
 hist(LOGD_E_VCT(q_C_E_VCT>0.1),20)
+%%
+figure(1)
+hist(LOGTotal_E_VCT,20)
+figure(2)
+hist(LOGTotal_E_VCT(q_C_E_VCT>0.1),20)
