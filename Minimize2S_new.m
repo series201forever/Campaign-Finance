@@ -37,7 +37,7 @@ PartyE_VCT=datasetVCT(:,13);
 SameE_VCT=datasetVCT(:,14);
 LOGD_E_VCT=datasetVCT(:,15);
 LOGD_E_VC=datasetVCT(:,16);
-XQEVCT2=datasetVCT(:,17);
+
 
 %Derication of incumbent FOC uncontested
 LOGW_NXT_E_VNCT=datasetVNCT(:,2);
@@ -77,16 +77,16 @@ ben2=ben1;
 % ben_c=theta2(6,1);  %% coefficient on the benefit funciton of challenger.
 % RES=theta2(7,1); %% reservation value
 
-alpha=abs(theta2(4,1));
+alpha=0.5;
 % alpha=cdf('norm',theta2(3,1),0,1);
 % beta=1+abs(theta2(4,1));
-beta=abs(theta2(3,1));
+beta=2;
 cost2=1;%abs(theta2(6,1));  %% coefficient on the cost function of the incumbent, uncontested >normalized to 1. Can be normalized
           % because we make C_I(x)=(x^alpha)*exp(f(q)) and we treat f(q)
           % non parametrically. If we set f(q)=C+f(q) then
           % C_I(x)=C*(x^alpha)*exp(f(q))
-sig=abs(theta2(5,1));
-
+sig=abs(theta2(3,1));
+a=abs(theta2(4,1));
 
 
 
@@ -94,9 +94,10 @@ sig=abs(theta2(5,1));
 %%%%%%%%          E_V         %%%%%%%%%
 %% Given State, Tenure, warchest, compute incumbent continuation value %%
 %Contcontest=payoff if contested
-costpara=permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
-                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]);
-                
+%costpara=permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
+%                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]);
+                    
+costpara=permute(repmat((ones(N,1)*XQEV2.'+a*ones(N,1)*XQEV2.^2.'),[1 1 10]),[3 1 2]);                
 Contcontest=zeros(3,T,N,length(NCE_V));
 Contcontest(1,:,:,:)=ben1*(max(0,C(2,:,:,:))).^alpha.*C(1,:,:,:); %Benefit
 Contcontest(2,:,:,:)=-cost1*(alpha/beta)*ben2*costpara.*squeeze(C(3,:,:,:)).^beta.*squeeze(C(1,:,:,:)); %Cost
@@ -130,26 +131,7 @@ Continue1=(Contcontestpath+Contuncontestpath).';
 %payoff
 
 
-% Continue1=zeros(length(NCE_V),N);
-% %DContinue1=zeros(length(NCE_V),N);
-% for i=1:length(NCE_V)  %% (all elements of E_V)
-%     for k=1:N % simulation
-%         for j=1:(min(find(C(5,:,k,i)==0))) % number of periods
-%             if C(1,j,k,i)==1 %Contest
-%                 Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben1*max(0,C(2,j,k,i))^alpha-cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
-%                     ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
-%             else
-%                 Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben2*max(0,C(2,j,k,i))^alpha-cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
-%                     ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
-%             end
-% %             if DC(1,j,k,i)==1 %Contest
-% %                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben1*max(0,DC(2,j,k,i))^(1/2)-cost1*(1/4)*(ben2/cost2)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
-% %             else
-% %                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben2*max(0,DC(2,j,k,i))^(1/2)-ben2*(1/4)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
-% %             end
-%         end
-%     end
-% end
+
 Continue=mean(Continue1,2);
 Continuation1=Continue;
 Continuation1(E_VContestFUL,:)=[];           %% Continuation1 is the Continuation value for periods in which incumebent is contested.
@@ -177,8 +159,11 @@ DerivNCT=max(DerivNCT,0.00001);
 % Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),zeros(length(Continuation1),1),2*LOGW_NXT_E_VCT,XQEVCT,zeros(length(Continuation1),2)]*coef;
 % DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),zeros(length(Continuation2),1),2*LOGW_NXT_E_VNCT,XQEVNCT,zeros(length(Continuation2),2)]*coef;
 
-OUT=((beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
-    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
+%UT=((beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
+%    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
+OUT=((beta*cost1*(alpha/beta)*ben2*(XQEVCT2+a*XQEVCT2.^2).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
+
+
 
 SRR13=mean(abs(OUT-probwin),1);
 std13=std(OUT-probwin);
@@ -258,9 +243,13 @@ SRR9=-SRR9;
 %SRR9P_2=mean(sqrt(VV.^2)-sig)^2;
 %std9P_2=std(sqrt(VV.^2)-sig);
 %% foc of incumbent, contested periods %%
-FOC11=(beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
-    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
+%FOC11=(beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
+%    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
+%    -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
+FOC11=(beta*cost1*(alpha/beta)*ben2*(XQEVCT2+a*XQEVCT2.^2).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
     -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
+
+
 
 %FOC11(IND6CT,:)=[];
 FOC11(DEL_Pen,:)=[];
@@ -280,9 +269,11 @@ std10P=std(FOC11);
 
 
 % %% foc of incumbent, uncontested periods %%
+%FOC21=vdelta*DerivNCT.*(1./exp(LOGW_NXT_E_VNCT))-... 
+%(beta*cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_VNCT(:,1))./exp(NCE_VNCT(:,1))).*...
+%    ((max(0,NCE_VNCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VNCT(:,1)).^(beta-1))).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
 FOC21=vdelta*DerivNCT.*(1./exp(LOGW_NXT_E_VNCT))-... 
-(beta*cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_VNCT(:,1))./exp(NCE_VNCT(:,1))).*...
-    ((max(0,NCE_VNCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VNCT(:,1)).^(beta-1))).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
+(beta*cost2*(alpha/beta)*ben2*(XQEVNCT2+a*XQEVNCT2.^2).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
 %FOC21(IND6NCT,:)=[];
 
 % FOC21delta=0.9*(DContinuation2b2-Continuation2b2)-(ben2+incr)*RTotDE_VNCT.*((LOGTotal_E_VNCT+Delt).^2-LOGTotal_E_VNCT.^2);   %% delta*(d/dw_I)E_V-C_I'
@@ -296,7 +287,7 @@ std12P=std(FOC21);
 % % SRR11P
 % SRR12P
 
-SRR2step=SRR9+10^7*SRR10P/std10P+SRR11+10^4*SRR12P/std12P+10*sum(SRR15)+10*sum(SRR14)+0.0000*SRR13/std13;%+10000*(sigma>residstd);%+;%;%
+SRR2step=SRR9+10^6*SRR10P/std10P+10^3*SRR11+10^4*SRR12P/std12P+0*sum(SRR15)+0*sum(SRR14)+0.0000*SRR13/std13;%+10000*(sigma>residstd);%+;%;%
 
 %if bestiter==iterate-1
  %   save Best2step.txt theta2 SRR2step bestiter -ASCII

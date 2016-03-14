@@ -82,11 +82,11 @@ E_V_july8(E_V_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleC=find((E_V_july8(:,16)==0).*E_V_july8(:,8)==1);
 E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
 E_V_july8(174:177,:)=[]; %Drop an Rtotd outlier
-deleC2=find(E_V_july8(:,12)<5000);
+deleC2=find(E_V_july8(:,12)<5000|E_V_july8(:,12)>1200000);
 E_V_july8(deleC2,:)=[];%Drop if nonpositive saving
-deleC3=find(E_V_july8(:,11)<1);
+deleC3=find(E_V_july8(:,11)<5000);
 E_V_july8(deleC3,:)=[];%Drop if nonpositive begcash
-deleC4=find(E_V_july8(:,16)<5000&E_V_july8(:,8)==1);
+deleC4=find((E_V_july8(:,16)<5000|E_V_july8(:,16)>1200000)&E_V_july8(:,8)==1);
 E_V_july8(deleC4,:)=[];%Drop if nonpositive challenger spending
 
 E_VContestFUL=find(E_V_july8(:,8)==0);           %% E_VContestFUL is the elements in which contest==0 :277 distinct districts
@@ -662,7 +662,7 @@ presseq(:,:,begtwo)=presseqbegtwo;
 %%
 
 %Continue1=zeros(length(NCE_V),N);
-%DContinue1=zeros(length(NCE_V),N);
+% %DContinue1=zeros(length(NCE_V),N);
 % C=zeros(5,T,N,length(NCE_V));
 % %DC=zeros(5,T,N,length(NCE_V));
 % parfor i=1:length(NCE_V)
@@ -706,7 +706,7 @@ presseq(:,:,begtwo)=presseqbegtwo;
 %   save C.mat C
   %save DC.mat DC
 %%
- load('./C5000-1-5000.mat');
+ load('./C5012-50-5012.mat');
  C=C(:,:,1:100,:);
 load('residstd.mat');
 % load('./DC.mat');
@@ -738,7 +738,7 @@ probwin=[ones(length(NCE_VCT),1),LOGW_E_VCT,XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,
 
 %Input for the function evaluated
 datasetV=[NCE_V, LOGTot_NCE_V,XQEV2,LOGW_NXT_E_V, SameE_V,PartyE_V,TenureE_V, XSEV_,PresdumE_V,MidtermE_V];
-datasetVCT=[E_VNContestFUL,XQEVCT2,LOGTot_NCE_VCT, NCE_VCT,LOGW_NXT_E_VCT,LOGTotal_E_VCT,VSEVCT,XS_EVCT_,TenureE_VCT, PartyE_VCT,SameE_VCT, LOGD_E_VCT,LOGD_E_VC,XQEVCT2];
+datasetVCT=[E_VNContestFUL,XQEVCT2,LOGTot_NCE_VCT, NCE_VCT,LOGW_NXT_E_VCT,LOGTotal_E_VCT,VSEVCT,XS_EVCT_,TenureE_VCT, PartyE_VCT,SameE_VCT, LOGD_E_VCT,LOGD_E_VC];
 datasetVNCT=[E_VContestFUL,LOGW_NXT_E_VNCT,LOGTotal_E_VNCT,NCE_VNCT,LOGTot_NCE_VNCT,XQEVNCT2];
 
 
@@ -746,21 +746,20 @@ datasetVNCT=[E_VContestFUL,LOGW_NXT_E_VNCT,LOGTotal_E_VNCT,NCE_VNCT,LOGTot_NCE_V
 mintheta=[];
 SRR=[];
  options=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
- iter=55;  
+ iter=33;  
  Sofarbest=10^8;
-   minthetadist=zeros(5,iter);
-   initthetadist=zeros(5,iter);
+   minthetadist=zeros(4,iter);
+   initthetadist=zeros(4,iter);
    srrdist=zeros(1,iter);
    tic
  parfor i=1:iter
  %load inittheta2step
  %theta0([1,2,3,5])=inittheta2step;
   %  theta0(4)=rand(1,1);
-  theta0=rand(5,1);
+  theta0=rand(4,1);
   theta0(1)=theta0(1)*20;
   theta0(2)=theta0(2)*20;
-  theta0(3)=theta0(3)*20;
-  theta0(5)=theta0(5)*0.01;
+  theta0(3)=theta0(3)*0.01;
   %theta0(6)=theta0(3)*10*rand(1,1);     
   
 funvalue=Minimize2S_new(Est2,theta0,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
@@ -831,15 +830,15 @@ ben2=ben1;
 % ben_c=theta2(6,1);  %% coefficient on the benefit funciton of challenger.
 % RES=theta2(7,1); %% reservation value
 
-alpha=abs(theta2(4,1));
+alpha=0.5;
 % alpha=cdf('norm',theta2(3,1),0,1);
 % beta=1+abs(theta2(4,1));
-beta=abs(theta2(3,1));
+beta=2;
 cost2=1;%abs(theta2(6,1));  %% coefficient on the cost function of the incumbent, uncontested >normalized to 1. Can be normalized
           % because we make C_I(x)=(x^alpha)*exp(f(q)) and we treat f(q)
           % non parametrically. If we set f(q)=C+f(q) then
           % C_I(x)=C*(x^alpha)*exp(f(q))
-sig=abs(theta2(5,1));
+sig=abs(theta2(3,1));
 
 
 
@@ -1063,7 +1062,7 @@ std12P=std(FOC21);
 % % SRR11P
 % SRR12P
 
-SRR2step=SRR9+10^7*SRR10P/std10P+SRR11+10^4*SRR12P/std12P+sum(SRR15)+sum(SRR14)+0.0000*SRR13/std13;%+;%;%
+SRR2step=SRR9+10^6*SRR10P/std10P+SRR11+10^3*SRR12P/std12P+100*sum(SRR15)+100*sum(SRR14)+0.0000*SRR13/std13;%+;%;%
 %%
 figure(1)
 hist(OUT,20)
@@ -1079,7 +1078,7 @@ hist(XQEV2,20)
 %%
 hist(q_C_E_VCT,20)
 %%
-hist(q_C_E_VCT(Deriv<0.001),20)
+hist(q_C_E_VCT(OUT<0.1),20)
 %%
 hist(q_C_E_VCT(LOGW_NXT_E_VCT<10),20)
 %%
@@ -1094,27 +1093,27 @@ bar(hist2,'r')
 %%
 
 figure(1)
-hist(LOGW_NXT_E_VCT(q_C_E_VCT>0.1),20)
+hist(LOGW_NXT_E_VCT(q_C_E_VCT>0.2),20)
 figure(2)
 hist(LOGW_NXT_E_VCT,20)
 %%
 
 figure(1)
-hist(LOGW_E_VCT(q_C_E_VCT>0.1),20)
+hist(LOGW_E_VCT(q_C_E_VCT>0.2),20)
 figure(2)
 hist(LOGW_E_VCT,20)
 %%
 figure(1)
 hist(LOGD_E_VC,20)
 figure(2)
-hist(LOGD_E_VC(q_C_E_VCT>0.1),20)
+hist(LOGD_E_VC(q_C_E_VCT>0.2),20)
 %%
 figure(1)
 hist(LOGD_E_VCT,20)
 figure(2)
-hist(LOGD_E_VCT(q_C_E_VCT>0.1),20)
+hist(LOGD_E_VCT(q_C_E_VCT>0.2),20)
 %%
 figure(1)
 hist(LOGTotal_E_VCT,20)
 figure(2)
-hist(LOGTotal_E_VCT(q_C_E_VCT>0.1),20)
+hist(LOGTotal_E_VCT(q_C_E_VCT>0.2),20)
