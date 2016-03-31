@@ -83,9 +83,11 @@ deleC=find((E_V_july8(:,16)==0).*E_V_july8(:,8)==1);
 E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
 E_V_july8(174:177,:)=[]; %Drop an Rtotd outlier
 deleC2=find(E_V_july8(:,12)<5000|E_V_july8(:,12)>1200000);
+%deleC2=find(E_V_july8(:,12)<5000);
 E_V_july8(deleC2,:)=[];%Drop if nonpositive saving
 deleC3=find(E_V_july8(:,11)<5000);
 E_V_july8(deleC3,:)=[];%Drop if nonpositive begcash
+%deleC4=find((E_V_july8(:,16)<5000)&E_V_july8(:,8)==1);
 deleC4=find((E_V_july8(:,16)<5000|E_V_july8(:,16)>1200000)&E_V_july8(:,8)==1);
 E_V_july8(deleC4,:)=[];%Drop if nonpositive challenger spending
 
@@ -746,31 +748,33 @@ datasetVNCT=[E_VContestFUL,LOGW_NXT_E_VNCT,LOGTotal_E_VNCT,NCE_VNCT,LOGTot_NCE_V
 mintheta=[];
 SRR=[];
  options=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
- iter=33;  
+ iter=120;  
  Sofarbest=10^8;
-   minthetadist=zeros(4,iter);
-   initthetadist=zeros(4,iter);
+   minthetadist=zeros(6,iter);
+   initthetadist=zeros(6,iter);
    srrdist=zeros(1,iter);
    tic
  parfor i=1:iter
  %load inittheta2step
  %theta0([1,2,3,5])=inittheta2step;
   %  theta0(4)=rand(1,1);
-  theta0=rand(4,1);
-  theta0(1)=theta0(1)*20;
-  theta0(2)=theta0(2)*20;
-  theta0(3)=theta0(3)*0.01;
-  %theta0(6)=theta0(3)*10*rand(1,1);     
+   theta0=rand(6,1);
+   theta0(1)=theta0(1)*100;
+   theta0(2)=theta0(2)*100;
+   theta0(3)=theta0(3)*0.01;
+   theta0(4)=(theta0(4)-1);
+   theta0(5)=(theta0(5)-1)*5;
+   theta0(6)=(theta0(6)-1)*10;  
   
-funvalue=Minimize2S_new(Est2,theta0,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
+funvalue=Minimize2S_new(Est2,theta0,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd);
 funvalueend=0;
 thetaup=theta0;
 sss=1;
-while abs(funvalue-funvalueend)>0.01
+while abs(funvalue-funvalueend)>0.03
    sss=sss+1;
-   funvalue=Minimize2S_new(Est2,thetaup,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
+   funvalue=Minimize2S_new(Est2,thetaup,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd);
     [mintheta,SRR]=fminsearch(@(theta2) Minimize2S_new(Est2,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd),thetaup,options);
-   funvalueend=Minimize2S_new(Est2,mintheta,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
+   funvalueend=Minimize2S_new(Est2,mintheta,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd);
       if mod(sss,30)==1
       thetaup=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
       else
@@ -794,14 +798,24 @@ end
 % save Qualc.txt Qualc -ASCII
 % save QualI.txt XQEV2 -ASCII
  end
+ minthetadist=minthetadist(:,srrdist<mean(srrdist));
+ initthetadist=initthetadist(:,srrdist<mean(srrdist));
+  srrdist=srrdist(srrdist<mean(srrdist));
+  save dist5012-50-5012-flex-e1634-1-flexregcubeconst minthetadist initthetadist srrdist
  toc
 %%
 %Check winning prob and distribution
 thetain=Est2;
-
-
 theta2=mintheta;
-%LOGD_E_VC(LOGD_E_VC<9.21)=9.21;
+test=zeros(50,1);
+test2=zeros(50,1);
+test3=test;
+test4=test;
+test5=test;
+%for i=1:50
+%    theta2(1)=i;
+%theta2(2)=0.001*i;
+% %LOGD_E_VC(LOGD_E_VC<9.21)=9.21;
 
 
 vdelta=0.90;
@@ -839,15 +853,20 @@ cost2=1;%abs(theta2(6,1));  %% coefficient on the cost function of the incumbent
           % non parametrically. If we set f(q)=C+f(q) then
           % C_I(x)=C*(x^alpha)*exp(f(q))
 sig=abs(theta2(3,1));
-
-
-
+a=theta2(4,1);
+b=theta2(5,1);
+c=theta2(6,1);
 
 %Continuation(ST,q_I,Ten,w_I,epswh, epsump, E_VCTa, E_VCTt, gamma,dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,thetawin,Ret,Betawh,Betaump,cost,ben,thetaS,Party)
 %%%%%%%%          E_V         %%%%%%%%%
+% Given State, Tenure, warchest, compute incumbent continuation value %%
 %Contcontest=payoff if contested
-costpara=permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
-                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]);
+%costpara=permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
+%                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]);
+                    
+%costpara=permute(repmat((ones(N,1)*XQEV2.'+a*ones(N,1)*XQEV2.^2.'),[1 1 10]),[3 1 2]);     
+%costpara=permute(repmat((ones(N,1)*XQEV2.'+a*ones(N,1)*XQEV2.^2.'+b*ones(N,1)*XQEV2.^3.'),[1 1 10]),[3 1 2]);   
+costpara=permute(repmat((ones(N,length(XQEV2))+a*ones(N,1)*XQEV2.'+b*ones(N,1)*XQEV2.^2.'+c*ones(N,1)*XQEV2.^3.'),[1 1 10]),[3 1 2]);                
 Contcontest=zeros(3,T,N,length(NCE_V));
 Contcontest(1,:,:,:)=ben1*(max(0,C(2,:,:,:))).^alpha.*C(1,:,:,:); %Benefit
 Contcontest(2,:,:,:)=-cost1*(alpha/beta)*ben2*costpara.*squeeze(C(3,:,:,:)).^beta.*squeeze(C(1,:,:,:)); %Cost
@@ -881,43 +900,15 @@ Continue1=(Contcontestpath+Contuncontestpath).';
 %payoff
 
 
-% Given State, Tenure, warchest, compute incumbent continuation value %%
-%Continue1=zeros(length(NCE_V),N);
-%DContinue1=zeros(length(NCE_V),N);
-% for i=1:length(NCE_V)  %% (all elements of E_V)
-%     for k=1:N % simulation
-%         for j=1:(min(find(C(5,:,k,i)==0))) % number of periods
-%             if C(1,j,k,i)==1 %Contest
-%                 Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben1*max(0,C(2,j,k,i))^alpha-cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
-%                     ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
-%             else
-%                 Continue1(i,k)=Continue1(i,k)+((vdelta)^(j-1))*(ben2*max(0,C(2,j,k,i))^alpha-cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_V(i,1))/exp(NCE_V(i,1)))*...
-%                     ((max(0,NCE_V(i,1))^(alpha-1))/(max(0,LOGTot_NCE_V(i,1))^(beta-1)))*C(3,j,k,i)^beta+C(5,j,k,i));
-%             end
-% %             if DC(1,j,k,i)==1 %Contest
-% %                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben1*max(0,DC(2,j,k,i))^(1/2)-cost1*(1/4)*(ben2/cost2)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
-% %             else
-% %                 DContinue1(i,k)=DContinue1(i,k)+((0.9)^(j-1))*(ben2*max(0,DC(2,j,k,i))^(1/2)-ben2*(1/4)*RTotDE_V(i,1)*DC(3,j,k,i)^2+DC(5,j,k,i));
-% %             end
-%         end
-%     end
-% end
-Continue=mean(Continue1,2);
+
+Continue=median(Continue1,2);
 Continuation1=Continue;
 Continuation1(E_VContestFUL,:)=[];           %% Continuation1 is the Continuation value for periods in which incumebent is contested.
 Continuation2=Continue;
 Continuation2(E_VNContestFUL,:)=[];          %%  Continuation1 is the Continuation value for periods in which incumebent is uncontested.
 
 %Regress Continue on State variables to find the derivative. %
-
-
-%Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2,XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
-
-%quad
-%Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,XQEV2,LOGW_NXT_E_V.*XQEV2,LOGW_NXT_E_V.^2/10.*XQEV2,LOGW_NXT_E_V.^3/100.*XQEV2,LOGW_NXT_E_V.^4/1000.*XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
-%flex
 Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,XQEV2,LOGW_NXT_E_V.*XQEV2,LOGW_NXT_E_V.^2/10.*XQEV2,LOGW_NXT_E_V.^3/100.*XQEV2,LOGW_NXT_E_V.^4/1000.*XQEV2,TenureE_V,XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
-
 %Outlier=(LOGW_NXT_E_V<quantile(LOGW_NXT_E_V,.05));
 %Outlier=[];
 %Continue_san_OL=Continue;
@@ -928,24 +919,22 @@ coef=Regressand\Continue;
 %coef=(inv(Regressand_san_OL'*Regressand_san_OL))*Regressand_san_OL'*Continue_san_OL;
 
 %Use estimated derivative in computing FOC.
-%Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT,zeros(length(Continuation1),1),zeros(length(Continuation1),5)]*coef;
-%DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT,zeros(length(Continuation2),1),zeros(length(Continuation2),5)]*coef;
-
-%quad
-%Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT/10,3*LOGW_NXT_E_VCT.^2/100,4*LOGW_NXT_E_VCT.^3/1000,zeros(length(Continuation1),1),XQEVCT2,2*LOGW_NXT_E_VCT/10.*XQEVCT2,3*LOGW_NXT_E_VCT.^2/100.*XQEVCT2,4*LOGW_NXT_E_VCT.^3/1000.*XQEVCT2,zeros(length(Continuation1),5)]*coef;
-%DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT/10,3*LOGW_NXT_E_VNCT.^2/100,4*LOGW_NXT_E_VNCT.^3/1000,zeros(length(Continuation2),1),XQEVNCT2,2*LOGW_NXT_E_VNCT/10.*XQEVNCT2,3*LOGW_NXT_E_VNCT.^2/100.*XQEVNCT2,4*LOGW_NXT_E_VNCT.^3/1000.*XQEVNCT2,zeros(length(Continuation2),5)]*coef;
-
-%flex
 Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),2*LOGW_NXT_E_VCT/10,3*LOGW_NXT_E_VCT.^2/100,4*LOGW_NXT_E_VCT.^3/1000,zeros(length(Continuation1),1),XQEVCT2,2*LOGW_NXT_E_VCT/10.*XQEVCT2,3*LOGW_NXT_E_VCT.^2/100.*XQEVCT2,4*LOGW_NXT_E_VCT.^3/1000.*XQEVCT2,zeros(length(Continuation1),5)]*coef;
 DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NXT_E_VNCT/10,3*LOGW_NXT_E_VNCT.^2/100,4*LOGW_NXT_E_VNCT.^3/1000,zeros(length(Continuation2),1),XQEVNCT2,2*LOGW_NXT_E_VNCT/10.*XQEVNCT2,3*LOGW_NXT_E_VNCT.^2/100.*XQEVNCT2,4*LOGW_NXT_E_VNCT.^3/1000.*XQEVNCT2,zeros(length(Continuation2),5)]*coef;
-
-%
 Deriv=max(Deriv,0.00001);
 DerivNCT=max(DerivNCT,0.00001);
+% Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,XQEV,LOGW_NXT_E_V.^2,LOGW_NXT_E_V.*XQEV,XSEV.*PartyE_V,log(TenureE_V+1)];
+% coef=(inv(Regressand'*Regressand))*Regressand'*Continue;
+% Deriv=[zeros(length(Continuation1),1),ones(length(Continuation1),1),zeros(length(Continuation1),1),2*LOGW_NXT_E_VCT,XQEVCT,zeros(length(Continuation1),2)]*coef;
+% DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),zeros(length(Continuation2),1),2*LOGW_NXT_E_VNCT,XQEVNCT,zeros(length(Continuation2),2)]*coef;
 
-OUT=((beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
-    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
-DE=exp(LOGTotal_E_VCT(:,1)).*((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
+%UT=((beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
+%    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
+%OUT=((beta*cost1*(alpha/beta)*ben2*(XQEVCT2+a*XQEVCT2.^2+b*XQEVCT2.^3).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
+OUT=((beta*cost1*(alpha/beta)*ben2*(ones(length(XQEVCT2),1)+a*XQEVCT2+b*XQEVCT2.^2+c*XQEVCT2.^3).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
+
+%DE=exp(LOGTotal_E_VCT(:,1)).*((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
+
 SRR13=mean(abs(OUT-probwin),1);
 std13=std(OUT-probwin);
 SRR14=(OUT>1);
@@ -953,19 +942,19 @@ SRR15=(OUT<min(probwin));
 
 Pen=max(OUT-1,0)-min(OUT,0);
 Pen2=Pen;
-Pen2(IND6CT,:)=[];
-DEL_Pen=[find(Pen2<quantile(Pen2,.025));find(Pen2>quantile(Pen2,.975))];      %Cannot invert some observations:
+%Pen2(IND6CT,:)=[];
+DEL_Pen=[find(Pen2<quantile(Pen2,.025));find(Pen2>quantile(Pen2,.975))];    %Cannot invert some observations:
 %DEL2=find(Pen2>0);
 %Pen2(DEL_Pen,:)=[];
-OUT_m=OUT;
-OUT_m(DEL_Pen,:)=[];
+
 %ako=1/2+(1/pi)*atan((OUT-0.5)*h);
 ako=min(max(OUT,0.000001),0.999999);
 BX1=norminv(ako);
 % BX1=norminv(max(0.01,min(0.99,(beta*(alpha/beta)*ben2*...
 %     ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1))./(vdelta*Deriv))));  %%BX1=(1/sig)*(-0.5+B_I*d_I-B_C*d_C+...)=(K) in the paper.
 BX1sig=BX1;
-BX1sig(IND6CT,:)=[];
+%BX1sig(IND6CT,:)=[];
+
 
 q_C_E_VCT=(-1)*(sig*BX1-B_I*LOGD_E_VCT-B_C*LOGD_E_VC-[XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,2).*PartyE_VCT]*thetaS2-B_T*log(TenureE_VCT+1)-XQEVCT2);
 
@@ -974,25 +963,25 @@ q_C_E_VCT=(-1)*(sig*BX1-B_I*LOGD_E_VCT-B_C*LOGD_E_VC-[XS_EVCT_(:,1).*SameE_VCT,X
 
 
 VV=VSEVCT-0.5-B_I*LOGD_E_VCT-B_C*LOGD_E_VC-[XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,2).*PartyE_VCT]*thetaS2-XQEVCT2+q_C_E_VCT-B_T*log(TenureE_VCT+1);
-VV(IND6CT,:)=[];
+%VV(IND6CT,:)=[];
 VV(DEL_Pen,:)=[];
 LOGD_E_VCT_m=LOGD_E_VCT;
-LOGD_E_VCT_m(IND6CT,:)=[];
+%LOGD_E_VCT_m(IND6CT,:)=[];
 LOGD_E_VCT_m(DEL_Pen,:)=[];
 LOGD_E_VC_m=LOGD_E_VC;
-LOGD_E_VC_m(IND6CT,:)=[];
+%LOGD_E_VC_m(IND6CT,:)=[];
 LOGD_E_VC_m(DEL_Pen,:)=[];
 XS_m=[XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,2).*PartyE_VCT];
-XS_m(IND6CT,:)=[];
+%XS_m(IND6CT,:)=[];
 XS_m(DEL_Pen,:)=[];
 XQEVCT_m=XQEVCT2;
-XQEVCT_m(IND6CT,:)=[];
+%XQEVCT_m(IND6CT,:)=[];
 XQEVCT_m(DEL_Pen,:)=[];
 q_C_E_VCT_m=q_C_E_VCT;
-q_C_E_VCT_m(IND6CT,:)=[];
+%q_C_E_VCT_m(IND6CT,:)=[];
 q_C_E_VCT_m(DEL_Pen,:)=[];
 TenureE_VCT_m=TenureE_VCT;
-TenureE_VCT_m(IND6CT,:)=[];
+%TenureE_VCT_m(IND6CT,:)=[];
 TenureE_VCT_m(DEL_Pen,:)=[];
 SRR11_1=mean(VV.^2);     %To estimate sigma.
 std11_1=std(VV);
@@ -1024,11 +1013,20 @@ SRR9=-SRR9;
 %SRR9P_2=mean(sqrt(VV.^2)-sig)^2;
 %std9P_2=std(sqrt(VV.^2)-sig);
 % foc of incumbent, contested periods %%
-FOC11=(beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
-    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
+
+%Rtotd FOC11
+%FOC11=(beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
+%    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
+%    -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
+%Flexible FOC11 W/O constant
+%FOC11=(beta*cost1*(alpha/beta)*ben2*(XQEVCT2+a*XQEVCT2.^2+b*XQEVCT2.^3).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
+%    -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
+%Flexible FOC11 with constant
+FOC11=(beta*cost1*(alpha/beta)*ben2*(ones(length(XQEVCT2),1)+a*XQEVCT2+b*XQEVCT2.^2+c*XQEVCT2.^3).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
     -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
 
-FOC11(IND6CT,:)=[];
+
+%FOC11(IND6CT,:)=[];
 FOC11(DEL_Pen,:)=[];
 %FOC11(DEL2,:)=[];
 SRR10P=mean(FOC11.^2,1);
@@ -1046,10 +1044,18 @@ std10P=std(FOC11);
 
 
 % %% foc of incumbent, uncontested periods %%
+%Rtotd FOC21
+%FOC21=vdelta*DerivNCT.*(1./exp(LOGW_NXT_E_VNCT))-... 
+%(beta*cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_VNCT(:,1))./exp(NCE_VNCT(:,1))).*...
+%    ((max(0,NCE_VNCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VNCT(:,1)).^(beta-1))).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
+%Flexible FOC21 w/o constant
+%FOC21=vdelta*DerivNCT.*(1./exp(LOGW_NXT_E_VNCT))-... 
+%(beta*cost2*(alpha/beta)*ben2*(XQEVNCT2+a*XQEVNCT2.^2+b*XQEVNCT2.^3).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
+%Flexible FOC21 with constant
 FOC21=vdelta*DerivNCT.*(1./exp(LOGW_NXT_E_VNCT))-... 
-(beta*cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_VNCT(:,1))./exp(NCE_VNCT(:,1))).*...
-    ((max(0,NCE_VNCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VNCT(:,1)).^(beta-1))).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
-FOC21(IND6NCT,:)=[];
+(beta*cost2*(alpha/beta)*ben2*(ones(length(XQEVNCT2),1)+a*XQEVNCT2+b*XQEVNCT2.^2+c*XQEVNCT2.^3).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
+
+%FOC21(IND6NCT,:)=[];
 
 % FOC21delta=0.9*(DContinuation2b2-Continuation2b2)-(ben2+incr)*RTotDE_VNCT.*((LOGTotal_E_VNCT+Delt).^2-LOGTotal_E_VNCT.^2);   %% delta*(d/dw_I)E_V-C_I'
 % FOC21delta(IND6NCT,:)=[];
@@ -1061,12 +1067,28 @@ std12P=std(FOC21);
 % SRR10P
 % % SRR11P
 % SRR12P
+ test(i)=size(find(q_C_E_VCT>0.15),1);
+ test2(i)=size(find(q_C_E_VCT>0.1),1);
+ test3(i)=mean(Continue);
+ test4(i)=min(Continue);
+ test5(i)=min(Deriv);
+SRR2step=SRR9+10^6*SRR10P/std10P+10^3*SRR11+10^4*SRR12P/std12P+sum(SRR15)+sum(SRR14)+0.0000*SRR13/std13;%+10000*(sigma>residstd);%+;%;%
+end
 
-SRR2step=SRR9+10^6*SRR10P/std10P+SRR11+10^3*SRR12P/std12P+100*sum(SRR15)+100*sum(SRR14)+0.0000*SRR13/std13;%+;%;%
 %%
-figure(1)
+A=@(test,test2)cost1*(alpha/beta)*ben2*(c+test+a*test.^2+b*test.^3).*test2.^beta;
+space1=0.01:0.01:0.2;
+space2=9:0.5:15;
+mat1=A(space1,13);
+mat2=A(0.1,space2);
+scatter(space2,mat2)
+
+%%
+
 hist(OUT,20)
-figure(2)
+%%
+hist(OUT(OUT<2),20)
+%%
 hist(OUT(q_C_E_VCT>0.1),20)
 %%
 hist(DE(q_C_E_VCT>0.1),20)
@@ -1086,9 +1108,9 @@ hist(q_C_E_VCT(LOGW_NXT_E_VCT<10),20)
 bins=linspace(-0.5,0.5,100);
 [hist1,scale1]=hist(q_C_E_VCT,bins);
 [hist2,scale2]=hist(XQEV2,bins);
-bar(hist1)
+bar(hist2,'c')
 hold on;
-bar(hist2,'r')
+bar(hist1,'EdgeColor','r','FaceColor','none')
 
 %%
 

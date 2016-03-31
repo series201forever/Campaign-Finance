@@ -86,18 +86,25 @@ cost2=1;%abs(theta2(6,1));  %% coefficient on the cost function of the incumbent
           % non parametrically. If we set f(q)=C+f(q) then
           % C_I(x)=C*(x^alpha)*exp(f(q))
 sig=abs(theta2(3,1));
-a=abs(theta2(4,1));
-
+a=theta2(4,1);
+b=theta2(5,1);
+c=theta2(6,1);
 
 
 %Continuation(ST,q_I,Ten,w_I,epswh, epsump, E_VCTa, E_VCTt, gamma,dF_gamma_ct, dF_total_ct, dF_nxt_nxt,Winrnd,thetawin,Ret,Betawh,Betaump,cost,ben,thetaS,Party)
 %%%%%%%%          E_V         %%%%%%%%%
 %% Given State, Tenure, warchest, compute incumbent continuation value %%
 %Contcontest=payoff if contested
+
+%Costpara with Rtotd
 %costpara=permute(repmat((ones(N,1)*((exp(LOGTot_NCE_V(:,1))./exp(NCE_V(:,1))).*...
 %                    ((max(0,NCE_V(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_V(:,1)).^(beta-1)))).'),[1 1 10]),[3 1 2]);
-                    
-costpara=permute(repmat((ones(N,1)*XQEV2.'+a*ones(N,1)*XQEV2.^2.'),[1 1 10]),[3 1 2]);                
+
+%Costpara with flexible XQEV2 with constant
+costpara=permute(repmat((ones(N,length(XQEV2))+a*ones(N,1)*XQEV2.'+b*ones(N,1)*XQEV2.^2.'+c*ones(N,1)*XQEV2.^3.'),[1 1 10]),[3 1 2]);                
+
+%Without constant
+%costpara=permute(repmat((ones(N,1)*XQEV2.'+a*ones(N,1)*XQEV2.^2.'+b*ones(N,1)*XQEV2.^3.'),[1 1 10]),[3 1 2]);   
 Contcontest=zeros(3,T,N,length(NCE_V));
 Contcontest(1,:,:,:)=ben1*(max(0,C(2,:,:,:))).^alpha.*C(1,:,:,:); %Benefit
 Contcontest(2,:,:,:)=-cost1*(alpha/beta)*ben2*costpara.*squeeze(C(3,:,:,:)).^beta.*squeeze(C(1,:,:,:)); %Cost
@@ -161,9 +168,10 @@ DerivNCT=max(DerivNCT,0.00001);
 
 %UT=((beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
 %    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
-OUT=((beta*cost1*(alpha/beta)*ben2*(XQEVCT2+a*XQEVCT2.^2).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
+%Flexible OUT with constant
+OUT=((beta*cost1*(alpha/beta)*ben2*(ones(length(XQEVCT2),1)+a*XQEVCT2+b*XQEVCT2.^2+c*XQEVCT2.^3).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
 
-
+%DE=exp(LOGTotal_E_VCT(:,1)).*((vdelta*Deriv).*(1./exp(LOGW_NXT_E_VCT)));
 
 SRR13=mean(abs(OUT-probwin),1);
 std13=std(OUT-probwin);
@@ -246,7 +254,7 @@ SRR9=-SRR9;
 %FOC11=(beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
 %    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
 %    -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
-FOC11=(beta*cost1*(alpha/beta)*ben2*(XQEVCT2+a*XQEVCT2.^2).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
+FOC11=(beta*cost1*(alpha/beta)*ben2*(ones(length(XQEVCT2),1)+a*XQEVCT2+b*XQEVCT2.^2+c*XQEVCT2.^3).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
     -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
 
 
@@ -273,7 +281,7 @@ std10P=std(FOC11);
 %(beta*cost2*(alpha/beta)*ben2*(exp(LOGTot_NCE_VNCT(:,1))./exp(NCE_VNCT(:,1))).*...
 %    ((max(0,NCE_VNCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VNCT(:,1)).^(beta-1))).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
 FOC21=vdelta*DerivNCT.*(1./exp(LOGW_NXT_E_VNCT))-... 
-(beta*cost2*(alpha/beta)*ben2*(XQEVNCT2+a*XQEVNCT2.^2).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
+(beta*cost2*(alpha/beta)*ben2*(ones(length(XQEVNCT2),1)+a*XQEVNCT2+b*XQEVNCT2.^2+c*XQEVNCT2.^3).*LOGTotal_E_VNCT.^(beta-1)).*(1./exp(LOGTotal_E_VNCT(:,1)));   %% delta*(d/dw_I)E_V-C_I'
 %FOC21(IND6NCT,:)=[];
 
 % FOC21delta=0.9*(DContinuation2b2-Continuation2b2)-(ben2+incr)*RTotDE_VNCT.*((LOGTotal_E_VNCT+Delt).^2-LOGTotal_E_VNCT.^2);   %% delta*(d/dw_I)E_V-C_I'
@@ -287,7 +295,7 @@ std12P=std(FOC21);
 % % SRR11P
 % SRR12P
 
-SRR2step=SRR9+10^6*SRR10P/std10P+10^3*SRR11+10^4*SRR12P/std12P+0*sum(SRR15)+0*sum(SRR14)+0.0000*SRR13/std13;%+10000*(sigma>residstd);%+;%;%
+SRR2step=SRR9+10^6*SRR10P/std10P+10^3*SRR11+10^4*SRR12P/std12P+sum(SRR15)+sum(SRR14)+0.0000*SRR13/std13;%+10000*(sigma>residstd);%+;%;%
 
 %if bestiter==iterate-1
  %   save Best2step.txt theta2 SRR2step bestiter -ASCII
