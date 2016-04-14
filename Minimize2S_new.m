@@ -57,15 +57,7 @@ B_I=thetain(1,1);
 B_C=thetain(2,1);
 B_T=thetain(5,1);
 thetaS2=thetain(3:4,1);
-% for k=1:13
-%     ACDa(:,k)=thetain(24+12*(k-1):24+12*k-1,1);
-% end
-% for k=1:13
-%     ACDt(:,k)=thetain(180+12*(k-1):180+12*k-1,1);
-% end
-% for k=1:13
-%     gammaACD(:,k)=thetain(336+12*(k-1):336+12*k-1,1);
-% end
+
 
 
 %h=1;

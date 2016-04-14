@@ -13,14 +13,7 @@ rng(958)
 
 
 
-%load ('./E_V_july8.mat')
 E_V_july8=csvread('E_Vjuly8partisan.csv',1,0);
-
-% load('./op_inc_july8.mat')
-%OP_INC_july8=csvread('OP_INC_july8partisan.csv',1,0);
-
-% load('./op_inc_iv_july8.mat')
-%OP_INC_IV_july8=csvread('OP_INC_IV_july8partisan.csv',1,0);
 
 load('./Est1.mat');
 load('./Est2.mat');
@@ -43,39 +36,12 @@ load('./Est53.mat');
 
 load ('./retire.txt');
 
-% load ('./theta0.txt')
 load ('./stateevol.mat')
-% 
-% load ('./Fststage_kettei.txt')
- load ('./Sndstage_initial_long.txt')
+
+load ('./Sndstage_initial_long.txt')
  
 
-
-% rand('state',1000);
-% randn('state',10);
-
-% dele1=find(sum(isnan(OP_INC_IV_july8),2)>0);
-% OP_INC_IV_july8(dele1,:)=[]; %Drop NaN
-% OP_INC_IV_july8(OP_INC_IV_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
-% deleA=find(OP_INC_IV_july8(:,16)==0);
-% OP_INC_IV_july8(deleA,:)=[];%Drop if oppornent disburse=0
-% OP_INC_IV_july8(102,:)=[];%Drop an Rtotd outlier
-% deleA2=find(OP_INC_IV_july8(:,12)<1);
-% OP_INC_IV_july8(deleA2,:)=[];%Drop if nonpositive saving
-% deleA3=find(OP_INC_IV_july8(:,11)<1);
-% OP_INC_IV_july8(deleA3,:)=[];%Drop if nonpositive begcash
-
-% dele2=find(sum(isnan(OP_INC_july8),2)>0);
-% OP_INC_july8(dele2,:)=[]; %Drop NaN
-% OP_INC_july8(OP_INC_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
-% deleB=find(((OP_INC_july8(:,16)==0).*OP_INC_july8(:,8))==1);
-% OP_INC_july8(deleB,:)=[];%Drop if oppornent disburse=0 and contested
-% OP_INC_july8(119:121,:)=[];%Drop an Rtotd outlier
-% deleB2=find(OP_INC_july8(:,12)<1);
-% OP_INC_july8(deleB2,:)=[];%Drop if nonpositive saving
-% deleB3=find(OP_INC_july8(:,11)<1);
-% OP_INC_july8(deleB3,:)=[];%Drop if nonpositive begcash
-
+%Construct dataset
 dele3=find(sum(isnan(E_V_july8),2)>0); 
 E_V_july8(dele3,:)=[]; %Drop NaN
 E_V_july8(E_V_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
@@ -285,27 +251,6 @@ VSEVCT(E_VContestFUL,:)=[];
 % the value of the B-Spline basis function evaluated at each of the 8
 % basis functions.
 % 
-% mesh=quantile(LOGLOGD_E_V,[.125;.25;.375;.5;.625;.75;.875]);
-% mesh=[min(LOGLOGD_E_V);mesh;max(LOGLOGD_E_V)];
-% X_KnotEV1=(LOGLOGD_E_V<mesh(2,1)).*(1-(LOGLOGD_E_V-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-% for i=1:6
-%     PLUS=(LOGLOGD_E_V>=mesh(i+1,1)).*(LOGLOGD_E_V<mesh(i+2,1)).*((LOGLOGD_E_V-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
-%         +(LOGLOGD_E_V>mesh(i+2,1)).*(LOGLOGD_E_V<mesh(i+3,1)).*(1-(LOGLOGD_E_V-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
-%     X_KnotEV1=[X_KnotEV1,PLUS];
-% end
-% PLUS=(LOGLOGD_E_V>=mesh(8,1)).*(LOGLOGD_E_V-mesh(8,1))/(mesh(9,1)-mesh(8,1));
-% X_KnotEV1=[X_KnotEV1,PLUS];
-% 
-% mesh=quantile(LOGLOGTot_E_V,[.125;.25;.375;.5;.625;.75;.875]);
-% mesh=[min(LOGLOGTot_E_V);mesh;max(LOGLOGTot_E_V)];
-% X_KnotEV2=(LOGLOGTot_E_V<mesh(2,1)).*(1-(LOGLOGTot_E_V-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-% for i=1:6
-%     PLUS=(LOGLOGTot_E_V>=mesh(i+1,1)).*(LOGLOGTot_E_V<mesh(i+2,1)).*((LOGLOGTot_E_V-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
-%         +(LOGLOGTot_E_V>mesh(i+2,1)).*(LOGLOGTot_E_V<mesh(i+3,1)).*(1-(LOGLOGTot_E_V-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
-%     X_KnotEV2=[X_KnotEV2,PLUS];
-% end
-% PLUS=(LOGLOGTot_E_V>=mesh(8,1)).*(LOGLOGTot_E_V-mesh(8,1))/(mesh(9,1)-mesh(8,1));
-% X_KnotEV2=[X_KnotEV2,PLUS];
  fineness=9;
 % mesh=quantile(RTotD_NC,linspace(0,1,fineness).');
 mesh=quantile(RTotDE_V,linspace(0,1,fineness).');
@@ -390,34 +335,6 @@ coefprobwin=Est3;
     end
    
    
-% iterate=1;
-% % XS2=[Unemployment,White]*thetaS2;
-% % XSEV2=XSEV_*thetaS2;
-% thetaQ(1,1)=1;
-% %     for ii=2:size(X_Knot1,2)
-% %         thetaQ(ii,1)=1-sum(abs(Est1(3:(ii+1),1)));
-% %     end
-% thetaQ(2:9,1)=thetain1step(3:10,1);
-% thetaQ2(1,1)=thetain1step(24,1);
-% %     for ii=2:size(X_Knot1,2)
-% %         thetaQ2(ii,1)=thetaQ2(1,1)-sum(abs(thetain(4:(ii+2),1)));
-% %     end
-% thetaQ2(2:9,1)=thetain1step(25:32,1);
-% 
-% XQEV=X_KnotEV1*thetaQ;  % q_I
-% XQEVCT=XQEV;
-% XQEVCT(E_VContestFUL,:)=[];
-% XQEVNCT=XQEV;
-% XQEVNCT(E_VNContestFUL,:)=[];
-% 
-% XQEV2=X_KnotEV1*thetaQ2;  % q_I
-% XQEVCT2=XQEV2;
-% XQEVCT2(E_VContestFUL,:)=[];
-% XQEVNCT2=XQEV2;
-% XQEVNCT2(E_VNContestFUL,:)=[];
-% save XQEVNCT2.mat XQEVNCT2
-% save XQEVCT2.mat XQEVCT2
-
 %Result from the first stage till here.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -436,10 +353,10 @@ Winrnd=rand(T,N,length(E_V_july8));            %Simulation draw for computing th
 
 Retirernd=(rand(T-1,N,length(E_V_july8))<repmat(retire',[1 N, length(E_V_july8)]));
 Retirernd(T,:,:)=1;
-RetirerndC=(rand(T-1,N,length(E_V_july8))<repmat(retire',[1 N, length(E_V_july8)]));
-RetirerndC(T,:,:)=1;
-RetirerndR=(rand(T-1,N,length(E_V_july8))<repmat(retire',[1 N, length(E_V_july8)]));
-RetirerndR(T,:,:)=1;
+% RetirerndC=(rand(T-1,N,length(E_V_july8))<repmat(retire',[1 N, length(E_V_july8)]));
+% RetirerndC(T,:,:)=1;
+% RetirerndR=(rand(T-1,N,length(E_V_july8))<repmat(retire',[1 N, length(E_V_july8)]));
+% RetirerndR(T,:,:)=1;
 
 
 for i=1:N
@@ -447,23 +364,17 @@ for i=1:N
         Ret(i,j)=find(Retirernd(:,i,j)==1,1,'first');
     end
 end
-for i=1:N
-    for j=1:length(E_V_july8)
-        RetC(i,j)=find(RetirerndC(:,i,j)==1,1,'first');
-    end
-end
-for i=1:N
-    for j=1:length(E_V_july8)
-        RetR(i,j)=find(RetirerndR(:,i,j)==1,1,'first');
-    end
-end
+% for i=1:N
+%     for j=1:length(E_V_july8)
+%         RetC(i,j)=find(RetirerndC(:,i,j)==1,1,'first');
+%     end
+% end
+% for i=1:N
+%     for j=1:length(E_V_july8)
+%         RetR(i,j)=find(RetirerndR(:,i,j)==1,1,'first');
+%     end
+% end
 
-
-% minmax=min(max(Ret,[],1))
-% 
-% minmax=min(max(RetC,[],1))
-% 
-% minmax=min(max(RetR,[],1))
 
 
 dF_gamma_ct=rand(T,N,length(E_V_july8));
@@ -476,17 +387,17 @@ dF_nxt_nxt_ct=rand(T,N,length(E_V_july8));
 % dF_total_nct=rand(T,N,length(E_V_july8));
 % dF_nxt_nxt_nct=rand(T,N,length(E_V_july8));
 
-dF_gamma_ctC=rand(T,N,length(E_V_july8));
-dF_total_ctC=rand(T,N,length(E_V_july8));
-dF_nxt_nxt_ctC=rand(T,N,length(E_V_july8));
+% dF_gamma_ctC=rand(T,N,length(E_V_july8));
+% dF_total_ctC=rand(T,N,length(E_V_july8));
+% dF_nxt_nxt_ctC=rand(T,N,length(E_V_july8));
 
 % dF_gamma_nctC=rand(T,N,length(E_V_july8));
 % dF_total_nctC=rand(T,N,length(E_V_july8));
 % dF_nxt_nxt_nctC=rand(T,N,length(E_V_july8));
-
-dF_gamma_ctR=rand(T,N,length(E_V_july8));
-dF_total_ctR=rand(T,N,length(E_V_july8));
-dF_nxt_nxt_ctR=rand(T,N,length(E_V_july8));
+ 
+% dF_gamma_ctR=rand(T,N,length(E_V_july8));
+% dF_total_ctR=rand(T,N,length(E_V_july8));
+% dF_nxt_nxt_ctR=rand(T,N,length(E_V_july8));
 
 % dF_gamma_nctR=rand(T,N,length(E_V_july8));
 % dF_total_nctR=rand(T,N,length(E_V_july8));
@@ -660,7 +571,7 @@ presseq(:,:,begone)=presseqbegone;
 presseq(:,:,begtwo)=presseqbegtwo;
 
 
-
+save presseq presseq
 %%
 
 %Continue1=zeros(length(NCE_V),N);
@@ -713,24 +624,6 @@ presseq(:,:,begtwo)=presseqbegtwo;
 load('residstd.mat');
 % load('./DC.mat');
 
-% LB(1)=-Inf; % normalized to 1, vacuous.
-% LB(2)=-Inf; % ben1, coefficient on benefit
-% LB(3)=-1; % alpha, benefit of spending
-% LB(4)=1; % beta, cost or fundraising
-% LB(5)=-1; % sig
-% UB(1)=Inf;
-% UB(2)=Inf;
-% UB(3)=1;
-% UB(4)=Inf;
-% UB(5)=1;
-% Aineq=[0,0,1,-1,0];
-% Bineq=0;
-% LB(1)=-Inf; % normalized to 1, vacuous.
-% LB(2)=-Inf; % ben1, coefficient on benefit
-% LB(3)=0; % alpha, benefit of spending
-% LB(4)=0; % beta, cost or fundraising
-% LB(5)=-Inf; % sig
-% UB=[];
 
 %Compute probability of winning from step 1-3
 probwin=[ones(length(NCE_VCT),1),LOGW_E_VCT,XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,1).^2.*SameE_VCT,XS_EVCT_(:,2).*PartyE_VCT,LOGW_E_VCT.^2,X_KnotE_VCT,log(TenureE_VCT+1),log(TenureE_VCT+1).^2,...
@@ -788,23 +681,23 @@ end
 %theta2ndstep=aux;
 %save minimizedtheta.txt mintheta SRR -ASCII
 % 
-% 
-% Qualc(:,1)=E_V_july8(:,31);
-% Qualc(:,2)=E_V_july8(:,32);
-% Qualc(:,3)=E_V_july8(:,33);
-% Qualc(:,4)=E_V_july8(:,34);
-% Qualc(E_VContestFUL,:)=[];
-% load q_C_E_VCT.mat
-% Qualc(:,5)=q_C_E_VCT;
-% save Qualc.txt Qualc -ASCII
-% save QualI.txt XQEV2 -ASCII
  end
  minthetadist=minthetadist(:,srrdist<mean(srrdist));
  initthetadist=initthetadist(:,srrdist<mean(srrdist));
   srrdist=srrdist(srrdist<mean(srrdist));
 
   toc
-%%
+  
+  %%
+
+  
+%%%%%%  
+% Specification check and saving the result
+%%%%%%
+load dist5012-50-5012-flex-e1634-1-flexregcubeconst
+[~,aux]=min(srrdist);
+mintheta=minthetadist(:,aux);
+
 %Check winning prob and distribution
 thetain=Est2;
 theta2=mintheta;
@@ -1144,7 +1037,15 @@ SRR2step=SRR9+10^6*SRR10P/std10P+10^3*SRR11+10^4*SRR12P/std12P+sum(SRR15)+sum(SR
 
 %end
 
+mintheta2ndstage=mintheta;
+  save q_C_E_VCT q_C_E_VCT
+  save est2ndstage mintheta2ndstage
+  save DEL_Pen DEL_Pen
+  save Continue Continue
 %%
+%%%%%%%%%%%
+%Specification check
+%%%%%%%%%%
 %Cost function
 A=@(test,test2)cost1*(alpha/beta)*ben2*(1+a*test+b*test.^2+c*test.^3).*test2.^beta;
 space1=0.01:0.01:0.2;

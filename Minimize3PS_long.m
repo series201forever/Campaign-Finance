@@ -4,104 +4,33 @@ function SRR3step=Minimize3PS(thetain1,thetain2,theta3)
 %% theta2 : the parameters that we estimate in the 2nd step.
 
 global iterate
-global results
-global LOGW_I
-global Contest
-global Party
-global Winrnd
-global EntryC
-global WinrndC
-global EntryR
-global WinrndR
-global Betawh
-global Betaump
-global Samplesize
-global Contest
-global LOGW_I
-global LOGD_NC
-global LOGW_NC
-global LOGWNXT_NC
-global Tenure
-global Party
-global White
-global White_NC
-global Unemployment
-global Unemployment_NC
-global E_VContestFUL
-global E_VNContestFUL
-global NCE_V
-global NCE_VCT
-global NCE_VNCT
-global PartyE_V
-global PartyE_VCT
-global PartyE_VNCT
-global XSNCEVCT_
-global XSNCEVNCT_
-global XS_EVCT_
-global XS_EVNCT_
-global XS_EVCTwnxt_
-global XSEV_
-global TenureE_V
-global TenureE_VCT
-global TenureE_VNCT
-global Win_E_VCT
-global LOGW_NXT_E_VCT
-global LOGW_NXT_E_VNCT
-global LOGTotal_E_VCT
-global LOGTotal_E_VNCT
-global LOGW_E_VCT
-global LOGW_E_VNCT
-global LOGW_E_VCTwnxt
-global LOGD_E_VCT
-global LOGD_E_VNCT
+
+
 global N
 global Sofarbest
 global bestiter
-global NCE_VCTwnxt
-global TenureE_VCTwnxt
-global PartyE_VCTwnxt
-global XSNCEVCTwnxt_
-global LOGW_NXT_E_V
-global LOGW_NXT_E_VCTwnxt
-global LOGW_NXT_E_VC
-global LOGD_E_VC
-global LOGTot_E_VC
-global IND6CTto7
-global IND6CT
-global IND6NCT
-global IND7CT
+
 global Cc
 global XQEV2
-global XQEVCT
-global Pen
-global RTotDE_VCT
-global RTotDE_VNCT
-global VSEVCT
-global XXX
-global PrE3step
+
 global q_c3step
 global LOGD_E_VC3step
 global rtotd3step
 global LOGTot_E_VC3step
 global BX13step
-global logtot3step
-global logd3step
-global qEntry
-global LOGW_E_VCT3step
-global qc_LB
-global qc_UB
+
 global LOGW_NXT3step
 global XS3step_
-global Tenure3step
+
 global Party3step
-global q_i3step
-global TenureE_VCT3step
 
 global coef
 
-B_I=thetain1(33,1);
-B_C=thetain1(34,1);
-B_T=thetain1(11,1);
+B_I=thetain(1,1);
+B_C=thetain(2,1);
+B_T=thetain(5,1);
+thetaS2=thetain(3:4,1);
+
 
 
 
@@ -109,67 +38,69 @@ cost1=abs(thetain2(1,1));  %% coefficient on the cost function of incumbent, con
 ben1=abs(thetain2(2,1));   %% coefficient on the benefit function of incumbent, contested
 ben2=ben1;   %% coefficient on the benefit function of incumbent, uncontested
 cost2=1;  %% coefficient on the cost function of the incumbent, uncontested >normalized to 1. Can be normalized
-          %% because we make C_I(x)=(x^alpha)*exp(f(q)) and we treat f(q)
-          %% non parametrically. If we set f(q)=C+f(q) then
-          %% C_I(x)=C*(x^alpha)*exp(f(q))
-sig=abs(thetain2(5,1));
+sig=abs(thetain2(3,1));
 alpha=1/2;
 %alpha=cdf('norm',thetain2(3,1),0,1);
 %beta=1+abs(thetain2(4,1));
 beta=2;
+
+
 costc=abs(theta3(1,1)); %% coefficient on the cost function of challenger
 benc=ben1;  %% coefficient on the benefit funciton of challenger
 % pracrazy=abs(theta3(4,1));  %% probability of entry by crazy type.
 % betacr1=abs(theta3(5,1));  %% crazy type: beta1
 % betacr2=abs(theta3(6,1));  %% crazy tpe: beta2
-betara1=abs(theta3(3,1));  %% rational type: beta1
-betara2=abs(theta3(4,1));  %% rational type : beta2
+%betara1=abs(theta3(3,1));  %% rational type: beta1
+%betara2=abs(theta3(4,1));  %% rational type : beta2
 
 
 
-
-% Party3step
-% Tenure3step
-% LOGW_NXT3step
-% q_i3step
-% q_c3step
 
 
 % %%%%%%%%          E_V         %%%%%%%%%
 % %% Given State, Tenure, warchest, compute challenger's continuation value %%
 % %% use ben1 and cost1 to evaluate E_V as challenger becomes incumbemt  %%
-Continue13step=zeros(length(q_c3step),N);
-% % DContinue13step=zeros(length(q_c3step),N);
-for i=1:length(q_c3step)  %% (all elements of E_V(IND6CT,:)=[])
-    for k=1:N
-        for j=1:10
-            if Cc(1,j,k,i)==1 %Contest
-                Continue13step(i,k)=Continue13step(i,k)+((0.9)^(j-1))*(ben1*max(0,Cc(2,j,k,i))^alpha-(alpha/beta)*cost1*ben2*...
-                    rtotd3step(i,1)*Cc(3,j,k,i)^beta+Cc(5,j,k,i)); %Note we use ben1, cost1 etc and NOT benc, costc.
-            else
-                Continue13step(i,k)=Continue13step(i,k)+((0.9)^(j-1))*(ben2*max(0,Cc(2,j,k,i))^alpha-(alpha/beta)*ben2*...
-                    rtotd3step(i,1)*Cc(3,j,k,i)^beta+Cc(5,j,k,i));
-            end
-        end
-    end
-end
-Continue3step=mean(Continue13step,2);
-Regressand=[ones(length(q_c3step),1),LOGW_NXT3step,q_c3step,LOGW_NXT3step.*q_c3step,XS3step_.*repmat(Party3step,1,2)];
-Outlier=(LOGW_NXT3step<quantile(LOGW_NXT3step,.05));
-Continue3step_san_OL=Continue3step;
-Continue3step_san_OL(Outlier,:)=[];
-%egressand_san_OL=Regressand;
-Regressand_san_OL(Outlier,:)=[];
-%coef=(inv(Regressand_san_OL'*Regressand_san_OL))*Regressand_san_OL'*Continue3step_san_OL;
-%Regress Continue on State variables to find the derivative. %
-% Regressand=[ones(length(q_c3step),1),LOGW_NXT3step,q_c3step,LOGW_NXT3step.^2,LOGW_NXT3step.*q_c3step,XS3step.*Party3step];
-% coef=(inv(Regressand'*Regressand))*Regressand'*Continue3step;
-Continue3step=[ones(length(q_c3step),1),LOGW_NXT3step,q_c3step,ones(length(q_c3step),1),XS3step_(:,1).*Party3step,XS3step_(:,2).*Party3step]*coef;
-% Deriv=[zeros(length(q_c3step),1),ones(length(q_c3step),1),zeros(length(q_c3step),1),zeros(length(q_c3step),3)]*coef;
-% Deriv=max(Deriv,0.00001);
+% Continue13step=zeros(length(q_c3step),N);
+% % % DContinue13step=zeros(length(q_c3step),N);
+% for i=1:length(q_c3step)  %% (all elements of E_V(IND6CT,:)=[])
+%     for k=1:N
+%         for j=1:10
+%             if Cc(1,j,k,i)==1 %Contest
+%                 Continue13step(i,k)=Continue13step(i,k)+((0.9)^(j-1))*(ben1*max(0,Cc(2,j,k,i))^alpha-(alpha/beta)*cost1*ben2*...
+%                     rtotd3step(i,1)*Cc(3,j,k,i)^beta+Cc(5,j,k,i)); %Note we use ben1, cost1 etc and NOT benc, costc.
+%             else
+%                 Continue13step(i,k)=Continue13step(i,k)+((0.9)^(j-1))*(ben2*max(0,Cc(2,j,k,i))^alpha-(alpha/beta)*ben2*...
+%                     rtotd3step(i,1)*Cc(3,j,k,i)^beta+Cc(5,j,k,i));
+%             end
+%         end
+%     end
+% end
+% Continue3step=mean(Continue13step,2);
+% Regressand=[ones(length(q_c3step),1),LOGW_NXT3step,q_c3step,LOGW_NXT3step.*q_c3step,XS3step_.*repmat(Party3step,1,2)];
+% Outlier=(LOGW_NXT3step<quantile(LOGW_NXT3step,.05));
+% Continue3step_san_OL=Continue3step;
+% Continue3step_san_OL(Outlier,:)=[];
+% %egressand_san_OL=Regressand;
+% Regressand_san_OL(Outlier,:)=[];
+% %coef=(inv(Regressand_san_OL'*Regressand_san_OL))*Regressand_san_OL'*Continue3step_san_OL;
+% %Regress Continue on State variables to find the derivative. %
+% % Regressand=[ones(length(q_c3step),1),LOGW_NXT3step,q_c3step,LOGW_NXT3step.^2,LOGW_NXT3step.*q_c3step,XS3step.*Party3step];
+% % coef=(inv(Regressand'*Regressand))*Regressand'*Continue3step;
+% Continue3step=[ones(length(q_c3step),1),LOGW_NXT3step,q_c3step,ones(length(q_c3step),1),XS3step_(:,1).*Party3step,XS3step_(:,2).*Party3step]*coef;
+% % Deriv=[zeros(length(q_c3step),1),ones(length(q_c3step),1),zeros(length(q_c3step),1),zeros(length(q_c3step),3)]*coef;
+% % Deriv=max(Deriv,0.00001);
+% 
+% NOFOC=min([LOGTot_E_VC3step,LOGD_E_VC3step]')';
+% IND8=find(NOFOC==0);
 
-NOFOC=min([LOGTot_E_VC3step,LOGD_E_VC3step]')';
-IND8=find(NOFOC==0);
+
+Continue3step=[ones(length(q_c3step),1),LOGW_NXT3step,q_c3step,ones(length(q_c3step),1),XS3step_(:,1).*Party3step,XS3step_(:,2).*Party3step]*coef;
+
+
+[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,...
+    XQEV2,LOGW_NXT_E_V.*XQEV2,LOGW_NXT_E_V.^2/10.*XQEV2,LOGW_NXT_E_V.^3/100.*XQEV2,LOGW_NXT_E_V.^4/1000.*XQEV2,...
+    TenureE_V,TenureE_V.^2,XSEV_(:,1).*SameE_V,XSEV_(:,1).^2.*SameE_V,XSEV_(:,2).*PartyE_V,XSEV_(:,2).^2.*PartyE_V,...
+    TenureE_V.*XSEV_(:,1).*SameE_V,TenureE_V.*XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V]
 
 % %% foc of challenger %%
 FOC31=costc*beta*(alpha/beta)*ben2*(1./exp(LOGTot_E_VC3step)).*...
