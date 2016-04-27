@@ -1042,6 +1042,16 @@ mintheta2ndstage=mintheta;
   save est2ndstage mintheta2ndstage
   save DEL_Pen DEL_Pen
   save Continue Continue
+  coef2ndstep=coef;
+  save coef2ndstep coef2ndstep
+%%
+%Outsheet the csv for calculating incumbency advantage
+q_C_E_V=zeros(length(XQEV2),1);
+q_C_E_V(E_VNContestFUL)=q_C_E_VCT;
+computeincadv=[E_V_july8(:,[1:4,9,10]),q_C_E_V,XQEV2];
+dlmwrite('computeincadv.csv',computeincadv,'delimiter', ',', 'precision', 9)
+
+
 %%
 %%%%%%%%%%%
 %Specification check

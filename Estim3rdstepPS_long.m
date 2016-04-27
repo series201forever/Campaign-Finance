@@ -4,74 +4,6 @@ clear
 % make sure you get the sign of q_e right. Also note that f_d_qe, f_w_qe have the PARTY of Challenger.
 % **
 
-global LOGW_I
-global Contest
-global Party
-global Entry
-global Winrnd
-global Tenure
-global E_VContestFUL
-global E_VNContestFUL
-global NCE_V
-global NCE_VCT
-global NCE_VNCT
-global PartyE_V
-global PartyE_VCT
-global XS_EVCT_
-global XS_EVNCT_
-global XS_EVCTwnxt_
-global XSEV_
-global TenureE_V
-global TenureE_VCT
-global TenureE_VNCT
-global Win_E_VCT
-global LOGW_NXT_E_VCT
-global LOGW_NXT_E_VNCT
-global LOGTotal_E_VCT
-global LOGTotal_E_VNCT
-global LOGTot_NCE_V
-global LOGW_E_VCT
-global LOGW_E_VNCT
-global LOGW_E_VCTwnxt
-global LOGD_E_VCT
-global LOGD_E_VNCT
-global N
-global Sofarbest
-global bestiter
-global TenureE_VCTwnxt
-global LOGW_NXT_E_V
-global LOGW_NXT_E_VCTwnxt
-global LOGW_NXT_E_VC
-global LOGD_E_VC
-global LOGTot_E_VC
-global NumSim;
-global IND6CTto7
-global IND6CT
-global IND6NCT
-global RTotDE_V
-global RTotDE_VCT
-global XQEV2
-global RTotDE_VNCT
-global VSEVCT;
-global PrE3step
-global q_c3step
-global LOGD_E_VC3step
-global LOGTot_E_VC3step
-global rtotd3step
-global max_N
-global LOGW_E_VCT3step
-global LOGW_NXT3step
-global XS3step_
-global Tenure3step
-global Party3step
-global TenureE_VCT3step
-global interest
-
-
-% load ('./coef.mat')
-% load ('./BX1.mat') 
-
-
 
 
 
@@ -98,14 +30,16 @@ load('./Est52.mat');
 load('./Est53.mat');
 
 %Estimates from second stage
-load('./ q_C_E_VCT.mat');
+load('./q_C_E_VCT.mat');
 %load ('./presseq.mat')
 load ('./DEL_Pen.mat')
 load ('./Continue.mat')
+%load ('./coef2ndstep.mat')
+load ('./est2ndstage.mat')
 
 %Others
-load ('./retire.txt');
-load ('./stateevol.mat')
+%load ('./retire.txt');
+%load ('./stateevol.mat')
 
 
 
@@ -123,7 +57,6 @@ E_V_july8(deleC3,:)=[];%Drop if nonpositive begcash
 %deleC4=find((E_V_july8(:,16)<5000)&E_V_july8(:,8)==1);
 deleC4=find((E_V_july8(:,16)<5000|E_V_july8(:,16)>1200000)&E_V_july8(:,8)==1);
 E_V_july8(deleC4,:)=[];%Drop if nonpositive challenger spending
-
 
 
 %Construct dataset
@@ -315,6 +248,11 @@ VSEV=E_V_july8(:,13);
 VSEVCT=VSEV;
 VSEVCT(E_VContestFUL,:)=[];
 
+
+
+
+
+
 %%B-Spline for q_I(RTotDE_V), where RTotDE_V=(NCE_VCT(:,1)./LOGTot_NCE_V)  etc.%%
 % take knots to be between 0.88 to 1.025 with 8 knots (8 basis functions). (Almost all lie
 
@@ -418,15 +356,15 @@ coefprobwin=Est3;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Sofarbest=10^8;
-bestiter=0;
+%Sofarbest=10^8;
+%bestiter=0;
 %Delt=0.5;
-interest=0.1;
-dfSim=100;              %dfSim is the number of simulations used to evaluate the conditional expectation of the entrant's quality.
-N=20;                      % N is the number of simulations.
-NumSim=50;              %NumSim is the number of simulations in the 1st step to obtain f(.,q_e)
-max_N=max(OP_INC_july8(:,36));               % max_N is the maximum number of possible entrants in the Primary.
-T=10;                      % T is the number of periods that we move the simlation forward.
+%interest=0.1;
+%dfSim=100;              %dfSim is the number of simulations used to evaluate the conditional expectation of the entrant's quality.
+%N=20;                      % N is the number of simulations.
+%NumSim=50;              %NumSim is the number of simulations in the 1st step to obtain f(.,q_e)
+%max_N=max(OP_INC_july8(:,36));               % max_N is the maximum number of possible entrants in the Primary.
+%T=10;                      % T is the number of periods that we move the simlation forward.
 
 
 
@@ -473,89 +411,122 @@ T=10;                      % T is the number of periods that we move the simlati
 % Shockpartisan3=sqrt(epspartisan)*randn(T,N,length(E_V_july8));
 
 
-
-
-
-
-q_c3step=q_C_E_VCT;
-%q_c3step(IND6CT,:)=[];    %% Challenger quality.
-q_c3step(DEL_Pen,:)=[]; % DEL_Pen outlier. cannot use.
-rtotd3step=zeros(length(q_c3step),1);
-for i=1:length(q_c3step)
-    [minq,argminq]=min(abs(q_c3step(i,1)-XQEV2));
-%     [result,r]=fmincon(@(rtotd) f_qinverse(rtotd),0.03,[],[],[],[],[],[],@(x) f_constraint(x,q_c3step(i,1),thetaQ2));   %%invert f_q function to get d/tot.
-    rtotd3step(i,1)=RTotDE_V(argminq,1);
-%    rtotd3step(i,1)=result;
-end
-% x_knot3step=(rtotd3step<mesh(2,1)).*(1-(rtotd3step-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
-% for i=0:6
-%     PLUS=(rtotd3step>=mesh(i+1,1)).*(rtotd3step<mesh(i+2,1)).*((rtotd3step-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
-%         +(rtotd3step>=mesh(i+2,1)).*(rtotd3step<mesh(i+3,1)).*(1-(rtotd3step-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
-%     x_knot3step=[x_knot3step,PLUS];
-% end
-% PLUS=(rtotd3step>=mesh(8,1)).*(rtotd3step-mesh(8,1))/(mesh(9,1)-mesh(8,1));
-% x_knot3step=[x_knot3step,PLUS];
-% q_c3step0=x_knot3step*thetaQ;
-% save rtotd3step.mat rtotd3step
-% load('./rtotd3step.mat');
-[thetae,SRR]=fminsearch(@(x) entry_probit(x,Contest, LOGW_I,XS_, XQ2, Party,Tenure ),[theta(1:3,1);thetaS*theta(4,1);theta(5,1)]);
-save thetae.mat thetae
-XS3step_=XS_EVCT_;
-%XS3step_(IND6CT,:)=[];
-XS3step_(DEL_Pen,:)=[];
-Party3step=(-1)*PartyE_VCT;  %% Challenger party=(-1)*Incumbent party
-%Party3step(IND6CT,:)=[];
-Party3step(DEL_Pen,:)=[];
-Tenure3step=zeros(size(Party3step,1),1);               %% Challenger starts with Tenure==0;
-LOGW_NXT3step=LOGW_NXT_E_VC;
-%LOGW_NXT3step(IND6CT,:)=[];                                    %% challenger warchest.
-LOGW_NXT3step(DEL_Pen,:)=[];
-LOGW_E_VCT3step=LOGW_E_VCT;
-%LOGW_E_VCT3step(IND6CT,:)=[];
-LOGW_E_VCT3step(DEL_Pen,:)=[];
-TenureE_VCT3step=TenureE_VCT;
-%TenureE_VCT3step(IND6CT,:)=[];
-TenureE_VCT3step(DEL_Pen,:)=[];
-
-LOGD_E_VC3step=LOGD_E_VC;
-%LOGD_E_VC3step(IND6CT,:)=[];            %challenger spending
-LOGD_E_VC3step(DEL_Pen,:)=[];
-LOGTot_E_VC3step=LOGTot_E_VC;
-%LOGTot_E_VC3step(IND6CT,:)=[];              %challenger tot
-LOGTot_E_VC3step(DEL_Pen,:)=[];
-VSEVCT3step=VSEVCT;
-%VSEVCT3step(IND6CT,:)=[];
-VSEVCT3step(DEL_Pen,:)=[];
-IND6CTto7=find(LOGW_NXT3step==0);        %IND6CTto7 indexes those for which war chest next period==0 for challenger.
-% % 
-% Cc=zeros(5,T,N,length(Party3step));
-% % DCc=zeros(5,T,N,length(Party3step));
-% for i=1:length(Party3step)
-%     Cc(:,:,:,i)=Actions3(i,XS3step_(i,:)',thetae,q_c3step(i,1),Tenure3step(i,1),LOGW_NXT3step(i,1),...
-%         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), E_VCTa, E_VCTt, gammaCT, gammaNCT, tNCT, wNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
-%         dF_nxt_nxt_ct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,thetaS,thetaS2,Party3step(i,1));
-% %     DCc(:,:,:,i)=Actions(i,XS3step_(i,:)',q_c3step(i,1),rtotd3step(i,1),Tenure3step(i,1),LOGW_NXT3step(i,1)+Delt,...
-% %         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
-% %         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_nxt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,thetaS,Party3step(i,1));
-% end
-% save Cc.mat Cc
-% % save DCc.mat DCc
-
-load('./Cc.mat');
-% load('./DCc.mat');
-load('./C.mat');
-% % load('./DC.mat');
-% %% compute PrE %%
-% %% probability of entry ex-ante %%
-
 %%
 
-%Inpute continuation payoff
+%Continuation payoff: inputed from incumbents' problem
 Regressand=[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,...
     XQEV2,LOGW_NXT_E_V.*XQEV2,LOGW_NXT_E_V.^2/10.*XQEV2,LOGW_NXT_E_V.^3/100.*XQEV2,LOGW_NXT_E_V.^4/1000.*XQEV2,...
     TenureE_V,TenureE_V.^2,XSEV_(:,1).*SameE_V,XSEV_(:,1).^2.*SameE_V,XSEV_(:,2).*PartyE_V,XSEV_(:,2).^2.*PartyE_V,...
     TenureE_V.*XSEV_(:,1).*SameE_V,TenureE_V.*XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V];
-coef=Regressand\Continue;
+coef3rdstep=Regressand\Continue;
+test=Regressand*coef3rdstep;
+
+Continuec=max(0,[ones(length(LOGW_NXT_E_VC),1),LOGW_NXT_E_VC,LOGW_NXT_E_VC.^2/10,LOGW_NXT_E_VC.^3/100,LOGW_NXT_E_VC.^4/1000,...
+    q_C_E_VCT,LOGW_NXT_E_VC.*q_C_E_VCT,LOGW_NXT_E_VC.^2/10.*q_C_E_VCT,LOGW_NXT_E_VC.^3/100.*q_C_E_VCT,LOGW_NXT_E_VC.^4/1000.*q_C_E_VCT,...
+    zeros(length(LOGW_NXT_E_VC),1),zeros(length(LOGW_NXT_E_VC),1),XS_EVCT_(:,1).*((-1)*SameE_VCT),XS_EVCT_(:,1).^2.*((-1)*SameE_VCT),XS_EVCT_(:,2).*((-1)*PartyE_VCT),XS_EVCT_(:,2).^2.*((-1)*PartyE_VCT),...
+    zeros(length(LOGW_NXT_E_VC),2),PresdumE_VCT,MidtermE_VCT]*coef3rdstep);
+
+
+% Deriv=([zeros(length(LOGW_NXT_E_VC),1),ones(length(LOGW_NXT_E_VC),1),2*LOGW_NXT_E_VC/10,3*LOGW_NXT_E_VC.^2/100,4*LOGW_NXT_E_VC.^3/1000,...
+%     zeros(length(LOGW_NXT_E_VC),1),q_C_E_VCT,2*LOGW_NXT_E_VC/10.*q_C_E_VCT,3*LOGW_NXT_E_VC.^2/100.*q_C_E_VCT,4*LOGW_NXT_E_VC.^3/1000.*q_C_E_VCT,...
+%     zeros(length(LOGW_NXT_E_VC),10)]*coef3rdstep).*(LOGW_NXT_E_VC>0&Continuec>0);
+% 
+
+
+%%
+
+%Specification check
+figure(1)
+scatter(q_C_E_VCT(LOGW_NXT_E_VC>0&Continuec>0),Continuec(LOGW_NXT_E_VC>0&Continuec>0))
+figure(2)
+scatter(q_C_E_VCT(LOGW_NXT_E_VC>0&Continuec<=0),Continuec(LOGW_NXT_E_VC>0&Continuec<=0))
+figure(3)
+scatter(q_C_E_VCT(LOGW_NXT_E_VC==0),Continuec(LOGW_NXT_E_VC==0))
+%scatter(q_C_E_VCT(LOGW_NXT_E_VC>0&Continuec>0),Deriv(LOGW_NXT_E_VC>0&Continuec>0))
+%scatter(q_C_E_VCT(Deriv>0),Deriv(Deriv>0))
+length(find(LOGW_NXT_E_VC>0))
+length(find(Continuec>0))
+%length(find(Deriv>0))
+% 
+% D=@(test) coef3rdstep(6)+test*coef3rdstep(7)+test.^2/10*coef3rdstep(8)+test.^3/100*coef3rdstep(9)+test.^4/1000*coef3rdstep(10);
+% space1=9:0.5:15;
+% mat1=D(space1);
+% scatter(space1,mat1);
+
+
+%%
+
+% q_c3step=q_C_E_VCT;
+% %q_c3step(IND6CT,:)=[];    %% Challenger quality.
+% q_c3step(DEL_Pen,:)=[]; % DEL_Pen outlier. cannot use.
+% rtotd3step=zeros(length(q_c3step),1);
+% for i=1:length(q_c3step)
+%     [minq,argminq]=min(abs(q_c3step(i,1)-XQEV2));
+% %     [result,r]=fmincon(@(rtotd) f_qinverse(rtotd),0.03,[],[],[],[],[],[],@(x) f_constraint(x,q_c3step(i,1),thetaQ2));   %%invert f_q function to get d/tot.
+%     rtotd3step(i,1)=RTotDE_V(argminq,1);
+% %    rtotd3step(i,1)=result;
+% end
+% % x_knot3step=(rtotd3step<mesh(2,1)).*(1-(rtotd3step-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
+% % for i=0:6
+% %     PLUS=(rtotd3step>=mesh(i+1,1)).*(rtotd3step<mesh(i+2,1)).*((rtotd3step-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
+% %         +(rtotd3step>=mesh(i+2,1)).*(rtotd3step<mesh(i+3,1)).*(1-(rtotd3step-mesh(i+2,1))/(mesh(i+3,1)-mesh(i+2,1)));
+% %     x_knot3step=[x_knot3step,PLUS];
+% % end
+% % PLUS=(rtotd3step>=mesh(8,1)).*(rtotd3step-mesh(8,1))/(mesh(9,1)-mesh(8,1));
+% % x_knot3step=[x_knot3step,PLUS];
+% % q_c3step0=x_knot3step*thetaQ;
+% % save rtotd3step.mat rtotd3step
+% % load('./rtotd3step.mat');
+% [thetae,SRR]=fminsearch(@(x) entry_probit(x,Contest, LOGW_I,XS_, XQ2, Party,Tenure ),[theta(1:3,1);thetaS*theta(4,1);theta(5,1)]);
+% save thetae.mat thetae
+% XS3step_=XS_EVCT_;
+% %XS3step_(IND6CT,:)=[];
+% XS3step_(DEL_Pen,:)=[];
+% Party3step=(-1)*PartyE_VCT;  %% Challenger party=(-1)*Incumbent party
+% %Party3step(IND6CT,:)=[];
+% Party3step(DEL_Pen,:)=[];
+% Tenure3step=zeros(size(Party3step,1),1);               %% Challenger starts with Tenure==0;
+% LOGW_NXT3step=LOGW_NXT_E_VC;
+% %LOGW_NXT3step(IND6CT,:)=[];                                    %% challenger warchest.
+% LOGW_NXT3step(DEL_Pen,:)=[];
+% LOGW_E_VCT3step=LOGW_E_VCT;
+% %LOGW_E_VCT3step(IND6CT,:)=[];
+% LOGW_E_VCT3step(DEL_Pen,:)=[];
+% TenureE_VCT3step=TenureE_VCT;
+% %TenureE_VCT3step(IND6CT,:)=[];
+% TenureE_VCT3step(DEL_Pen,:)=[];
+% 
+% LOGD_E_VC3step=LOGD_E_VC;
+% %LOGD_E_VC3step(IND6CT,:)=[];            %challenger spending
+% LOGD_E_VC3step(DEL_Pen,:)=[];
+% LOGTot_E_VC3step=LOGTot_E_VC;
+% %LOGTot_E_VC3step(IND6CT,:)=[];              %challenger tot
+% LOGTot_E_VC3step(DEL_Pen,:)=[];
+% VSEVCT3step=VSEVCT;
+% %VSEVCT3step(IND6CT,:)=[];
+% VSEVCT3step(DEL_Pen,:)=[];
+% IND6CTto7=find(LOGW_NXT3step==0);        %IND6CTto7 indexes those for which war chest next period==0 for challenger.
+% % % 
+% % Cc=zeros(5,T,N,length(Party3step));
+% % % DCc=zeros(5,T,N,length(Party3step));
+% % for i=1:length(Party3step)
+% %     Cc(:,:,:,i)=Actions3(i,XS3step_(i,:)',thetae,q_c3step(i,1),Tenure3step(i,1),LOGW_NXT3step(i,1),...
+% %         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), E_VCTa, E_VCTt, gammaCT, gammaNCT, tNCT, wNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
+% %         dF_nxt_nxt_ct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,thetaS,thetaS2,Party3step(i,1));
+% % %     DCc(:,:,:,i)=Actions(i,XS3step_(i,:)',q_c3step(i,1),rtotd3step(i,1),Tenure3step(i,1),LOGW_NXT3step(i,1)+Delt,...
+% % %         Shockwh(:,:,i), Shockump(:,:,i), Entry(:,:,i), theta, E_VCTa, E_VCTt, gammaCT, E_VNCTa, E_VNCTt, gammaNCT, dF_gamma_ct(:,:,i), dF_total_ct(:,:,i),...
+% % %         dF_nxt_nxt_ct(:,:,i),dF_gamma_nct(:,:,i),dF_total_nct(:,:,i),dF_nxt_nxt_nct(:,:,i), Winrnd(:,:,i),thetawin,Ret(:,i)',Betawh,Betaump,thetaS,Party3step(i,1));
+% % end
+% % save Cc.mat Cc
+% % % save DCc.mat DCc
+% 
+% load('./Cc.mat');
+% % load('./DCc.mat');
+% load('./C.mat');
+% % % load('./DC.mat');
+% % %% compute PrE %%
+% % %% probability of entry ex-ante %%
+% 
 
 
 
@@ -571,21 +542,27 @@ coef=Regressand\Continue;
 % E_PrimaryN3step(DEL_Pen,:)=[];
 % 
 % 
-% %BX1=abs(1/Sndstage_kettei_long(5,1))*(B_I*LOGD_E_VCT+B_C*LOGD_E_VC+XS_EVCT2.*PartyE_VCT+B_T*log(TenureE_VCT+1)+XQEVCT2+q_C_E_VCT);
-% BX13step=BX1;
-% BX13step(IND6CT,:)=[];
-% BX13step(DEL_Pen,:)=[];
+
+BX1=abs(1/mintheta2ndstage(3))*([LOGD_E_VCT,LOGD_E_VC,XS_EVCT_.*[SameE_VCT,PartyE_VCT],log(TenureE_VCT+1)]*Est2(1:5)+XQEVCT2+q_C_E_VCT);
+%BX13step=BX1;
+%BX13step(IND6CT,:)=[];
+%BX13step(DEL_Pen,:)=[];
 % thetain2=Sndstage_kettei_long;
 % % Estim3=[   -1.9713322e+01
 % %   -1.1704758e-02
 % %    1.6123112e+03
 % %   -7.4047131e+033]
 
-for i=1:5
-thetain3=Trdstage_initial(1:4,i);
-[mintheta,SRR]=fminsearch(@(theta3) Minimize3PS_long(thetain1step,thetain2,theta3),thetain3);
-end
+datasetVC=[LOGTot_E_VC,LOGW_NXT_E_VC,LOGD_E_VC,q_C_E_VCT,BX1,Continuec];
 
+para0=mintheta2ndstage([1,4,5,6]);
+ options=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+[mintheta,SRR]=fminsearch(@(theta3) Minimize3PS_long(Est2,mintheta2ndstage,theta3,datasetVC),para0,options);
+
+
+est3rdstage=mintheta;
+save est3rdstage est3rdstage
+%%
 load Best3step.txt
 mintheta=Best3step(1:4,1);
 Vandq_c=Vandq_c(thetain1step,thetain2,mintheta);

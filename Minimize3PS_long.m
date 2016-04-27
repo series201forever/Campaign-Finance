@@ -1,48 +1,36 @@
-function SRR3step=Minimize3PS(thetain1,thetain2,theta3)
+function SRR3step=Minimize3PS_long(thetain1,thetain2,theta3,datasetVC)
 
 %% thetain : the estimated first step estimator.
 %% theta2 : the parameters that we estimate in the 2nd step.
 
-global iterate
+
+LOGTot_E_VC=datasetVC(:,1);
+LOGW_NXT_E_VC=datasetVC(:,2);
+LOGD_E_VC=datasetVC(:,3);
+q_C_E_VCT=datasetVC(:,4);
+BX1=datasetVC(:,5);
+Continuec=datasetVC(:,6);
 
 
-global N
-global Sofarbest
-global bestiter
+vdelta=0.9;
+% B_I=thetain(1,1);
+ B_C=thetain1(2,1);
+% B_T=thetain(5,1);
+% thetaS2=thetain(3:4,1);
+% 
+% 
+% 
+% 
 
-global Cc
-global XQEV2
-
-global q_c3step
-global LOGD_E_VC3step
-global rtotd3step
-global LOGTot_E_VC3step
-global BX13step
-
-global LOGW_NXT3step
-global XS3step_
-
-global Party3step
-
-global coef
-
-B_I=thetain(1,1);
-B_C=thetain(2,1);
-B_T=thetain(5,1);
-thetaS2=thetain(3:4,1);
-
-
-
-
-cost1=abs(thetain2(1,1));  %% coefficient on the cost function of incumbent, contested
-ben1=abs(thetain2(2,1));   %% coefficient on the benefit function of incumbent, contested
-ben2=ben1;   %% coefficient on the benefit function of incumbent, uncontested
-cost2=1;  %% coefficient on the cost function of the incumbent, uncontested >normalized to 1. Can be normalized
-sig=abs(thetain2(3,1));
-alpha=1/2;
-%alpha=cdf('norm',thetain2(3,1),0,1);
-%beta=1+abs(thetain2(4,1));
-beta=2;
+ %cost1=abs(thetain2(1,1));  %% coefficient on the cost function of incumbent, contested
+ ben1=abs(thetain2(2,1));   %% coefficient on the benefit function of incumbent, contested
+ ben2=ben1;   %% coefficient on the benefit function of incumbent, uncontested
+% cost2=1;  %% coefficient on the cost function of the incumbent, uncontested >normalized to 1. Can be normalized
+ sig=abs(thetain2(3,1));
+ alpha=1/2;
+% %alpha=cdf('norm',thetain2(3,1),0,1);
+% %beta=1+abs(thetain2(4,1));
+ beta=2;
 
 
 costc=abs(theta3(1,1)); %% coefficient on the cost function of challenger
@@ -53,7 +41,9 @@ benc=ben1;  %% coefficient on the benefit funciton of challenger
 %betara1=abs(theta3(3,1));  %% rational type: beta1
 %betara2=abs(theta3(4,1));  %% rational type : beta2
 
-
+a=theta3(2,1);
+b=theta3(3,1);
+c=theta3(4,1);
 
 
 
@@ -94,25 +84,24 @@ benc=ben1;  %% coefficient on the benefit funciton of challenger
 % IND8=find(NOFOC==0);
 
 
-Continue3step=[ones(length(q_c3step),1),LOGW_NXT3step,q_c3step,ones(length(q_c3step),1),XS3step_(:,1).*Party3step,XS3step_(:,2).*Party3step]*coef;
-
-
-[ones(length(NCE_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,...
-    XQEV2,LOGW_NXT_E_V.*XQEV2,LOGW_NXT_E_V.^2/10.*XQEV2,LOGW_NXT_E_V.^3/100.*XQEV2,LOGW_NXT_E_V.^4/1000.*XQEV2,...
-    TenureE_V,TenureE_V.^2,XSEV_(:,1).*SameE_V,XSEV_(:,1).^2.*SameE_V,XSEV_(:,2).*PartyE_V,XSEV_(:,2).^2.*PartyE_V,...
-    TenureE_V.*XSEV_(:,1).*SameE_V,TenureE_V.*XSEV_(:,2).*PartyE_V,PresdumE_V,MidtermE_V]
 
 % %% foc of challenger %%
-FOC31=costc*beta*(alpha/beta)*ben2*(1./exp(LOGTot_E_VC3step)).*...
-    rtotd3step.*(LOGTot_E_VC3step).^(beta-1)...      %% d/dI C_I(total)
-    +(B_C./(sig*exp(LOGD_E_VC3step))).*normpdf(BX13step).*(1+0.9*Continue3step)-alpha*benc*(LOGD_E_VC3step.^(alpha-1)).*(1./exp(LOGD_E_VC3step)); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
-% benefitspwin=mean(-1*(B_C/sig)*normpdf(BX13step).*(1+0.9*Continue3step))
+FOC31=costc*beta*(alpha/beta)*ben2*(1./exp(LOGTot_E_VC)).*...
+    (ones(length(q_C_E_VCT),1)+a*q_C_E_VCT+b*q_C_E_VCT.^2+c*q_C_E_VCT.^3).*(LOGTot_E_VC).^(beta-1)...      %% d/dI C_I(total)
+    +(B_C./(sig*exp(LOGD_E_VC))).*normpdf(BX1).*(1+vdelta*Continuec)-alpha*benc*(LOGD_E_VC.^(alpha-1)).*(1./exp(LOGD_E_VC)); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
+
+FOC311=FOC31.*(LOGW_NXT_E_VC>0);
+FOC312=min(0,FOC31.*(LOGW_NXT_E_VC==0));
+
+
+%benefitspwin=mean(-1*(B_C/sig)*normpdf(BX13step).*(1+0.9*Continue3step))
 % benefitspsp=mean(benc*((LOGD_E_VC3step+Delt).^(1/2)-(LOGD_E_VC3step).^(1/2)))
-FOC31(IND8,:)=[];
-HQ_Entrant=(q_c3step>=min(XQEV2));
-HQ_Entrant(IND8,:)=[];
-FOC31=FOC31(HQ_Entrant,:);
-SRR13P=sum(FOC31,1)^2;
+% FOC31(IND8,:)=[];
+% HQ_Entrant=(q_c3step>=min(XQEV2));
+% HQ_Entrant(IND8,:)=[];
+% FOC31=FOC31(HQ_Entrant,:);
+SRR13P=mean(FOC311.^2,1);
+SRR14P=mean(FOC312.^2,1);
 %XXX=(B_C/sig)*normpdf(BX13step).*(1+0.9*Continue3step)-benc*((LOGD_E_VC3step+Delt).^(1/2)-(LOGD_E_VC3step).^(1/2));
 
 % %% foc of challenger %%
@@ -223,15 +212,15 @@ SRR13P=sum(FOC31,1)^2;
 % Penalty=sum((PrEra<0).*(PrEra).^2)+sum((PrEra>1).*(PrEra-1).^2)
 
 %SRR3step=SRR13P+SRR14P+SRR15PS+SRR16PS%+10000*Penalty
-SRR3step=SRR13P;%+SRR14P;%+SRR15PS%+10000*Penalty%+SRR16PS
-if SRR3step<Sofarbest
-    Sofarbest=SRR3step;
-    bestiter=iterate;
-end
-
-iterate=iterate+1;
-
-if bestiter==iterate-1
-    save Best3step.txt theta3 SRR3step bestiter -ASCII
+SRR3step=SRR13P+SRR14P;%+SRR15PS%+10000*Penalty%+SRR16PS
+% if SRR3step<Sofarbest
+%     Sofarbest=SRR3step;
+%     bestiter=iterate;
+% end
+% 
+% iterate=iterate+1;
+% 
+% if bestiter==iterate-1
+%     save Best3step.txt theta3 SRR3step bestiter -ASCII
 end
 
