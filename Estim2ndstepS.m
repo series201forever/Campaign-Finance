@@ -1060,9 +1060,9 @@ dlmwrite('computeincadv.csv',computeincadv,'delimiter', ',', 'precision', 9)
 A=@(test,test2)cost1*(alpha/beta)*ben2*(1+a*test+b*test.^2+c*test.^3).*test2.^beta;
 space1=0.01:0.01:0.2;
 space2=9:0.5:15;
-mat1=A(space1,13);
+mat1=A(space1,11);
 mat2=A(0.1,space2);
-scatter(space2,mat2)
+scatter(space1,mat1)
 
 %%
 %Derivative w.r.t LOGW
