@@ -38,9 +38,6 @@ load ('./retire.txt');
 
 load ('./stateevol.mat')
 
-load ('./Sndstage_initial_long.txt')
- 
-
 %Construct dataset
 dele3=find(sum(isnan(E_V_july8),2)>0); 
 E_V_july8(dele3,:)=[]; %Drop NaN
@@ -621,7 +618,7 @@ save presseq presseq
 %%
  load('./C5012-50-5012.mat');
  C=C(:,:,1:100,:);
-load('residstd.mat');
+%load('residstd.mat');
 % load('./DC.mat');
 
 
@@ -635,40 +632,41 @@ probwin=[ones(length(NCE_VCT),1),LOGW_E_VCT,XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,
 datasetV=[NCE_V, LOGTot_NCE_V,XQEV2,LOGW_NXT_E_V, SameE_V,PartyE_V,TenureE_V, XSEV_,PresdumE_V,MidtermE_V];
 datasetVCT=[E_VNContestFUL,XQEVCT2,LOGTot_NCE_VCT, NCE_VCT,LOGW_NXT_E_VCT,LOGTotal_E_VCT,VSEVCT,XS_EVCT_,TenureE_VCT, PartyE_VCT,SameE_VCT, LOGD_E_VCT,LOGD_E_VC];
 datasetVNCT=[E_VContestFUL,LOGW_NXT_E_VNCT,LOGTotal_E_VNCT,NCE_VNCT,LOGTot_NCE_VNCT,XQEVNCT2];
-%%
-inittheta=minthetadist;
+
+
+load('./est2ndstage.mat');
+inittheta=mintheta2ndstage;
 %%
 mintheta=[];
 SRR=[];
  options=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
- iter=33;  
+ iter=1;  
  Sofarbest=10^8;
    minthetadist=zeros(6,iter);
    initthetadist=zeros(6,iter);
    srrdist=zeros(1,iter);
    tic
  parfor i=1:iter
- %load inittheta2step
- 
- %theta0=inittheta(:,i);
 
-    theta0=rand(6,1);
-    theta0(1)=theta0(1)*100;
-    theta0(2)=theta0(2)*100;
-    theta0(3)=theta0(3)*0.01;
-    theta0(4)=(theta0(4)-1);
-    theta0(5)=(theta0(5)-1)*5;
-    theta0(6)=(theta0(6)-1)*10;  
-  
-funvalue=Minimize2S_new(Est2,theta0,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd);
+ theta0=inittheta;
+% 
+%     theta0=rand(6,1);
+%     theta0(1)=theta0(1)*100;
+%     theta0(2)=theta0(2)*100;
+%     theta0(3)=theta0(3)*0.01;
+%     theta0(4)=(theta0(4)-1);
+%     theta0(5)=(theta0(5)-1)*5;
+%     theta0(6)=(theta0(6)-1)*10;  
+%   
+funvalue=Minimize2S_new(Est2,theta0,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
 funvalueend=0;
 thetaup=theta0;
 sss=1;
 while abs(funvalue-funvalueend)>0.03
    sss=sss+1;
-   funvalue=Minimize2S_new(Est2,thetaup,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd);
-    [mintheta,SRR]=fminsearch(@(theta2) Minimize2S_new(Est2,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd),thetaup,options);
-   funvalueend=Minimize2S_new(Est2,mintheta,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd);
+   funvalue=Minimize2S_new(Est2,thetaup,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
+    [mintheta,SRR]=fminsearch(@(theta2) Minimize2S_new(Est2,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T),thetaup,options);
+   funvalueend=Minimize2S_new(Est2,mintheta,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T);
       if mod(sss,30)==1
       thetaup=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
       else
@@ -682,9 +680,9 @@ end
 %save minimizedtheta.txt mintheta SRR -ASCII
 % 
  end
- minthetadist=minthetadist(:,srrdist<mean(srrdist));
- initthetadist=initthetadist(:,srrdist<mean(srrdist));
-  srrdist=srrdist(srrdist<mean(srrdist));
+%  minthetadist=minthetadist(:,srrdist<mean(srrdist));
+%  initthetadist=initthetadist(:,srrdist<mean(srrdist));
+%   srrdist=srrdist(srrdist<mean(srrdist));
 
   toc
   
@@ -694,9 +692,8 @@ end
 %%%%%%  
 % Specification check and saving the result
 %%%%%%
-load dist5012-50-5012-flex-e1634-1-flexregcubeconst
-[~,aux]=min(srrdist);
-mintheta=minthetadist(:,aux);
+load est2ndstage
+mintheta=mintheta2ndstage;
 
 %Check winning prob and distribution
 thetain=Est2;
@@ -984,7 +981,7 @@ SRR9=-SRR9;
 %    -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
 %Flexible FOC11 with constant
 FOC11=(beta*cost1*(alpha/beta)*ben2*(ones(length(XQEVCT2),1)+a*XQEVCT2+b*XQEVCT2.^2+c*XQEVCT2.^3).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
-    -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
+    -(B_I./(sig*exp(LOGD_E_VCT(:,1)))).*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
 
 
 %FOC11(IND6CT,:)=[];
@@ -1036,7 +1033,7 @@ std12P=std(FOC21);
 SRR2step=SRR9+10^6*SRR10P/std10P+10^3*SRR11+10^4*SRR12P/std12P+sum(SRR15)+sum(SRR14)+0.0000*SRR13/std13;%+10000*(sigma>residstd);%+;%;%
 
 %end
-
+%%
 mintheta2ndstage=mintheta;
   save q_C_E_VCT q_C_E_VCT
   save est2ndstage mintheta2ndstage
@@ -1049,7 +1046,7 @@ mintheta2ndstage=mintheta;
 q_C_E_V=zeros(length(XQEV2),1);
 q_C_E_V(E_VNContestFUL)=q_C_E_VCT;
 computeincadv=[E_V_july8(:,[1:4,9,10]),q_C_E_V,XQEV2];
-dlmwrite('computeincadv.csv',computeincadv,'delimiter', ',', 'precision', 9)
+dlmwrite('incquality.csv',computeincadv,'delimiter', ',', 'precision', 9)
 
 
 %%

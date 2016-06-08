@@ -329,7 +329,7 @@ Continuec=max(0,[ones(length(LOGW_NXT_E_VC),1),LOGW_NXT_E_VC,LOGW_NXT_E_VC.^2/10
 %    zeros(length(LOGW_NXT_E_VC),1),zeros(length(LOGW_NXT_E_VC),1),XS_EVCT_(:,1).*((-1)*SameE_VCT),XS_EVCT_(:,1).^2.*((-1)*SameE_VCT),XS_EVCT_(:,2).*((-1)*PartyE_VCT),XS_EVCT_(:,2).^2.*((-1)*PartyE_VCT),...
 %    zeros(length(LOGW_NXT_E_VC),2),PresdumE_VCT,MidtermE_VCT]*coef3rdstep);
 
-
+save coef3rdstep coef3rdstep
 %%
 
 %Specification check
@@ -344,14 +344,19 @@ scatter(q_C_E_VCT(LOGW_NXT_E_VC==0),Continuec(LOGW_NXT_E_VC==0))
 length(find(LOGW_NXT_E_VC>0))
 length(find(Continuec>0))
 %length(find(Deriv>0))
-% 
-% D=@(test) coef3rdstep(6)+test*coef3rdstep(7)+test.^2/10*coef3rdstep(8)+test.^3/100*coef3rdstep(9)+test.^4/1000*coef3rdstep(10);
-% space1=9:0.5:15;
-% mat1=D(space1);
-% scatter(space1,mat1);
-
-
-
+%% 
+ D=@(test) coef3rdstep(6)+test*coef3rdstep(7)+test.^2/10*coef3rdstep(8)+test.^3/100*coef3rdstep(9)+test.^4/1000*coef3rdstep(10);
+ space1=9:0.5:15;
+ mat1=D(space1);
+ scatter(space1,mat1);
+%%
+B=@(test,test2)coef3rdstep(2)+2*test2/10*coef3rdstep(3)+3*test2.^2/100*coef3rdstep(4)+4*test2.^3/1000*coef3rdstep(5)+test*coef3rdstep(7)+2*test2/10.*test*coef3rdstep(8)...
+   +3*test2.^2/100.*test*coef3rdstep(9)+4*test2.^3/1000.*test*coef3rdstep(10);
+space1=0.01:0.01:0.2;
+space2=5:0.5:15;
+mat1=B(space1,11);
+mat2=B(0.07,space2);
+scatter(space2,mat2)
 
 %% use LOGW_EVCT, etc, variables for incumbents %%
 % 
@@ -377,10 +382,12 @@ BX1=abs(1/mintheta2ndstage(3))*([LOGD_E_VCT,LOGD_E_VC,XS_EVCT_.*[SameE_VCT,Party
 % %   -7.4047131e+033]
 
 datasetVC=[LOGTot_E_VC,LOGW_NXT_E_VC,LOGD_E_VC,q_C_E_VCT,BX1,Continuec];
-%datasetVC(Continuec<max(Continue)|(LOGW_NXT_E_VC==0),:)=[];
+%datasetVC(Continuec>max(Continue)|(LOGW_NXT_E_VC==0),:)=[];
 %datasetVC((LOGW_NXT_E_VC==0),:)=[];
-datasetVC(((LOGW_NXT_E_VC==0)&(Continuec>100)),:)=[];
-datasetVC(((LOGW_NXT_E_VC==0)|(q_C_E_VCT>0.2)),:)=[];
+datasetVC(((LOGW_NXT_E_VC==0)|((LOGW_NXT_E_VC==0)&(Continuec>100))),:)=[];
+
+%datasetVC(((LOGW_NXT_E_VC==0)&(Continuec>100)),:)=[];
+%datasetVC(((LOGW_NXT_E_VC==0)|(q_C_E_VCT>0.2)),:)=[];
 %datasetVC(Continuec>100,:)=[];
 %%
 para0=mintheta2ndstage([1,4,5,6]);

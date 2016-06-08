@@ -87,7 +87,7 @@ c=theta3(4,1);
 
 % %% foc of challenger %%
 %Offset quality
-FOC31=costc*beta*(alpha/beta)*ben2*(1./exp(LOGTot_E_VC)).*...
+FOC31=costc*beta*(alpha/beta)*benc*(1./exp(LOGTot_E_VC)).*...
    (ones(length(q_C_E_VCT),1)+a*(q_C_E_VCT+abs(min(q_C_E_VCT))+0.001)+b*(q_C_E_VCT+abs(min(q_C_E_VCT))+0.001).^2+c*(q_C_E_VCT+abs(min(q_C_E_VCT))+0.001).^3).*(LOGTot_E_VC).^(beta-1)...      %% d/dI C_I(total)
    +(B_C./(sig*exp(LOGD_E_VC))).*normpdf(BX1).*(1+vdelta*Continuec)-alpha*benc*(LOGD_E_VC.^(alpha-1)).*(1./exp(LOGD_E_VC)); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
 

@@ -1,4 +1,4 @@
-function SRR2step=Minimize2S_new(thetain,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T,residstd)
+function SRR2step=Minimize2S_new(thetain,theta2,probwin,datasetV,datasetVCT,datasetVNCT,N,C,T)
 
 %% thetain : the estimated first step estimator.
 %% theta2 : the parameters that we estimate in the 2nd step.
@@ -277,7 +277,7 @@ SRR9=-SRR9;
 %    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
 %    -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
 FOC11=(beta*cost1*(alpha/beta)*ben2*(ones(length(XQEVCT2),1)+a*XQEVCT2+b*XQEVCT2.^2+c*XQEVCT2.^3).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
-    -(B_I/(sig*exp(LOGD_E_VCT(:,1))))*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
+    -(B_I./(sig*exp(LOGD_E_VCT(:,1)))).*normpdf(BX1).*(1+vdelta*Continuation1)-alpha*ben1*(1./exp(LOGD_E_VCT(:,1))).*(max(0,(LOGD_E_VCT))).^(alpha-1); %% d/d_I(P_2)(B+delta*EV+(d/dI)H_I())
 
 
 
