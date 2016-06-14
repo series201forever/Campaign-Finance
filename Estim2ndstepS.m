@@ -1036,17 +1036,21 @@ SRR2step=SRR9+10^6*SRR10P/std10P+10^3*SRR11+10^4*SRR12P/std12P+sum(SRR15)+sum(SR
 %%
 mintheta2ndstage=mintheta;
   save q_C_E_VCT q_C_E_VCT
+  save XQEV2 XQEV2
   save est2ndstage mintheta2ndstage
   save DEL_Pen DEL_Pen
   save Continue Continue
   coef2ndstep=coef;
   save coef2ndstep coef2ndstep
 %%
-%Outsheet the csv for calculating incumbency advantage
+%Outsheet the csv for creating quality estimation data
 q_C_E_V=zeros(length(XQEV2),1);
 q_C_E_V(E_VNContestFUL)=q_C_E_VCT;
-computeincadv=[E_V_july8(:,[1:4,9,10]),q_C_E_V,XQEV2];
-dlmwrite('incquality.csv',computeincadv,'delimiter', ',', 'precision', 9)
+computeincadv=[E_V_july8(:,[1:4,9,10,16,13,24,63]),q_C_E_V,XQEV2];
+dlmwrite('incquality.csv',computeincadv,'delimiter', ',', 'precision', 16)
+%appearance	year	party	opponent_total	realtotal	realdisburse	opponent_disburse	voteshare	unemploymentrate	partindex	qc	qi
+
+
 
 
 %%

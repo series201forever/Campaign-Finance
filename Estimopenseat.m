@@ -59,7 +59,7 @@ E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
 
 %Construct dataset
 E_VContestFUL=find(E_V_july8(:,66)==0);           %% E_VContestFUL is the elements in which Quality of challenger A not observed.
-%E_VNContestFUL=find(E_V_july8(:,8)==1);          %% E_VNContestFUL is the elements in which contest==1 :297 distinct districts
+E_VNContestFUL=find(E_V_july8(:,66)~=0);          %% E_VNContestFUL is the elements in which Quality of challenger A is observed.
 
 %Win_E_V=(E_V_july8(:,13)>=0.5);  % Dummy for whether incumbent won the election in (t).
 %Win_E_VCT=Win_E_V;
@@ -324,6 +324,7 @@ length(find(LOGW_NXT_E_VCT>0))
 length(find(Continuei_VCT>0))
 %length(find(Deriv>0))
 %% 
+%-----------
  D=@(test) coef3rdstep(6)+test*coef3rdstep(7)+test.^2/10*coef3rdstep(8)+test.^3/100*coef3rdstep(9)+test.^4/1000*coef3rdstep(10);
  space1=9:0.5:15;
  mat1=D(space1);
@@ -336,7 +337,7 @@ space2=5:0.5:15;
 mat1=B(space1,11);
 mat2=B(0.07,space2);
 scatter(space2,mat2)
-
+%-----------
 %% 
 
 %Estimation of cost parameters
@@ -356,6 +357,7 @@ save estopen estopen
 
 %%
 %Compute q_c
+load estopen
 thetain=mintheta2ndstage;
 theta4=estopen;
 theta3=est3rdstage;
@@ -396,7 +398,16 @@ qc=regressor*coef+qi-sig*BX1;
 
 save qcopen qc
 
-
-
-
-
+%%
+%Outsheet the csv for creating quality estimation data
+q_C_E_V=zeros(length(E_V_july8),1);
+q_C_E_V(E_VNContestFUL)=qc;
+XQEV2=zeros(length(E_V_july8),1);
+XQEV2(E_VNContestFUL)=XQEVCT;
+questionVCT=(OUT>1|OUT<0);
+question=zeros(length(E_V_july8),1);
+question(E_VNContestFUL)=questionVCT;
+computeincadv=[E_V_july8(:,[3,4,9,10,16,13,24,63]),q_C_E_V,XQEV2,question];
+dlmwrite('openquality.csv',computeincadv,'delimiter', ',', 'precision', 16)
+%Question means that in computing q_c, out condition is violated and
+%chopped at 1.
