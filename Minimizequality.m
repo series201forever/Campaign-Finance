@@ -1,4 +1,4 @@
-function [SRR4step,out,OUTI,OUTC]=Minimizequality(Est2,mintheta2ndstage,est3rdstage,coef3rdstep,estopen,q_C_E_VCT,datasetV,XQEV,id)
+function [SRR4step,out,OUTI,OUTC,BX1i,BX1c,SRR11i,SRR11c,test]=Minimizequality(Est2,mintheta2ndstage,est3rdstage,coef3rdstep,estopen,q_C_E_VCT,datasetV,XQEV,id)
 
 %This is the function to be minimized to obtain quality estimates, given
 %parameter values estimated in the previous steps
@@ -66,16 +66,21 @@ Continuec=max(0,[ones(length(LOGW_NXT_E_VC),1),LOGW_NXT_E_VC,LOGW_NXT_E_VC.^2/10
     PresdumE_V,MidtermE_V]*coef3rdstep);
 
 
-Derivi=[zeros(length(LOGW_NXT_E_V),1),ones(length(LOGW_NXT_E_V),1),2*LOGW_NXT_E_V/10,3*LOGW_NXT_E_V.^2/100,4*LOGW_NXT_E_V.^3/1000,...
-     zeros(length(LOGW_NXT_E_V),1),qi,2*LOGW_NXT_E_V/10.*qi,3*LOGW_NXT_E_V.^2/100.*qi,4*LOGW_NXT_E_V.^3/1000.*qi,zeros(length(LOGW_NXT_E_V),5)]*coef3rdstep;
-Derivc=[zeros(length(LOGW_NXT_E_VC),1),ones(length(LOGW_NXT_E_VC),1),2*LOGW_NXT_E_VC/10,3*LOGW_NXT_E_VC.^2/100,4*LOGW_NXT_E_VC.^3/1000,...
-     zeros(length(LOGW_NXT_E_VC),1),qc,2*LOGW_NXT_E_VC/10.*qc,3*LOGW_NXT_E_VC.^2/100.*qc,4*LOGW_NXT_E_VC.^3/1000.*qc,zeros(length(LOGW_NXT_E_VC),5)]*coef3rdstep;
+Derivi=max(0.0001,[zeros(length(LOGW_NXT_E_V),1),ones(length(LOGW_NXT_E_V),1),2*LOGW_NXT_E_V/10,3*LOGW_NXT_E_V.^2/100,4*LOGW_NXT_E_V.^3/1000,...
+    zeros(length(LOGW_NXT_E_V),1),qi,2*LOGW_NXT_E_V/10.*qi,3*LOGW_NXT_E_V.^2/100.*qi,4*LOGW_NXT_E_V.^3/1000.*qi,zeros(length(LOGW_NXT_E_V),5)]*coef3rdstep);
+Derivc=max(0.0001,[zeros(length(LOGW_NXT_E_VC),1),ones(length(LOGW_NXT_E_VC),1),2*LOGW_NXT_E_VC/10,3*LOGW_NXT_E_VC.^2/100,4*LOGW_NXT_E_VC.^3/1000,...
+    zeros(length(LOGW_NXT_E_VC),1),qc,2*LOGW_NXT_E_VC/10.*qc,3*LOGW_NXT_E_VC.^2/100.*qc,4*LOGW_NXT_E_VC.^3/1000.*qc,zeros(length(LOGW_NXT_E_VC),5)]*coef3rdstep);
+% Derivi=[zeros(length(LOGW_NXT_E_V),1),ones(length(LOGW_NXT_E_V),1),2*LOGW_NXT_E_V/10,3*LOGW_NXT_E_V.^2/100,4*LOGW_NXT_E_V.^3/1000,...
+%      zeros(length(LOGW_NXT_E_V),1),qi,2*LOGW_NXT_E_V/10.*qi,3*LOGW_NXT_E_V.^2/100.*qi,4*LOGW_NXT_E_V.^3/1000.*qi,zeros(length(LOGW_NXT_E_V),5)]*coef3rdstep;
+% Derivc=[zeros(length(LOGW_NXT_E_VC),1),ones(length(LOGW_NXT_E_VC),1),2*LOGW_NXT_E_VC/10,3*LOGW_NXT_E_VC.^2/100,4*LOGW_NXT_E_VC.^3/1000,...
+%      zeros(length(LOGW_NXT_E_VC),1),qc,2*LOGW_NXT_E_VC/10.*qc,3*LOGW_NXT_E_VC.^2/100.*qc,4*LOGW_NXT_E_VC.^3/1000.*qc,zeros(length(LOGW_NXT_E_VC),5)]*coef3rdstep;
+
 
 
 
 %Calculate K
-OUTI=((beta*costi*(alpha/beta)*ben2*(ones(length(qi),1)+a*qi+b*qi.^2+c*qi.^3).*LOGTotal_E_V.^(beta-1)).*(1./exp(LOGTotal_E_V(:,1))))./((vdelta*Derivi).*(1./exp(LOGW_NXT_E_V)));
-OUTC=((beta*costc*(alpha/beta)*ben2*(ones(length(qc),1)+ac*(qc+abs(min(q_C_E_VCT))+0.001)+bc*(qc+abs(min(q_C_E_VCT))+0.001).^2+cc*(qc+abs(min(q_C_E_VCT))+0.001).^3).*LOGTotal_E_VC.^(beta-1)).*(1./exp(LOGTotal_E_VC(:,1))))./((vdelta*Derivc).*(1./exp(LOGW_NXT_E_VC)));
+OUTI=((beta*costi*(alpha/beta)*ben2*(max(10^(-8),ones(length(qi),1)+a*qi+b*qi.^2+c*qi.^3)).*LOGTotal_E_V.^(beta-1)).*(1./exp(LOGTotal_E_V(:,1))))./((vdelta*Derivi).*(1./exp(LOGW_NXT_E_V)));
+OUTC=((beta*costc*(alpha/beta)*ben2*(max(10^(-8),ones(length(qc),1)+ac*(qc+abs(min(q_C_E_VCT))+0.001)+bc*(qc+abs(min(q_C_E_VCT))+0.001).^2+cc*(qc+abs(min(q_C_E_VCT))+0.001).^3)).*LOGTotal_E_VC.^(beta-1)).*(1./exp(LOGTotal_E_VC(:,1))))./((vdelta*Derivc).*(1./exp(LOGW_NXT_E_VC)));
 
  
 SRR14=(OUTI>1);
@@ -118,6 +123,8 @@ SRR11c=mean((BX1c-1./sig*(-B_C*LOGD_E_VC-B_I*LOGD_E_V+qc-qi-XSEV_*B_state)).^2,1
 SRR12=mean((OUTI+OUTC-1).^2,1);
 
 SRR4step=SRR10Pi+SRR10Pc+SRR11i+SRR11c+SRR12+sum(SRR14)+sum(SRR15)+sum(SRR16)+sum(SRR17);%+0.0000*SRR13/std13;%+10000*(sigma>residstd);%+;%;%
+
+test=1./sig*(B_I*LOGD_E_V+B_C*LOGD_E_VC+qi-qc+XSEV_*B_state+B_T*log(1+TenureE_V));
 end
 
 
@@ -135,16 +142,22 @@ Continuec=max(0,[ones(length(LOGW_NXT_E_VC),1),LOGW_NXT_E_VC,LOGW_NXT_E_VC.^2/10
     PresdumE_V,MidtermE_V]*coef3rdstep);
 
 
-Derivi=[zeros(length(LOGW_NXT_E_V),1),ones(length(LOGW_NXT_E_V),1),2*LOGW_NXT_E_V/10,3*LOGW_NXT_E_V.^2/100,4*LOGW_NXT_E_V.^3/1000,...
-     zeros(length(LOGW_NXT_E_V),1),qi,2*LOGW_NXT_E_V/10.*qi,3*LOGW_NXT_E_V.^2/100.*qi,4*LOGW_NXT_E_V.^3/1000.*qi,zeros(length(LOGW_NXT_E_V),5)]*coef3rdstep;
-Derivc=[zeros(length(LOGW_NXT_E_VC),1),ones(length(LOGW_NXT_E_VC),1),2*LOGW_NXT_E_VC/10,3*LOGW_NXT_E_VC.^2/100,4*LOGW_NXT_E_VC.^3/1000,...
-     zeros(length(LOGW_NXT_E_VC),1),qc,2*LOGW_NXT_E_VC/10.*qc,3*LOGW_NXT_E_VC.^2/100.*qc,4*LOGW_NXT_E_VC.^3/1000.*qc,zeros(length(LOGW_NXT_E_VC),5)]*coef3rdstep;
+Derivi=max(0.0001,[zeros(length(LOGW_NXT_E_V),1),ones(length(LOGW_NXT_E_V),1),2*LOGW_NXT_E_V/10,3*LOGW_NXT_E_V.^2/100,4*LOGW_NXT_E_V.^3/1000,...
+    zeros(length(LOGW_NXT_E_V),1),qi,2*LOGW_NXT_E_V/10.*qi,3*LOGW_NXT_E_V.^2/100.*qi,4*LOGW_NXT_E_V.^3/1000.*qi,zeros(length(LOGW_NXT_E_V),5)]*coef3rdstep);
+Derivc=max(0.0001,[zeros(length(LOGW_NXT_E_VC),1),ones(length(LOGW_NXT_E_VC),1),2*LOGW_NXT_E_VC/10,3*LOGW_NXT_E_VC.^2/100,4*LOGW_NXT_E_VC.^3/1000,...
+    zeros(length(LOGW_NXT_E_VC),1),qc,2*LOGW_NXT_E_VC/10.*qc,3*LOGW_NXT_E_VC.^2/100.*qc,4*LOGW_NXT_E_VC.^3/1000.*qc,zeros(length(LOGW_NXT_E_VC),5)]*coef3rdstep);
+% Derivi=[zeros(length(LOGW_NXT_E_V),1),ones(length(LOGW_NXT_E_V),1),2*LOGW_NXT_E_V/10,3*LOGW_NXT_E_V.^2/100,4*LOGW_NXT_E_V.^3/1000,...
+%      zeros(length(LOGW_NXT_E_V),1),qi,2*LOGW_NXT_E_V/10.*qi,3*LOGW_NXT_E_V.^2/100.*qi,4*LOGW_NXT_E_V.^3/1000.*qi,zeros(length(LOGW_NXT_E_V),5)]*coef3rdstep;
+% Derivc=[zeros(length(LOGW_NXT_E_VC),1),ones(length(LOGW_NXT_E_VC),1),2*LOGW_NXT_E_VC/10,3*LOGW_NXT_E_VC.^2/100,4*LOGW_NXT_E_VC.^3/1000,...
+%      zeros(length(LOGW_NXT_E_VC),1),qc,2*LOGW_NXT_E_VC/10.*qc,3*LOGW_NXT_E_VC.^2/100.*qc,4*LOGW_NXT_E_VC.^3/1000.*qc,zeros(length(LOGW_NXT_E_VC),5)]*coef3rdstep;
 
 
 
 %Calculate K
-OUTI=((beta*costc*(alpha/beta)*ben2*(ones(length(qi),1)+ac*(qi+abs(min(q_C_E_VCT))+0.001)+bc*(qi+abs(min(q_C_E_VCT))+0.001).^2+cc*(qi+abs(min(q_C_E_VCT))+0.001).^3).*LOGTotal_E_V.^(beta-1)).*(1./exp(LOGTotal_E_V(:,1))))./((vdelta*Derivi).*(1./exp(LOGW_NXT_E_V)));
-OUTC=((beta*costc*(alpha/beta)*ben2*(ones(length(qc),1)+ac*(qc+abs(min(q_C_E_VCT))+0.001)+bc*(qc+abs(min(q_C_E_VCT))+0.001).^2+cc*(qc+abs(min(q_C_E_VCT))+0.001).^3).*LOGTotal_E_VC.^(beta-1)).*(1./exp(LOGTotal_E_VC(:,1))))./((vdelta*Derivc).*(1./exp(LOGW_NXT_E_VC)));
+OUTI=((beta*costc*(alpha/beta)*ben2*(max(10^(-8),ones(length(qi),1)+ac*(qi+abs(min(q_C_E_VCT))+0.001)+bc*(qi+abs(min(q_C_E_VCT))+0.001).^2+cc*(qi+abs(min(q_C_E_VCT))+0.001).^3)).*LOGTotal_E_V.^(beta-1)).*(1./exp(LOGTotal_E_V(:,1))))./((vdelta*Derivi).*(1./exp(LOGW_NXT_E_V)));
+OUTC=((beta*costc*(alpha/beta)*ben2*(max(10^(-8),ones(length(qc),1)+ac*(qc+abs(min(q_C_E_VCT))+0.001)+bc*(qc+abs(min(q_C_E_VCT))+0.001).^2+cc*(qc+abs(min(q_C_E_VCT))+0.001).^3)).*LOGTotal_E_VC.^(beta-1)).*(1./exp(LOGTotal_E_VC(:,1))))./((vdelta*Derivc).*(1./exp(LOGW_NXT_E_VC)));
+%OUTI=((beta*costc*(alpha/beta)*ben2*(ones(length(qi),1)+ac*(qi+abs(min(q_C_E_VCT))+0.001)+bc*(qi+abs(min(q_C_E_VCT))+0.001).^2+cc*(qi+abs(min(q_C_E_VCT))+0.001).^3).*LOGTotal_E_V.^(beta-1)).*(1./exp(LOGTotal_E_V(:,1))))./((vdelta*Derivi).*(1./exp(LOGW_NXT_E_V)));
+%OUTC=((beta*costc*(alpha/beta)*ben2*(ones(length(qc),1)+ac*(qc+abs(min(q_C_E_VCT))+0.001)+bc*(qc+abs(min(q_C_E_VCT))+0.001).^2+cc*(qc+abs(min(q_C_E_VCT))+0.001).^3).*LOGTotal_E_VC.^(beta-1)).*(1./exp(LOGTotal_E_VC(:,1))))./((vdelta*Derivc).*(1./exp(LOGW_NXT_E_VC)));
 
  
 SRR14=(OUTI>1);
@@ -187,9 +200,14 @@ SRR11c=mean((BX1c-1./sig*(B_O*LOGD_E_VC-B_O*LOGD_E_V+qc-qi-XSEV_*B_state)).^2,1)
 SRR12=mean((OUTI+OUTC-1).^2,1);
 
 SRR4step=SRR10Pi+SRR10Pc+SRR11i+SRR11c+SRR12+sum(SRR14)+sum(SRR15)+sum(SRR16)+sum(SRR17);
+
+test=1./sig*(B_O*LOGD_E_V-B_O*LOGD_E_VC+qi-qc+XSEV_*B_state);
 end
 
 out=max((SRR14+SRR15),(SRR16+SRR17));
+
 %out=min((OUTI>=0.99)+(OUTI<=0)+(OUTC>=0.99)+(OUTC<=0),1);
 end
+
+
 

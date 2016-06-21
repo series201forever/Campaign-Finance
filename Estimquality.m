@@ -115,7 +115,7 @@ ido=id(open==1,:);
 qidistc=zeros(length(datasetc),1);
 qcdistc=qidistc;
 
-q0=[0.05,-0.1];
+q0=[0.05,-0.05];
 tic
 for i=1:length(datasetc);
 options=optimset('MaxIter',200000,'MaxFunEvals',1000000,'Display','none');
@@ -127,7 +127,7 @@ qcdistc(i)=minq(2);
 end
 end
 toc
-save qcondist qidistc qcdistc 
+save qcondist2 qidistc qcdistc 
 
 %%
 %Estimate quality for open
@@ -145,20 +145,95 @@ qcdisto(i)=minq(2);
 end
 end
 toc
-save qopendist qidisto qcdisto 
+save qopendist2 qidisto qcdisto 
+%%
+%OUT specification check
+datasetV=datasetc;
+LOGW_NXT_E_V=datasetV(1,1);
+LOGTotal_E_V=datasetV(1,2);
+LOGD_E_V=datasetV(1,3);
+PartyE_V=datasetV(1,4);
+SameE_V=datasetV(1,5);
+PresdumE_V=datasetV(1,6);
+MidtermE_V=datasetV(1,7);
+XSEV_=datasetV(1,8:9);
+TenureE_V=datasetV(1,10);
+LOGW_NXT_E_VC=datasetV(1,11);
+LOGTotal_E_VC=datasetV(1,12);
+LOGD_E_VC=datasetV(1,13);
+
+vdelta=0.90;
+% thetaS=thetain(1:2,1);
+% B_I=thetain(1,1);
+% B_C=thetain(2,1);
+% B_T=thetain(5,1);
+% thetaS2=thetain(3:4,1);
+
+
+alpha=1/2;
+beta=2;
+ben1=abs(mintheta2ndstage(2));
+ben2=ben1;
+sig=abs(mintheta2ndstage(3));
+
+costi=abs(mintheta2ndstage(1));
+a=mintheta2ndstage(4);
+b=mintheta2ndstage(5);
+c=mintheta2ndstage(6);
+
+costc=abs(est3rdstage(1));
+ac=est3rdstage(2);
+bc=est3rdstage(3);
+cc=est3rdstage(4);
+
+
+B_I=Est2(1);
+B_C=Est2(2);
+B_O=abs(estopen(1));
+B_state=Est2(3:4);
+B_T=Est2(5);
+Derivi=@(qi)[zeros(length(LOGW_NXT_E_V),1),ones(length(LOGW_NXT_E_V),1),2*LOGW_NXT_E_V/10,3*LOGW_NXT_E_V.^2/100,4*LOGW_NXT_E_V.^3/1000,...
+     zeros(length(LOGW_NXT_E_V),1),qi,2*LOGW_NXT_E_V/10.*qi,3*LOGW_NXT_E_V.^2/100.*qi,4*LOGW_NXT_E_V.^3/1000.*qi,zeros(length(LOGW_NXT_E_V),5)]*coef3rdstep;
+Derivc=@(qc)[zeros(length(LOGW_NXT_E_VC),1),ones(length(LOGW_NXT_E_VC),1),2*LOGW_NXT_E_VC/10,3*LOGW_NXT_E_VC.^2/100,4*LOGW_NXT_E_VC.^3/1000,...
+     zeros(length(LOGW_NXT_E_VC),1),qc,2*LOGW_NXT_E_VC/10.*qc,3*LOGW_NXT_E_VC.^2/100.*qc,4*LOGW_NXT_E_VC.^3/1000.*qc,zeros(length(LOGW_NXT_E_VC),5)]*coef3rdstep;
+
+OUTI=@(qi)((beta*costi*(alpha/beta)*ben2*(ones(length(qi),1)+a*qi+b*qi.^2+c*qi.^3).*LOGTotal_E_V.^(beta-1)).*(1./exp(LOGTotal_E_V(:,1))))./((vdelta*Derivi(qi)).*(1./exp(LOGW_NXT_E_V)));
+OUTC=@(qc)((beta*costc*(alpha/beta)*ben2*(ones(length(qc),1)+ac*(qc+abs(min(q_C_E_VCT))+0.001)+bc*(qc+abs(min(q_C_E_VCT))+0.001).^2+cc*(qc+abs(min(q_C_E_VCT))+0.001).^3).*LOGTotal_E_VC.^(beta-1)).*(1./exp(LOGTotal_E_VC(:,1))))./((vdelta*Derivc(qc)).*(1./exp(LOGW_NXT_E_VC)));
+
+
+space=linspace(-0.2+abs(min(q_C_E_VCT)),0.2+abs(min(q_C_E_VCT)),10000);
+outmatc=zeros(length(space),1);
+for i= 1:length(space)
+    outmatc(i)=OUTC(space(i));
+end
+
+space2=linspace(0.05,0.065,10000);
+outmati=zeros(length(space2),1);
+for i= 1:length(space2)
+    outmati(i)=OUTI(space2(i));
+end
+figure(1)
+plot(space-abs(min(q_C_E_VCT)),outmatc)
+figure(2)
+plot(space2,outmati)
 %%
 
 %Quality data restoration
-load qcondist
-load qopendist
+load qcondist2
+load qopendist2
 
 %Indicator of sample truncation
 %for contested
 outc=zeros(length(datasetc),1);
 OUTIc=outc;
 OUTCc=outc;
+BX1ic=outc;
+BX1cc=outc;
+SRR11ic=outc;
+SRR11cc=outc;
+testc=outc;
 for i=1:length(datasetc)
-[~,outc(i),OUTIc(i),OUTCc(i)]=Minimizequality(Est2,mintheta2ndstage,est3rdstage,coef3rdstep,estopen,q_C_E_VCT,datasetc(i,:),[qidistc(i),qcdistc(i)],1);
+[~,outc(i),OUTIc(i),OUTCc(i),BX1ic(i),BX1cc(i),SRR11ic(i),SRR11cc(i),testc(i)]=Minimizequality(Est2,mintheta2ndstage,est3rdstage,coef3rdstep,estopen,q_C_E_VCT,datasetc(i,:),[qidistc(i),qcdistc(i)],1);
 end
 sum(outc)
 
@@ -166,8 +241,13 @@ sum(outc)
 outo=zeros(length(dataseto),1);
 OUTIo=outo;
 OUTCo=outo;
+BX1io=outo;
+BX1co=outo;
+SRR11io=outo;
+SRR11co=outo;
+testo=outo;
 for i=1:length(dataseto)
-[~,outo(i),OUTIo(i),OUTCo(i)]=Minimizequality(Est2,mintheta2ndstage,est3rdstage,coef3rdstep,estopen,q_C_E_VCT,dataseto(i,:),[qidisto(i),qcdisto(i)],3);
+[~,outo(i),OUTIo(i),OUTCo(i),BX1io(i),BX1co(i),SRR11io(i),SRR11co(i),testo(i)]=Minimizequality(Est2,mintheta2ndstage,est3rdstage,coef3rdstep,estopen,q_C_E_VCT,dataseto(i,:),[qidisto(i),qcdisto(i)],3);
 end
 sum(outo)
 
@@ -192,6 +272,13 @@ qualchal=[idcon2(:,2),qdistc(:,2),qcon2(:,2),ones(length(idcon2),1),zeros(length
     ido2(:,1),qdisto(:,1),qo2(:,1),zeros(length(ido2),1),ones(length(ido2),1);...
     ido2(:,2),qdisto(:,2),qo2(:,2),zeros(length(ido2),1),ones(length(ido2),1)];
 
+%%
+figure(1)
+scatter(OUTIc(abs(OUTIc)<2),qidistc(abs(OUTIc)<2))%(abs(qidistc)<0.065)
+figure(2)
+scatter(OUTCc(abs(OUTCc)<2),qcdistc(abs(OUTCc)<2))%(abs(qcdistc)<0.065)
+figure(3)
+scatter(OUTCo(abs(OUTCo)<2),qcdisto(abs(OUTCo)<2))%(abs(qidistc)<0.065)
 
 %%
 %Result check
@@ -224,6 +311,16 @@ histogram(XQEV2,bins)
 hold on
 histogram(q_C_E_VCT,bins)
 
+
+%%
+Derivfunc=@(LOGW_NXT_E_VC,qc)[zeros(length(LOGW_NXT_E_VC),1),ones(length(LOGW_NXT_E_VC),1),2*LOGW_NXT_E_VC/10,3*LOGW_NXT_E_VC.^2/100,4*LOGW_NXT_E_VC.^3/1000,...
+     zeros(length(LOGW_NXT_E_VC),1),qc,2*LOGW_NXT_E_VC/10.*qc,3*LOGW_NXT_E_VC.^2/100.*qc,4*LOGW_NXT_E_VC.^3/1000.*qc,zeros(length(LOGW_NXT_E_VC),5)]*coef3rdstep;
+ space=linspace(0.05,0.065,1000).';
+ l=length(space);
+ meanw=12*ones(l,1);
+ outmat=Derivfunc(meanw,space);
+ 
+ scatter(space,outmat);
 %%
 %Difference from original estimates
 figure(1)
