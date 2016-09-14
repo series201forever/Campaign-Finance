@@ -109,13 +109,16 @@ idcon=id(contested==1,:);
 dataseto=datasetV(open==1,:);
 qo=q(open==1,:);
 ido=id(open==1,:);
-
+%dataset for uncontested
+datasetu=datasetV(open==0&contested==0,:);
+qu=q(open==0&contested==0,:);
+idu=id(open==0&contested==0,:);
 %%
 %Estimate quality for contested
 qidistc=zeros(length(datasetc),1);
 qcdistc=qidistc;
 
-q0=[0.05,-0.05];
+q0=[0.01,-0.05];
 tic
 for i=1:length(datasetc);
 options=optimset('MaxIter',200000,'MaxFunEvals',1000000,'Display','none');
@@ -127,25 +130,41 @@ qcdistc(i)=minq(2);
 end
 end
 toc
-save qcondist2 qidistc qcdistc 
+%save qcondist qidistc qcdistc 
 
 %%
 %Estimate quality for open
+%Sum of OUT=1 constraint dropped
 qidisto=zeros(length(dataseto),1);
 qcdisto=qidisto;
-q0=[0,0];
+q0=[-0.05,-0.05];
 tic
 for i=1:length(dataseto);
 options=optimset('MaxIter',200000,'MaxFunEvals',1000000,'Display','none');
 [minq,SRR,flag]=fminsearch(@(XQEV) Minimizequality(Est2,mintheta2ndstage,est3rdstage,coef3rdstep,estopen,q_C_E_VCT,dataseto(i,:),XQEV,3),q0,options);
-%[minq,SRR,flag]=fminunc(@(XQEV) Minimizequality(Est2,mintheta2ndstage,est3rdstage,coef3rdstep,estopen,q_C_E_VCT,datasetc(i,:),XQEV,1),q0,options);
+%[minq,SRR,flag]=fminunc(@(XQEV) Minimizequality(Est2,mintheta2ndstage,est3rdstage,coef3rdstep,estopen,q_C_E_VCT,dataseto(i,:),XQEV,3),q0,options);
 if flag==1
 qidisto(i)=minq(1);
 qcdisto(i)=minq(2);
 end
 end
 toc
-save qopendist2 qidisto qcdisto 
+save qopendist3 qidisto qcdisto 
+
+%%
+%Estimate quality for uncontested
+qidistu=zeros(length(datasetu),1);
+q0=-0.01;
+tic
+for i=1:length(datasetu)
+options=optimset('MaxIter',200000,'MaxFunEvals',1000000,'Display','none');
+[minq,SRR,flag]=fminsearch(@(XQEV) Minimizequality(Est2,mintheta2ndstage,est3rdstage,coef3rdstep,estopen,q_C_E_VCT,datasetu(i,:),XQEV,2),q0,options);
+if flag==1
+qidistu(i)=minq(1);
+end
+end
+toc
+save quncondist qidistu 
 %%
 %OUT specification check
 datasetV=datasetc;
@@ -201,26 +220,84 @@ OUTI=@(qi)((beta*costi*(alpha/beta)*ben2*(ones(length(qi),1)+a*qi+b*qi.^2+c*qi.^
 OUTC=@(qc)((beta*costc*(alpha/beta)*ben2*(ones(length(qc),1)+ac*(qc+abs(min(q_C_E_VCT))+0.001)+bc*(qc+abs(min(q_C_E_VCT))+0.001).^2+cc*(qc+abs(min(q_C_E_VCT))+0.001).^3).*LOGTotal_E_VC.^(beta-1)).*(1./exp(LOGTotal_E_VC(:,1))))./((vdelta*Derivc(qc)).*(1./exp(LOGW_NXT_E_VC)));
 
 
-space=linspace(-0.2+abs(min(q_C_E_VCT)),0.2+abs(min(q_C_E_VCT)),10000);
+space=linspace(0.05,0.06,10000);
 outmatc=zeros(length(space),1);
 for i= 1:length(space)
     outmatc(i)=OUTC(space(i));
 end
 
-space2=linspace(0.05,0.065,10000);
+space2=linspace(0.05,0.055,10000);
 outmati=zeros(length(space2),1);
 for i= 1:length(space2)
     outmati(i)=OUTI(space2(i));
 end
 figure(1)
-plot(space-abs(min(q_C_E_VCT)),outmatc)
+plot(space,outmatc)
 figure(2)
 plot(space2,outmati)
+
+%%
+%FOC specification check for uncontested periods
+datasetV=datasetu;
+LOGW_NXT_E_V=datasetV(15,1);
+LOGTotal_E_V=datasetV(1,2);
+LOGD_E_V=datasetV(1,3);
+PartyE_V=datasetV(1,4);
+SameE_V=datasetV(1,5);
+PresdumE_V=datasetV(1,6);
+MidtermE_V=datasetV(1,7);
+XSEV_=datasetV(1,8:9);
+TenureE_V=datasetV(1,10);
+LOGW_NXT_E_VC=datasetV(1,11);
+LOGTotal_E_VC=datasetV(1,12);
+LOGD_E_VC=datasetV(1,13);
+
+vdelta=0.90;
+% thetaS=thetain(1:2,1);
+% B_I=thetain(1,1);
+% B_C=thetain(2,1);
+% B_T=thetain(5,1);
+% thetaS2=thetain(3:4,1);
+
+
+alpha=1/2;
+beta=2;
+ben1=abs(mintheta2ndstage(2));
+ben2=ben1;
+sig=abs(mintheta2ndstage(3));
+
+costi=abs(mintheta2ndstage(1));
+a=mintheta2ndstage(4);
+b=mintheta2ndstage(5);
+c=mintheta2ndstage(6);
+
+costc=abs(est3rdstage(1));
+ac=est3rdstage(2);
+bc=est3rdstage(3);
+cc=est3rdstage(4);
+
+
+B_I=Est2(1);
+B_C=Est2(2);
+B_O=abs(estopen(1));
+B_state=Est2(3:4);
+B_T=Est2(5);
+FOC11i=@(qi)(beta*costi*(alpha/beta)*ben2*(ones(length(qi),1)+a*qi+b*qi.^2+c*qi.^3).*LOGTotal_E_V.^(beta-1)).*(1./exp(LOGTotal_E_V(:,1)))...      %% d/dI C_I(total)
+    -alpha*ben1*(1./exp(LOGD_E_V(:,1))).*(max(0,(LOGD_E_V))).^(alpha-1);
+
+space=linspace(-0.2,0.5,10000);
+focmatu=zeros(length(space),1);
+for i= 1:length(space)
+    focmatu(i)=FOC11i(space(i));
+end
+
+figure(1)
+plot(space,focmatu)
 %%
 
 %Quality data restoration
 load qcondist2
-load qopendist2
+load qopendist3
 
 %Indicator of sample truncation
 %for contested
@@ -296,11 +373,11 @@ contestc=qualchal(:,4);
 %%
 %Raw distribution
 bins=linspace(-0.5,0.5,100);
-figure(1)
-histogram(qdistinc(contesti==1,:),bins)
-hold on
+%figure(1)
+%histogram(qdistinc(contesti==1,:),bins)
+%hold on
 %figure(2)
-histogram(qdistchal,bins)
+histogram(qdistchal(contestc==0,:),bins)
 %figure(3)
 %hist(qdistchal(contestc==0,:))
 
@@ -354,7 +431,7 @@ qual(open==1,:)=[qidisto,qcdisto,outo];
 
 
 data2=[E_V_july8,qual];
-dlmwrite('contestedresult.csv',data2,'delimiter', ',', 'precision', 16)
+dlmwrite('qualresult.csv',data2,'delimiter', ',', 'precision', 16)
 
 
 
