@@ -61,6 +61,7 @@ OP_INC_IV_july8(OP_INC_IV_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleA=find(OP_INC_IV_july8(:,16)==0);
 OP_INC_IV_july8(deleA,:)=[];%Drop if oppornent disburse=0
 OP_INC_IV_july8(102,:)=[];%Drop an Rtotd outlier
+OP_INC_IV_july8(6,:)=[];%Drop an Rtotd outlier
 
  
 dele2=find(sum(isnan(OP_INC_july8),2)>0);
@@ -77,6 +78,9 @@ E_V_july8(E_V_july8(:,2)>2002,:)=[]; %Drop year 2004 and on
 deleC=find((E_V_july8(:,16)==0).*E_V_july8(:,8)==1);
 E_V_july8(deleC,:)=[]; %Drop if oppornent disburse=0 and contested
 E_V_july8(174:177,:)=[]; %Drop an Rtotd outlier
+E_V_july8(11:13,:)=[]; %Drop an Rtotd outlier
+E_V_july8([850,1110,1111],:)=[]; %Drop an Rtotd outlier
+
 
 %DO NOT DROP SAMPLES WITH NONPOSITIVE BEGCASH/NONPOSITIVE ENDCASH.
 %ESTIMATION RESULTS CONSIDERABLY DIFFERENT.
@@ -129,6 +133,8 @@ Same=Same-Dif;%Same party=1 if candidate party=President party, otherwise -1
 % Black_NC=Estimation_OP(:,28);
 % Other_NC=Estimation_OP(:,29);
 Unemployment=Estimation_OP(:,24);
+%Unemployment=Unemployment-mean(Unemployment);
+
 % Unemployment_NC=Estimation_OP(:,30);
 Partisan=Estimation_OP(:,63);
 
@@ -150,6 +156,7 @@ Midterm=Estimation_OP(:,65);
 %---------------------------------------------------------
 fineness=9;
 mesh=quantile(RTotD_NC,linspace(0,1,fineness).');
+
 X_Knot1=(RTotD_NC<mesh(2,1)).*(1-(RTotD_NC-mesh(1,1))/(mesh(2,1)-mesh(1,1)));
 for i=0:(numel(mesh)-3)
     PLUS=(RTotD_NC>=mesh(i+1,1)).*(RTotD_NC<mesh(i+2,1)).*((RTotD_NC-mesh(i+1,1))/(mesh(i+2,1)-mesh(i+1,1)))...
@@ -163,7 +170,7 @@ X_Knot1=[X_Knot1,PLUS];
 X_Knot1=X_Knot1(:,2:fineness);
 
 
-
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%      Ai & Chen     %%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -205,6 +212,7 @@ SameAC=SameAC-DifAC;
 % Black_NCAC=AC(:,28);
 % Other_NCAC=AC(:,29);
 UnemploymentAC=AC(:,24);
+%UnemploymentAC=UnemploymentAC-mean(UnemploymentAC);
 UnemploymentsqAC=UnemploymentAC.^2;
 %Unemployment_NCAC=AC(:,30);
 PartisanAC=AC(:,63);
@@ -213,6 +221,7 @@ PartisanAC=AC(:,63);
 UnempsameAC=UnemploymentAC.*SameAC;
 UnempsqsameAC=UnemploymentsqAC.*SameAC;
 PartdemoAC=PartisanAC.*PartyAC;
+PartsqdemoAC=PartisanAC.^2.*PartyAC;
 
 PresdumAC=AC(:,64);
 PresdumsameAC=PresdumAC.*SameAC;
@@ -325,6 +334,7 @@ MidtermE_VNCT(E_VNContestFUL,:)=[];
 % XS_EVNCT_(E_VNContestFUL,:)=[];
 
 XSEV_=[E_V_july8(:,24),E_V_july8(:,63)];    % E_V(:,24)=unemployment (%), E_V(:,63)=partisanship
+%XSEV_(:,2)=XSEV_(:,2)-mean(XSEV_(:,2));
 XS_EVCT_=XSEV_;
 XS_EVCT_(E_VContestFUL,:)=[];
 XS_EVCTwnxt_=XS_EVCT_;
@@ -480,16 +490,45 @@ X_KnotE_VNCT(E_VNContestFUL,:)=[];
 
 
 %Specification 1
- Xentry=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),X_Knot1];
+ Xentry=[ones(Samplesize,1),LOGW_I,LOGW_I.^2,Unempsame,Partdemo,log(Tenure+1),Midterm,Presdum,Midterm.*Presdum,X_Knot1,X_Knot1.*(repmat(LOGW_I,1,size(X_Knot1,2)))];
  coefentry=Xentry\Contest;
+ residentry=Contest-Xentry*coefentry;
+ sigma2entry=residentry.'*residentry/(Samplesize-size(Xentry,2));
+ XX=Xentry.'*Xentry;
+ covmatentry=inv(XX)*sigma2entry;
+ seentry=sqrt(diag(covmatentry));
+ 
  coefprimaryN=Xentry\Primary_N;
-
+ residprimaryn=Primary_N-Xentry*coefprimaryN;
+ sigma2primaryn=residprimaryn.'*residprimaryn/(Samplesize-size(Xentry,2));
+ XX=Xentry.'*Xentry;
+ covmatprimaryn=inv(XX)*sigma2primaryn;
+ seprimaryn=sqrt(diag(covmatprimaryn));
 %Specification 2
-%  Xentry2=[ones(Samplesize,1),LOGW_I,Unempsame,Partdemo,log(Tenure+1),Presdum,Presdumsame,Unemppresdumsame,Midterm,X_Knot1,X_Knot1.*(LOGW_I*ones(1,fineness-1))];
-%  coefentry2=Xentry2\Contest;
-%  coefprimaryN2=Xentry2\Primary_N;
-
-
+%  Xentry=[ones(Samplesize,1),LOGW_I,LOGW_I.^2,Unemployment,Unemployment.^2,Same,Partdemo,log(Tenure+1),Midterm,Presdum,Midterm.*Presdum,X_Knot1,X_Knot1.*(repmat(LOGW_I,1,size(X_Knot1,2)))];
+%  coefentry=Xentry\Contest;
+%  residentry=Contest-Xentry*coefentry;
+%  sigma2entry=residentry.'*residentry/(Samplesize-size(Xentry,2));
+%  XX=Xentry.'*Xentry;
+%  covmatentry=inv(XX)*sigma2entry;
+%  seentry=sqrt(diag(covmatentry));
+%  
+%  coefprimaryN=Xentry\Primary_N;
+%  residprimaryn=Primary_N-Xentry*coefprimaryN;
+%  sigma2primaryn=residprimaryn.'*residprimaryn/(Samplesize-size(Xentry,2));
+%  XX=Xentry.'*Xentry;
+%  covmatprimaryn=inv(XX)*sigma2primaryn;
+%  seprimaryn=sqrt(diag(covmatprimaryn));
+% 
+%   space2=min(Unemployment):0.0001:max(Unemployment);
+%  regressor=[space2;space2.^2].';%*100;space2.^3*1000;space2.^4*10000;space2.^5*100000]';%;space2.^6*1000000].';%;space2.^5*10000;space2.^(1/2)
+%  results=regressor*coefentry(4:5);
+% % %results=regressor*coefprimaryN(length(coefprimaryN)-4:length(coefprimaryN));
+%  scatter(space2,results)
+% 
+% space=min(LOGW_I):0.01:max(LOGW_I);
+% result=[space;space.^2].'*coefentry(2:3);
+% scatter(space,result)
 %%%%%%%%%%
 %Result of specification check: available on dropbox.
 
@@ -500,17 +539,23 @@ X_KnotE_VNCT(E_VNContestFUL,:)=[];
 %%%%%%%%%%%%%%%%%
 
 %Original specification
-Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry;
-Eentry2=min(1,[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry);
-EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefprimaryN;
-Xvoteshare=[LOGD_IAC,LOGD_CAC,UnempsameAC,PartdemoAC,log(TenureAC+1),EprimaryN,Eentry,EprimaryN.*Eentry,RTotD_NCAC,RTotD_NCAC.^2,RTotD_NCAC.^3];
-IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.*log(TenureAC+1),UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1)),PresdumAC,PresdumsameAC,UnemppresdumsameAC,MidtermAC];
-IVvar=IVvoteshare.'*IVvoteshare;
+Eentry=[ones(SamplesizeAC,1),LOGW_IAC,LOGW_IAC.^2,UnempsameAC,PartdemoAC,log(TenureAC+1),MidtermAC,PresdumAC,MidtermAC.*PresdumAC,X_KnotAC1,X_KnotAC1.*(repmat(LOGW_IAC,1,size(X_KnotAC1,2)))]*coefentry;
+EprimaryN=[ones(SamplesizeAC,1),LOGW_IAC,LOGW_IAC.^2,UnempsameAC,PartdemoAC,log(TenureAC+1),MidtermAC,PresdumAC,MidtermAC.*PresdumAC,X_KnotAC1,X_KnotAC1.*(repmat(LOGW_IAC,1,size(X_KnotAC1,2)))]*coefprimaryN;
 
-coefvoteshare=inv(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*Xvoteshare)*(Xvoteshare.'*IVvoteshare*inv(IVvar)*IVvoteshare.'*(VSAC-0.5));
+Xvoteshare=[ones(length(VSAC),1),LOGD_IAC,LOGD_CAC,UnemploymentAC,UnemploymentsqAC,UnempsameAC,UnempsqsameAC,PartdemoAC,log(TenureAC+1),EprimaryN,Eentry,EprimaryN.*Eentry,EprimaryN.^2,Eentry.^2,RTotD_NCAC,RTotD_NCAC.^2*100,RTotD_NCAC.^3*1000,RTotD_NCAC.^4*10000,RTotD_NCAC.^5*100000];%,RTotD_NCAC.^6*1000000];%,,RTotD_NCAC.^(1/2)
+IVvoteshare=[ones(length(VSAC),1),LOGW_IAC,LOGW_IAC.^2,LOGW_IAC.*log(TenureAC+1),LOGW_IAC.*UnemploymentAC,LOGW_IAC.*PartdemoAC,UnemploymentAC,UnemploymentsqAC,UnempsameAC,UnempsqsameAC,SameAC,PartdemoAC,PartsqdemoAC,log(TenureAC+1),(log(TenureAC+1)).^2,X_KnotAC1,X_KnotAC1.*(LOGW_IAC*ones(1,fineness-1)),PresdumAC,MidtermAC,PresdumAC.*MidtermAC];
+IVvar=IVvoteshare.'*IVvoteshare;
+IVmix=IVvoteshare*(IVvar\IVvoteshare.');
+
+
+
+
+coefvoteshare=(Xvoteshare.'*IVmix*Xvoteshare)\(Xvoteshare.'*IVmix*(VSAC-0.5));
 
 residual=VSAC-0.5-Xvoteshare*coefvoteshare;
-residstd=sqrt(sum(residual.^2)./(SamplesizeAC-numel(coefvoteshare)-1));
+residvar=sum(residual.^2)./(SamplesizeAC-numel(coefvoteshare));
+covvoteshare=residvar*inv(Xvoteshare.'*IVmix*Xvoteshare);
+sevoteshare=sqrt(diag(covvoteshare));
 %Variant 1(to reduce coef of Logd_CAC and increase q_I)
 %  Eentry=[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry;
 %  Eentry2=min(1,[ones(SamplesizeAC,1),LOGW_IAC,UnempsameAC,PartdemoAC,log(TenureAC+1),X_KnotAC1]*coefentry);
@@ -530,13 +575,29 @@ residstd=sqrt(sum(residual.^2)./(SamplesizeAC-numel(coefvoteshare)-1));
 % IVvar2=IVvoteshare2.'*IVvoteshare2;
 % 
 % coefvoteshare2=inv(Xvoteshare2.'*IVvoteshare2*inv(IVvar2)*IVvoteshare2.'*Xvoteshare2)*(Xvoteshare2.'*IVvoteshare2*inv(IVvar2)*IVvoteshare2.'*(VSAC-0.5));
-% % 
+% %
+save residvar residvar
+%%
+%Specification check
+space=(min(UnemploymentAC):0.0001:max(UnemploymentAC));
+figure(1)
+scatter(space,(coefvoteshare(4)-coefvoteshare(6))*space+(coefvoteshare(5)-coefvoteshare(7))*space.^2)
+hold on
+scatter(space,(coefvoteshare(4)+coefvoteshare(6))*space+(coefvoteshare(5)+coefvoteshare(7))*space.^2)
+figure(2)
+histogram(UnemploymentAC)
+
+%%
+space2=min(RTotD_NCAC):0.0001:0.07;
+regressor=[space2;space2.^2*100;space2.^3*1000;space2.^4*10000;space2.^5*100000]';%;space2.^6*1000000].';%;space2.^5*10000;space2.^(1/2)
+results=regressor*coefvoteshare(length(coefvoteshare)-size(regressor,2)+1:length(coefvoteshare));
+scatter(space2,results)
 %%
 %%%%%%%%%%%%%%%%%%
 %Estimation of winning probability
 %Number=3
 %%%%%%%%%%%%%%%%%%
-Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnempsameAC,UnempsqsameAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1),log(TenureAC+1).^2,...
+Xprobwin=[ones(length(Win_AC),1),LOGW_IAC,UnemploymentAC,UnemploymentsqAC,PartdemoAC,LOGW_IAC.^2,X_KnotAC1,log(TenureAC+1),log(TenureAC+1).^2,...
     X_KnotAC1.*(UnempsameAC*ones(1,8)),X_KnotAC1.*(PartdemoAC*ones(1,8)),X_KnotAC1.*(log(TenureAC+1)*ones(1,8)),...;
   LOGW_IAC.^3];%X_KnotAC1.*(LOGW_IAC*ones(1,8)), ,log(TenureAC+1).*LOGW_IAC
 
@@ -548,7 +609,10 @@ predprobwin=min(1,Xprobwin*coefprobwin);
 
 %If modifying Xprobwin, make sure the corresponding part on "actions.m" is
 %modified as well.
-
+%%
+expectedqc=[EprimaryN,Eentry,EprimaryN.*Eentry,EprimaryN.^2,Eentry.^2]*coefvoteshare(10:14);
+histogram(expectedqc)
+save expectedqc expectedqc
 %%
 %Specification check for winning probability
 errorprobwin=sum((Win_AC-Xprobwin*coefprobwin).^2)/(var(Win_AC)*length(Win_AC));
@@ -570,7 +634,7 @@ scatter(xspace,derivprobwin(xspace,max(log(TenureAC+1)),quantile(RTotD_NCAC,0.9)
 derivprobwin2=[zeros(numel(LOGW_IAC),1),ones(numel(LOGW_IAC),1),zeros(numel(LOGW_IAC),3),2*LOGW_IAC,zeros(numel(LOGW_IAC),10),...
     zeros(numel(LOGW_IAC),24),3*LOGW_IAC.^2]*coefprobwin;%2*LOGW_IAC,,3*LOGW_IAC.^2
 
-derivprobwinall1=(coefentry(2)).*predprobwin+Eentry2.*derivprobwin2-(coefentry(2))*ones(numel(LOGW_IAC),1);
+derivprobwinall1=(coefentry(2)).*predprobwin+Eentry.*derivprobwin2-(coefentry(2))*ones(numel(LOGW_IAC),1);
 hist(derivprobwinall1(derivprobwinall1>-0.01),50)
 
 test1=find(derivprobwinall1<0);
@@ -584,7 +648,8 @@ Est1=[coefentry;coefprimaryN];
 Est2=coefvoteshare;
 %Est1=[coefentry2;coefprimaryN2];
 %Est2=coefvoteshare2;
-
+save Est1 Est1
+save Est2 Est2
 
 %%
 %%%%%%%%%%%%%%%%%%
@@ -597,81 +662,158 @@ Est2=coefvoteshare;
   %%%%%%%%%%
   %4-1: spending
   %%%%%%%%%%
-load('./Est411.mat');
-load('./Est412.mat');
-load('./Est413.mat');
-Sofarbest1= Minimize_Apr2013(Est411,11);
-Sofarbest2= Minimize_Apr2013(Est412,12);
-Sofarbest3= Minimize_Apr2013(Est413,13);
-aux11=Est411;
-aux12=Est412;
-aux13=Est413;
-  OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
-  
-%%
-for j=1:500
-    
+
 %Find initial theta0
-    thetaQ2=Est2(9:numel(Est2));
-if numel(thetaQ2)==3
-    XQEV2=[RTotDE_VCT,RTotDE_VCT.^2,RTotDE_VCT.^3]*thetaQ2; % q_I
+    thetaQ2=Est2(numel(Est2)-4:numel(Est2));
+%if numel(thetaQ2)==2
+aux=[RTotDE_VCT,RTotDE_VCT.^2*100,RTotDE_VCT.^3*1000,RTotDE_VCT.^4*10000,RTotDE_VCT.^5*100000]*thetaQ2;
+    XQEV2=aux-mean(aux); % q_I
     XQEVCT2=XQEV2;
     %XQEVCT2(E_VContestFUL,:)=[]; Already VCT
     XQEVCTwnxt2=XQEVCT2;
     XQEVCTwnxt2(IND5,:)=[];
-else
-    XQEV2=X_KnotEV1*thetaQ2;  % q_I
-    XQEVCT2=XQEV2;
-    XQEVCT2(E_VContestFUL,:)=[];
-    XQEVCTwnxt2=XQEVCT2;
-    XQEVCTwnxt2(IND5,:)=[];
-end
+% else
+%     XQEV2=X_KnotEV1*thetaQ2;  % q_I
+%     XQEVCT2=XQEV2;
+%     XQEVCT2(E_VContestFUL,:)=[];
+%     XQEVCTwnxt2=XQEVCT2;
+%     XQEVCTwnxt2(IND5,:)=[];
+% end
+%%
 
-theta0=zeros(24,1);
+%Start from random points
+seed=57;
+rng(seed);
+
+nn=500000;
+theta0=zeros(24,nn);
 Cutoff=[-1;3;7;100];
 TAU=find((TenureE_VCT<=Cutoff(3,1))&(TenureE_VCT>Cutoff(2,1)));
-theta0(1:8)=20*rand(8,1);
-theta0(9)=mean(LOGD_E_VCT(TAU));
-theta0(10)=mean(XQEVCT2(TAU));
-theta0(11)=mean(LOGW_E_VCT(TAU));
-theta0(12)=mean(XS_EVCT_(TAU,1));
-theta0(13)=mean(XS_EVCT_(TAU,2).*PartyE_VCT(TAU));
-theta0(14)=mean(SameE_VCT(TAU));
-theta0(15)=mean(PresdumE_VCT(TAU));
-theta0(16)=mean(MidtermE_VCT(TAU));
-theta0(17:24)=rand(8,1);
-
+% theta0(1:8,:)=20*rand(8,nn);
+% theta0(9,:)=0.65*mean(LOGD_E_VCT(TAU))+0.65*mean(LOGD_E_VCT(TAU))*rand(1,nn);
+% theta0(10,:)=0.65*mean(XQEVCT2(TAU))+0.65*mean(XQEVCT2(TAU))*rand(1,nn);
+% theta0(11,:)=0.65*mean(LOGW_E_VCT(TAU))+0.65*mean(LOGW_E_VCT(TAU))*rand(1,nn);
+% theta0(12,:)=0.65*mean(XS_EVCT_(TAU,1))+0.65*mean(XS_EVCT_(TAU,1))*rand(1,nn);
+% theta0(13,:)=0.65*mean(XS_EVCT_(TAU,2).*PartyE_VCT(TAU))+0.65*mean(XS_EVCT_(TAU,2).*PartyE_VCT(TAU))*rand(1,nn);
+% theta0(14,:)=0.65*mean(SameE_VCT(TAU))+0.65*mean(SameE_VCT(TAU))*rand(1,nn);
+% theta0(15,:)=0.65*mean(PresdumE_VCT(TAU))+0.65*mean(PresdumE_VCT(TAU))*rand(1,nn);
+% theta0(16,:)=0.65*mean(MidtermE_VCT(TAU))+0.65*mean(MidtermE_VCT(TAU))*rand(1,nn);
+% theta0(17:24,:)=rand(8,nn);
+theta0(1:8,:)=10*(rand(8,nn)-0.5);
+theta0(9:16,:)=100*(rand(8,nn)-0.5);
+theta0([1,3],:)=abs(theta0([1,3],:));
+theta0(17:24,:)=10*rand(8,nn);
 
 %Saving for young
-% 
-% funvalue=Minimize_Apr2013(theta0,11);
-% funvalueend=0;
-% theta411=theta0;
-% while abs(funvalue-funvalueend)>0.001
-%     funvalue=Minimize_Apr2013(theta411,11);
-%     [mintheta11,SRR]=fminsearch(@(x) Minimize_Apr2013(x,11),theta411,OPTIONS);
-%     funvalueend=Minimize_Apr2013(mintheta11,11);
-% %      if mod(sss,30)==1
-% %      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
-% %      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
-% %      else
-%         theta411=mintheta11;
-% %     end
-%     
-%     if SRR<Sofarbest1
-%         Sofarbest1=SRR;
-%         %    bestiter=iterate;
-%         %save Est4.txt mintheta -ASCII
-%         aux11=mintheta11;
-%     end
-% end
-% 
-% Est411=aux11;
-% save Est411 Est411
+funvalue11=zeros(1,nn);
+funvalue12=zeros(1,nn);
+funvalue13=zeros(1,nn);
+funvalue21=zeros(1,nn);
+funvalue22=zeros(1,nn);
+funvalue23=zeros(1,nn);
+% funvalue31=zeros(1,nn);
+% funvalue32=zeros(1,nn);
+% funvalue33=zeros(1,nn);
+funvalue311=zeros(1,nn);
+funvalue312=zeros(1,nn);
+funvalue313=zeros(1,nn);
+funvalue321=zeros(1,nn);
+funvalue322=zeros(1,nn);
+funvalue323=zeros(1,nn);
+for i=1:nn
+ i
+funvalue11(i)=Minimize_Apr2013(theta0(:,i),11);
+funvalue12(i)=Minimize_Apr2013(theta0(:,i),12);
+funvalue13(i)=Minimize_Apr2013(theta0(:,i),13);
+funvalue21(i)=Minimize_Apr2013(theta0(:,i),21);
+funvalue22(i)=Minimize_Apr2013(theta0(:,i),22);
+funvalue23(i)=Minimize_Apr2013(theta0(:,i),23);
+% funvalue31(i)=Minimize_Apr2013(theta0(:,i),31);
+% funvalue32(i)=Minimize_Apr2013(theta0(:,i),32);
+% funvalue33(i)=Minimize_Apr2013(theta0(:,i),33);
+funvalue311(i)=Minimize_Apr2013(theta0(:,i),311);
+funvalue312(i)=Minimize_Apr2013(theta0(:,i),312);
+funvalue313(i)=Minimize_Apr2013(theta0(:,i),313);
+funvalue321(i)=Minimize_Apr2013(theta0(:,i),321);
+funvalue322(i)=Minimize_Apr2013(theta0(:,i),322);
+funvalue323(i)=Minimize_Apr2013(theta0(:,i),323);
+end
+id=funvalue11>0;
+theta0=theta0(:,id);
+funvalue11=funvalue11(id);
+funvalue12=funvalue12(id);
+funvalue13=funvalue13(id);
+funvalue21=funvalue21(id);
+funvalue22=funvalue22(id);
+funvalue23=funvalue23(id);
+% funvalue31=funvalue31(id);
+% funvalue32=funvalue32(id);
+% funvalue33=funvalue33(id);
+funvalue311=funvalue311(id);
+funvalue312=funvalue312(id);
+funvalue313=funvalue313(id);
+funvalue321=funvalue321(id);
+funvalue322=funvalue322(id);
+funvalue323=funvalue323(id);
+save initfun2 funvalue11 funvalue12 funvalue13 funvalue21 funvalue22 funvalue23 funvalue311 funvalue312 funvalue313 funvalue321 funvalue322 funvalue323 theta0 seed
+%%
+ OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+  
+% load initfun2
+% %Minimize for 411
+% aux=sortrows([funvalue11(funvalue11<min(funvalue11)+1).',theta0(:,funvalue11<min(funvalue11)+1).']);
+% theta0mat=aux(:,2:end).';
+% theta411=theta0mat(:,1);
 
-funvalue=Minimize_Apr2013(theta0,12);
+load('./Est411.mat');
+clear Sofarbest1
+Sofarbest1= Minimize_Apr2013(Est411,11);
+aux11=Est411;
+
+theta411=aux11;
+
+funvalue=10;
 funvalueend=0;
-theta412=theta0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta411,11);
+    [mintheta11,SRR]=fminsearch(@(x) Minimize_Apr2013(x,11),theta411,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta11,11);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+    theta411=mintheta11;
+%     end
+    
+    if SRR<Sofarbest1
+        Sofarbest1=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        aux11=mintheta11;
+    end
+end
+
+Est411=aux11;
+save Est411 Est411 Sofarbest1
+%%
+
+ OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+  
+%load initfun
+%Minimize for 412
+% aux=sortrows([funvalue12(funvalue12<min(funvalue12)+10).',theta0(:,funvalue12<min(funvalue12)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta412=theta0mat(:,1);
+
+load('./Est412.mat');
+clear Sofarbest2
+Sofarbest2= Minimize_Apr2013(Est412,12);
+aux12=Est412;
+
+theta412=aux12;
+
+funvalue=10;
+funvalueend=0;
 while abs(funvalue-funvalueend)>0.001
     funvalue=Minimize_Apr2013(theta412,12);
     [mintheta12,SRR]=fminsearch(@(x) Minimize_Apr2013(x,12),theta412,OPTIONS);
@@ -692,113 +834,111 @@ while abs(funvalue-funvalueend)>0.001
 end
 
 Est412=aux12;
-save Est412 Est412
-% 
-% funvalue=Minimize_Apr2013(theta0,13);
-% funvalueend=0;
-% theta413=theta0;
-% while abs(funvalue-funvalueend)>0.001
-%     funvalue=Minimize_Apr2013(theta413,13);
-%     [mintheta13,SRR]=fminsearch(@(x) Minimize_Apr2013(x,13),theta413,OPTIONS);
-%     funvalueend=Minimize_Apr2013(mintheta13,13);
-% %      if mod(sss,30)==1
-% %      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
-% %      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
-% %      else
-%         theta413=mintheta13;
-% %     end
-%     
-%     if SRR<Sofarbest3
-%         Sofarbest3=SRR;
-%         %    bestiter=iterate;
-%         %save Est4.txt mintheta -ASCII
-%         aux13=mintheta13;
+save Est412 Est412 Sofarbest2
+
+ OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+  
+%load initfun
+%Minimize for 413
+% aux=sortrows([funvalue13(funvalue13<min(funvalue13)+10).',theta0(:,funvalue13<min(funvalue13)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta413=theta0mat(:,1);
+
+load('./Est413.mat');
+clear Sofarbest3
+Sofarbest3= Minimize_Apr2013(Est413,13);
+aux13=Est413;
+
+theta413=aux13;
+
+funvalue=10;
+funvalueend=0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta413,13);
+    [mintheta13,SRR]=fminsearch(@(x) Minimize_Apr2013(x,13),theta413,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta13,13);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta413=mintheta13;
 %     end
-% end
-% 
-% Est413=aux13;
-% save Est413 Est413
+    
+    if SRR<Sofarbest3
+        Sofarbest3=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        aux13=mintheta13;
+    end
 end
 
-%%
+Est413=aux13;
+save Est413 Est413 Sofarbest3
+
+
+
   %%%%%%%%%%
   %4-2: fundraising
   %%%%%%%%%%
- 
+
+%fundraising for young
+OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+%load initfun
+%Minimize for 421
+% aux=sortrows([funvalue21(funvalue21<min(funvalue21)+10).',theta0(:,funvalue21<min(funvalue21)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta421=theta0mat(:,1);
+
 load('./Est421.mat');
-load('./Est422.mat');
-load('./Est423.mat');
-Sofarbest1= Minimize_Apr2013(Est421,21);
-Sofarbest2= Minimize_Apr2013(Est422,22);
-Sofarbest3= Minimize_Apr2013(Est423,23);
+clear Sofarbest21
+Sofarbest21= Minimize_Apr2013(Est421,21);
 aux21=Est421;
-aux22=Est422;
-aux23=Est423;
-  OPTIONS=optimset('MaxIter',10000,'MaxFunEvals',1000000,'Display','iter');
-  
-%%
-for j=1:500
+
+theta421=aux21
+
+funvalue=10;
+funvalueend=0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta421,21);
+    [mintheta21,SRR]=fminsearch(@(x) Minimize_Apr2013(x,21),theta421,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta21,21);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta421=mintheta21;
+%     end
     
-%Find initial theta0
-    thetaQ2=Est2(9:numel(Est2));
-if numel(thetaQ2)==3
-    XQEV2=[RTotDE_VCT,RTotDE_VCT.^2,RTotDE_VCT.^3]*thetaQ2; % q_I
-    XQEVCT2=XQEV2;
-    %XQEVCT2(E_VContestFUL,:)=[]; Already VCT
-    XQEVCTwnxt2=XQEVCT2;
-    XQEVCTwnxt2(IND5,:)=[];
-else
-    XQEV2=X_KnotEV1*thetaQ2;  % q_I
-    XQEVCT2=XQEV2;
-    XQEVCT2(E_VContestFUL,:)=[];
-    XQEVCTwnxt2=XQEVCT2;
-    XQEVCTwnxt2(IND5,:)=[];
+    if SRR<Sofarbest21
+        Sofarbest21=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        aux21=mintheta21;
+    end
 end
 
-theta0=zeros(24,1);    
-theta0(1:8)=10*(rand(8,1)-1);
-theta0(3)=-20*rand(1,1);
-theta0(9)=mean(LOGD_E_VCT);
-theta0(10)=mean(XQEVCT2);
-theta0(11)=mean(LOGW_E_VCT);
-theta0(12)=mean(XS_EVCT_(:,1));
-theta0(13)=mean(XS_EVCT_(:,2).*PartyE_VCT);
-theta0(14)=mean(SameE_VCT);
-theta0(15)=mean(PresdumE_VCT);
-theta0(16)=mean(MidtermE_VCT);
-theta0(17:24)=rand(8,1);
+Est421=aux21;
+save Est421 Est421 Sofarbest21
 
 
-%Saving for young
-% 
-% funvalue=Minimize_Apr2013(theta0,21);
-% funvalueend=0;
-% theta421=theta0;
-% while abs(funvalue-funvalueend)>0.001
-%     funvalue=Minimize_Apr2013(theta421,21);
-%     [mintheta21,SRR]=fminsearch(@(x) Minimize_Apr2013(x,21),theta421,OPTIONS);
-%     funvalueend=Minimize_Apr2013(mintheta21,21);
-% %      if mod(sss,30)==1
-% %      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
-% %      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
-% %      else
-%         theta421=mintheta21;
-% %     end
-%     
-%     if SRR<Sofarbest1
-%         Sofarbest1=SRR;
-%         %    bestiter=iterate;
-%         %save Est4.txt mintheta -ASCII
-%         aux21=mintheta21;
-%     end
-% end
-% 
-% Est421=aux21;
-% save Est421 Est421
-% 
-funvalue=Minimize_Apr2013(theta0,22);
+
+
+OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+%load initfun
+%Minimize for 422
+% aux=sortrows([funvalue22(funvalue22<min(funvalue22)+10).',theta0(:,funvalue22<min(funvalue22)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta422=theta0mat(:,1);
+
+load('./Est422.mat');
+clear Sofarbest22
+Sofarbest22= Minimize_Apr2013(Est422,22);
+aux22=Est422;
+
+theta422=aux22;
+
+funvalue=10;
 funvalueend=0;
-theta422=theta0;
 while abs(funvalue-funvalueend)>0.001
     funvalue=Minimize_Apr2013(theta422,22);
     [mintheta22,SRR]=fminsearch(@(x) Minimize_Apr2013(x,22),theta422,OPTIONS);
@@ -810,8 +950,8 @@ while abs(funvalue-funvalueend)>0.001
         theta422=mintheta22;
 %     end
     
-    if SRR<Sofarbest2
-        Sofarbest2=SRR;
+    if SRR<Sofarbest22
+        Sofarbest22=SRR;
         %    bestiter=iterate;
         %save Est4.txt mintheta -ASCII
         aux22=mintheta22;
@@ -819,89 +959,70 @@ while abs(funvalue-funvalueend)>0.001
 end
 
 Est422=aux22;
-save Est422 Est422
+save Est422 Est422 Sofarbest22
 
-% funvalue=Minimize_Apr2013(theta0,23);
-% funvalueend=0;
-% theta423=theta0;
-% while abs(funvalue-funvalueend)>0.001
-%     funvalue=Minimize_Apr2013(theta423,23);
-%     [mintheta23,SRR]=fminsearch(@(x) Minimize_Apr2013(x,23),theta423,OPTIONS);
-%     funvalueend=Minimize_Apr2013(mintheta23,23);
-% %      if mod(sss,30)==1
-% %      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
-% %      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
-% %      else
-%         theta423=mintheta23;
-% %     end
-%     
-%     if SRR<Sofarbest3
-%         Sofarbest3=SRR;
-%         %    bestiter=iterate;
-%         %save Est4.txt mintheta -ASCII
-%         aux23=mintheta23;
+OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+%load initfun
+%Minimize for 423
+% aux=sortrows([funvalue23(funvalue23<min(funvalue23)+10).',theta0(:,funvalue23<min(funvalue23)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta423=theta0mat(:,1);
+
+load('./Est423.mat');
+clear Sofarbest23
+Sofarbest23= Minimize_Apr2013(Est423,23);
+aux23=Est423;
+
+theta423=aux23;
+
+funvalue=10;
+funvalueend=0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta423,23);
+    [mintheta23,SRR]=fminsearch(@(x) Minimize_Apr2013(x,23),theta423,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta23,23);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta423=mintheta23;
 %     end
-% end
-% 
-% Est423=aux23;
-% save Est423 Est423
+    
+    if SRR<Sofarbest23
+        Sofarbest23=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        aux23=mintheta23;
+    end
 end
+
+Est423=aux23;
+save Est423 Est423 Sofarbest23
 
 
   
 
-%%
+
   %%%%%%%%%%
   %4-3: saving
   %DIRECT ESTIMATION
   %%%%%%%%%%
-%   load('Est431.mat');
-%     load('Est432.mat');
-%       load('Est433.mat');
-%   Sofarbest1=Minimize_Apr2013(Est431,31);
-%    Sofarbest2=Minimize_Apr2013(Est432,32);
-%     Sofarbest3=Minimize_Apr2013(Est433,33);
-%     aux31=Est431;
-%     aux32=Est432;
-%     aux33=Est433;
-%   OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'display','iter');
-%%
-% for j=1:500
-%     
-% %Find initial theta0
-%     thetaQ2=Est2(9:numel(Est2));
-% if numel(thetaQ2)==3
-%     XQEV2=[RTotDE_VCT,RTotDE_VCT.^2,RTotDE_VCT.^3]*thetaQ2; % q_I
-%     XQEVCT2=XQEV2;
-%     %XQEVCT2(E_VContestFUL,:)=[]; Already VCT
-%     XQEVCTwnxt2=XQEVCT2;
-%     XQEVCTwnxt2(IND5,:)=[];
-% else
-%     XQEV2=X_KnotEV1*thetaQ2;  % q_I
-%     XQEVCT2=XQEV2;
-%     XQEVCT2(E_VContestFUL,:)=[];
-%     XQEVCTwnxt2=XQEVCT2;
-%     XQEVCTwnxt2(IND5,:)=[];
-% end
-% 
-% theta0=zeros(24,1);    
-% theta0(1:8)=5*(rand(8,1)-1);
-% theta0(9)=mean(LOGW_NXT_E_VCTwnxt);
-% theta0(10)=mean(XQEVCTwnxt2);
-% theta0(11)=mean(LOGW_E_VCTwnxt);
-% theta0(12)=mean(XS_EVCTwnxt_(:,1));
-% theta0(13)=mean(XS_EVCTwnxt_(:,2).*PartyE_VCTwnxt);
-% theta0(14)=mean(SameE_VCTwnxt);
-% theta0(15)=mean(PresdumE_VCTwnxt);
-% theta0(16)=mean(MidtermE_VCTwnxt);
-% theta0(17:24)=rand(8,1);
-% 
 
 %Saving for young
-
-% funvalue=Minimize_Apr2013(theta0,31);
+% OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+% load initfun
+% %Minimize for 431
+% aux=sortrows([funvalue31(funvalue31<min(funvalue31)+10).',theta0(:,funvalue31<min(funvalue31)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta431=theta0mat(:,1);
+% 
+% load('./Est431.mat');
+% clear Sofarbest31
+% Sofarbest31= Minimize_Apr2013(Est431,31);
+% aux31=Est431;
+% 
+% funvalue=10;
 % funvalueend=0;
-% theta431=theta0;
 % while abs(funvalue-funvalueend)>0.001
 %     funvalue=Minimize_Apr2013(theta431,31);
 %     [mintheta31,SRR]=fminsearch(@(x) Minimize_Apr2013(x,31),theta431,OPTIONS);
@@ -913,8 +1034,8 @@ end
 %         theta431=mintheta31;
 % %     end
 %     
-%     if SRR<Sofarbest1
-%         Sofarbest1=SRR;
+%     if SRR<Sofarbest31
+%         Sofarbest31=SRR;
 %         %    bestiter=iterate;
 %         %save Est4.txt mintheta -ASCII
 %         aux31=mintheta31;
@@ -923,11 +1044,23 @@ end
 % 
 % 
 % Est431=aux31;
-% save Est431 Est431
+% save Est431 Est431 Sofarbest31
+% %%
 % 
-% funvalue=Minimize_Apr2013(theta0,32);
+% OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+% load initfun
+% %Minimize for 432
+% aux=sortrows([funvalue32(funvalue32<min(funvalue32)+10).',theta0(:,funvalue32<min(funvalue32)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta432=theta0mat(:,1);
+% 
+% load('./Est432.mat');
+% clear Sofarbest32
+% Sofarbest32= Minimize_Apr2013(Est432,32);
+% aux32=Est432;
+% 
+% funvalue=10;
 % funvalueend=0;
-% theta432=theta0;
 % while abs(funvalue-funvalueend)>0.001
 %     funvalue=Minimize_Apr2013(theta432,32);
 %     [mintheta32,SRR]=fminsearch(@(x) Minimize_Apr2013(x,32),theta432,OPTIONS);
@@ -939,21 +1072,33 @@ end
 %         theta432=mintheta32;
 % %     end
 %     
-%     if SRR<Sofarbest2
-%         Sofarbest2=SRR;
+%     if SRR<Sofarbest32
+%         Sofarbest32=SRR;
 %         %    bestiter=iterate;
 %         %save Est4.txt mintheta -ASCII
 %         aux32=mintheta32;
 %     end
 % end
 % 
-% ;
+% 
 % Est432=aux32;
-% save Est432 Est432
-
-% funvalue=Minimize_Apr2013(theta0,33);
+% save Est432 Est432 Sofarbest32
+% %%
+% 
+% OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+% load initfun
+% %Minimize for 433
+% aux=sortrows([funvalue33(funvalue33<min(funvalue33)+10).',theta0(:,funvalue33<min(funvalue33)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta433=theta0mat(:,1);
+% 
+% load('./Est433.mat');
+% clear Sofarbest33
+% Sofarbest33= Minimize_Apr2013(Est433,33);
+% aux33=Est433;
+% 
+% funvalue=10;
 % funvalueend=0;
-% theta433=theta0;
 % while abs(funvalue-funvalueend)>0.001
 %     funvalue=Minimize_Apr2013(theta433,33);
 %     [mintheta33,SRR]=fminsearch(@(x) Minimize_Apr2013(x,33),theta433,OPTIONS);
@@ -965,8 +1110,8 @@ end
 %         theta433=mintheta33;
 % %     end
 %     
-%     if SRR<Sofarbest3
-%         Sofarbest3=SRR;
+%     if SRR<Sofarbest33
+%         Sofarbest33=SRR;
 %         %    bestiter=iterate;
 %         %save Est4.txt mintheta -ASCII
 %         aux33=mintheta33;
@@ -974,114 +1119,114 @@ end
 % end
 % 
 % Est433=aux33;
-% save Est433 Est433
-% end
-%%
+% save Est433 Est433 Sofarbest33
+
+
 %%%%%%%%%
 %Alternative estimating strategy for saving:
 %Estimate both spending and fundraising conditional on winnning, and use
 %the budget constraint to recover saving.
 %%%%%%%%%
 
-%ESTIMATE SPENDING CONDITIONAL ON WINNING
-   load('Est4311.mat');
-     load('Est4312.mat');
-       load('Est4313.mat');
-   Sofarbest1=Minimize_Apr2013(Est4311,311);
-    Sofarbest2=Minimize_Apr2013(Est4312,312);
-     Sofarbest3=Minimize_Apr2013(Est4313,313);
-     aux311=Est4311;
-     aux312=Est4312;
-     aux313=Est4313;
-  OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'display','iter');
-%%
-for j=1:500
+OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+%load initfun
+%Minimize for 4311
+% aux=sortrows([funvalue311(funvalue311<min(funvalue311)+10).',theta0(:,funvalue311<min(funvalue311)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta4311=theta0mat(:,1);
+
+load('./Est4311.mat');
+clear Sofarbest311
+Sofarbest311= Minimize_Apr2013(Est4311,311);
+aux311=Est4311;
+
+theta4311=aux311;
+
+funvalue=10;
+funvalueend=0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta4311,311);
+    [mintheta311,SRR]=fminsearch(@(x) Minimize_Apr2013(x,311),theta4311,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta311,311);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta4311=mintheta311;
+%     end
     
-%Find initial theta0
-    thetaQ2=Est2(9:numel(Est2));
-if numel(thetaQ2)==3
-    XQEV2=[RTotDE_VCT,RTotDE_VCT.^2,RTotDE_VCT.^3]*thetaQ2; % q_I
-    XQEVCT2=XQEV2;
-    %XQEVCT2(E_VContestFUL,:)=[]; Already VCT
-    XQEVCTwnxt2=XQEVCT2;
-    XQEVCTwnxt2(IND5,:)=[];
-else
-    XQEV2=X_KnotEV1*thetaQ2;  % q_I
-    XQEVCT2=XQEV2;
-    XQEVCT2(E_VContestFUL,:)=[];
-    XQEVCTwnxt2=XQEVCT2;
-    XQEVCTwnxt2(IND5,:)=[];
+    if SRR<Sofarbest311
+        Sofarbest311=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        aux311=mintheta311;
+    end
 end
 
-theta0=zeros(24,1);    
-theta0(1:8)=5*(rand(8,1)-1);
-theta0(9)=mean(LOGW_NXT_E_VCTwnxt);
-theta0(10)=mean(XQEVCTwnxt2);
-theta0(11)=mean(LOGW_E_VCTwnxt);
-theta0(12)=mean(XS_EVCTwnxt_(:,1));
-theta0(13)=mean(XS_EVCTwnxt_(:,2).*PartyE_VCTwnxt);
-theta0(14)=mean(SameE_VCTwnxt);
-theta0(15)=mean(PresdumE_VCTwnxt);
-theta0(16)=mean(MidtermE_VCTwnxt);
-theta0(17:24)=rand(8,1);
 
-% 
-% 
-% funvalue=Minimize_Apr2013(theta0,311);
-% funvalueend=0;
-% theta4311=Est411;
-% while abs(funvalue-funvalueend)>0.001
-%     funvalue=Minimize_Apr2013(theta4311,311);
-%     [mintheta311,SRR]=fminsearch(@(x) Minimize_Apr2013(x,311),theta4311,OPTIONS);
-%     funvalueend=Minimize_Apr2013(mintheta311,311);
-% %      if mod(sss,30)==1
-% %      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
-% %      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
-% %      else
-%         theta4311=mintheta311;
-% %     end
-%     
-%     if SRR<Sofarbest1
-%         Sofarbest1=SRR;
-%         %    bestiter=iterate;
-%         %save Est4.txt mintheta -ASCII
-%         aux311=mintheta311;
-%     end
-% end
-% 
-% 
-% Est4311=aux311;
-% save Est4311 Est4311
-% 
-% funvalue=Minimize_Apr2013(theta0,312);
-% funvalueend=0;
-% theta4312=Est412;
-% while abs(funvalue-funvalueend)>0.001
-%     funvalue=Minimize_Apr2013(theta4312,312);
-%     [mintheta312,SRR]=fminsearch(@(x) Minimize_Apr2013(x,312),theta4312,OPTIONS);
-%     funvalueend=Minimize_Apr2013(mintheta312,312);
-% %      if mod(sss,30)==1
-% %      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
-% %      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
-% %      else
-%         theta4312=mintheta312;
-% %     end
-%     
-%     if SRR<Sofarbest2
-%         Sofarbest2=SRR;
-%         %    bestiter=iterate;
-%         %save Est4.txt mintheta -ASCII
-%         aux312=mintheta312;
-%     end
-% end
-% 
-% 
-% Est4312=aux312;
-% save Est4312 Est4312
+Est4311=aux311;
+save Est4311 Est4311 Sofarbest311
 
-funvalue=Minimize_Apr2013(theta0,313);
+
+
+OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+%load initfun
+%Minimize for 4312
+% aux=sortrows([funvalue312(funvalue312<min(funvalue312)+10).',theta0(:,funvalue312<min(funvalue312)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta4312=theta0mat(:,1);
+
+load('./Est4312.mat');
+clear Sofarbest312
+Sofarbest312= Minimize_Apr2013(Est4312,312);
+aux312=Est4312;
+
+theta4312=aux312;
+
+funvalue=10;
 funvalueend=0;
-theta4313=theta0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta4312,312);
+    [mintheta312,SRR]=fminsearch(@(x) Minimize_Apr2013(x,312),theta4312,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta312,312);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta4312=mintheta312;
+%     end
+    
+    if SRR<Sofarbest312
+        Sofarbest312=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        aux312=mintheta312;
+    end
+end
+
+
+Est4312=aux312;
+save Est4312 Est4312 Sofarbest312
+
+
+
+
+OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+%load initfun
+%Minimize for 4313
+% aux=sortrows([funvalue313(funvalue313<min(funvalue313)+10).',theta0(:,funvalue313<min(funvalue313)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta4313=theta0mat(:,1);
+
+load('./Est4313.mat');
+clear Sofarbest313
+Sofarbest313= Minimize_Apr2013(Est4313,313);
+aux313=Est4313;
+
+theta4313=aux313;
+
+funvalue=10;
+funvalueend=0;
 while abs(funvalue-funvalueend)>0.001
     funvalue=Minimize_Apr2013(theta4313,313);
     [mintheta313,SRR]=fminsearch(@(x) Minimize_Apr2013(x,313),theta4313,OPTIONS);
@@ -1091,121 +1236,116 @@ while abs(funvalue-funvalueend)>0.001
 %      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
 %      else
         theta4313=mintheta313;
-%     end
+%    end
     
-    if SRR<Sofarbest3
-        Sofarbest3=SRR;
-        %    bestiter=iterate;
-        %save Est4.txt mintheta -ASCII
+    if SRR<Sofarbest313
+        Sofarbest313=SRR;
+%            bestiter=iterate;
+%         save Est4.txt mintheta -ASCII
         aux313=mintheta313;
     end
 end
 
 Est4313=aux313;
-save Est4313 Est4313
-end
+save Est4313 Est4313 Sofarbest313
 
-%%
+
 %ESTIMATE SPENDING CONDITIONAL ON WINNING
-   load('Est4321.mat');
-     load('Est4322.mat');
-       load('Est4323.mat');
-   Sofarbest1=Minimize_Apr2013(Est4321,321);
-    Sofarbest2=Minimize_Apr2013(Est4322,322);
-     Sofarbest3=Minimize_Apr2013(Est4323,323);
-     aux321=Est4321;
-     aux322=Est4322;
-     aux323=Est4323;
-  OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'display','iter');
-%%
-for j=1:500
+OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+%load initfun
+%Minimize for 4321
+% aux=sortrows([funvalue321(funvalue321<min(funvalue321)+10).',theta0(:,funvalue321<min(funvalue321)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta4321=theta0mat(:,1);
+
+load('./Est4321.mat');
+clear Sofarbest321
+Sofarbest321= Minimize_Apr2013(Est4321,321);
+aux321=Est4321;
+
+theta4321=aux321;
+
+funvalue=10;
+funvalueend=0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta4321,321);
+    [mintheta321,SRR]=fminsearch(@(x) Minimize_Apr2013(x,321),theta4321,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta321,321);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta4321=mintheta321;
+%     end
     
-%Find initial theta0
-    thetaQ2=Est2(9:numel(Est2));
-if numel(thetaQ2)==3
-    XQEV2=[RTotDE_VCT,RTotDE_VCT.^2,RTotDE_VCT.^3]*thetaQ2; % q_I
-    XQEVCT2=XQEV2;
-    %XQEVCT2(E_VContestFUL,:)=[]; Already VCT
-    XQEVCTwnxt2=XQEVCT2;
-    XQEVCTwnxt2(IND5,:)=[];
-else
-    XQEV2=X_KnotEV1*thetaQ2;  % q_I
-    XQEVCT2=XQEV2;
-    XQEVCT2(E_VContestFUL,:)=[];
-    XQEVCTwnxt2=XQEVCT2;
-    XQEVCTwnxt2(IND5,:)=[];
+    if SRR<Sofarbest321
+        Sofarbest321=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        aux321=mintheta321;
+    end
 end
 
-theta0=zeros(24,1);    
-theta0(1:8)=5*(rand(8,1)-1);
-theta0(9)=mean(LOGW_NXT_E_VCTwnxt);
-theta0(10)=mean(XQEVCTwnxt2);
-theta0(11)=mean(LOGW_E_VCTwnxt);
-theta0(12)=mean(XS_EVCTwnxt_(:,1));
-theta0(13)=mean(XS_EVCTwnxt_(:,2).*PartyE_VCTwnxt);
-theta0(14)=mean(SameE_VCTwnxt);
-theta0(15)=mean(PresdumE_VCTwnxt);
-theta0(16)=mean(MidtermE_VCTwnxt);
-theta0(17:24)=rand(8,1);
+
+Est4321=aux321;
+save Est4321 Est4321 Sofarbest321
 
 
+OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+%load initfun
+%Minimize for 4322
+% aux=sortrows([funvalue322(funvalue322<min(funvalue322)+10).',theta0(:,funvalue322<min(funvalue322)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta4322=theta0mat(:,1);
 
-% 
-% funvalue=Minimize_Apr2013(theta0,321);
-% funvalueend=0;
-% theta4321=Est421;
-% while abs(funvalue-funvalueend)>0.001
-%     funvalue=Minimize_Apr2013(theta4321,321);
-%     [mintheta321,SRR]=fminsearch(@(x) Minimize_Apr2013(x,321),theta4321,OPTIONS);
-%     funvalueend=Minimize_Apr2013(mintheta321,321);
-% %      if mod(sss,30)==1
-% %      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
-% %      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
-% %      else
-%         theta4321=mintheta321;
-% %     end
-%     
-%     if SRR<Sofarbest1
-%         Sofarbest1=SRR;
-%         %    bestiter=iterate;
-%         %save Est4.txt mintheta -ASCII
-%         aux321=mintheta321;
-%     end
-% end
-% 
-% 
-% Est4321=aux321;
-% save Est4321 Est4321
-% 
-% funvalue=Minimize_Apr2013(theta0,322);
-% funvalueend=0;
-% theta4322=Est422;
-% while abs(funvalue-funvalueend)>0.001
-%     funvalue=Minimize_Apr2013(theta4322,322);
-%     [mintheta322,SRR]=fminsearch(@(x) Minimize_Apr2013(x,322),theta4322,OPTIONS);
-%     funvalueend=Minimize_Apr2013(mintheta322,322);
-% %      if mod(sss,30)==1
-% %      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
-% %      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
-% %      else
-%         theta4322=mintheta322;
-% %     end
-%     
-%     if SRR<Sofarbest2
-%         Sofarbest2=SRR;
-%         %    bestiter=iterate;
-%         %save Est4.txt mintheta -ASCII
-%         aux322=mintheta322;
-%     end
-% end
-% 
-% 
-% Est4322=aux322;
-% save Est4322 Est4322
+load('./Est4322.mat');
+clear Sofarbest322
+Sofarbest322= Minimize_Apr2013(Est4322,322);
+aux322=Est4322;
 
-funvalue=Minimize_Apr2013(theta0,323);
+theta4322=aux322;
+
+funvalue=10;
 funvalueend=0;
-theta4323=theta0;
+while abs(funvalue-funvalueend)>0.001
+    funvalue=Minimize_Apr2013(theta4322,322);
+    [mintheta322,SRR]=fminsearch(@(x) Minimize_Apr2013(x,322),theta4322,OPTIONS);
+    funvalueend=Minimize_Apr2013(mintheta322,322);
+%      if mod(sss,30)==1
+%      theta0=mintheta+0.5*(rand(size(mintheta,1),1)-0.5).*mintheta;
+%      theta0([9,17])=mintheta([9,17])+ones(2,1)*0.3;
+%      else
+        theta4322=mintheta322;
+%     end
+    
+    if SRR<Sofarbest322
+        Sofarbest322=SRR;
+        %    bestiter=iterate;
+        %save Est4.txt mintheta -ASCII
+        aux322=mintheta322;
+    end
+end
+
+
+Est4322=aux322;
+save Est4322 Est4322 Sofarbest322
+
+OPTIONS=optimset('MaxIter',6000,'MaxFunEvals',1000000,'Display','iter');
+%load initfun
+%Minimize for 4323
+% aux=sortrows([funvalue323(funvalue323<min(funvalue323)+10).',theta0(:,funvalue323<min(funvalue323)+10).']);
+% theta0mat=aux(:,2:end).';
+% theta4323=theta0mat(:,1);
+
+load('./Est4323.mat');
+clear Sofarbest323
+Sofarbest323= Minimize_Apr2013(Est4323,323);
+aux323=Est4323;
+
+theta4323=aux323;
+
+funvalue=10;
+funvalueend=0;
 while abs(funvalue-funvalueend)>0.001
     funvalue=Minimize_Apr2013(theta4323,323);
     [mintheta323,SRR]=fminsearch(@(x) Minimize_Apr2013(x,323),theta4323,OPTIONS);
@@ -1217,8 +1357,8 @@ while abs(funvalue-funvalueend)>0.001
         theta4323=mintheta323;
 %     end
     
-    if SRR<Sofarbest3
-        Sofarbest3=SRR;
+    if SRR<Sofarbest323
+        Sofarbest323=SRR;
         %    bestiter=iterate;
         %save Est4.txt mintheta -ASCII
         aux323=mintheta323;
@@ -1226,31 +1366,32 @@ while abs(funvalue-funvalueend)>0.001
 end
 
 Est4323=aux323;
-save Est4323 Est4323
-end
+save Est4323 Est4323 Sofarbest323
+
 
 %%
-% %when not computing number=4
-% load('Est411.mat');
-% load('Est412.mat');
-% load('Est413.mat');
-% load('Est421.mat');
-% load('Est422.mat');
-% load('Est423.mat');
-% 
-% 
-% %Specification check: See if actions have right derivative
-% spendderiv=[Est411(1),Est411(3);Est412(1),Est412(3);Est413(1),Est413(3)];
-% fundderiv=[Est421(1),Est421(3);Est422(1),Est422(3);Est423(1),Est423(3)];
-% 
-% %Correlations on data
-% corr([LOGW_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGD_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGTotal_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGW_NXT_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7))])
-% corr([LOGW_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3)),LOGD_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3)),LOGTotal_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3)),LOGW_NXT_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3))])
-% 
-% corr([LOGW_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3)),LOGD_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3)),LOGTotal_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3)),LOGW_NXT_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3))])
-% corr([LOGW_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8)),LOGD_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8)),LOGTotal_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8)),LOGW_NXT_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8))])
-% 
-% corr([LOGW_E_VCT,LOGD_E_VCT,LOGTotal_E_VCT,LOGW_NXT_E_VCT])
+%when not computing number=4
+load('Est411.mat');
+load('Est412.mat');
+load('Est413.mat');
+load('Est421.mat');
+load('Est422.mat');
+load('Est423.mat');
+
+
+%Specification check: See if actions have right derivative
+spendderiv=[Est411(1),Est411(3);Est412(1),Est412(3);Est413(1),Est413(3)];
+fundderiv=[Est421(1),Est421(3);Est422(1),Est422(3);Est423(1),Est423(3)];
+%savederiv=[Est431(1),Est431(3);Est432(1),Est432(3);Est433(1),Est433(3)];
+
+%Correlations on data
+corr([LOGW_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGD_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGTotal_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)),LOGW_NXT_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7))])
+corr([LOGW_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3)),LOGD_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3)),LOGTotal_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3)),LOGW_NXT_E_VCT(TenureE_VCT<quantile(TenureE_VCT,0.3))])
+
+corr([LOGW_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3)),LOGD_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3)),LOGTotal_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3)),LOGW_NXT_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT<quantile(RTotDE_VCT,0.3))])
+corr([LOGW_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8)),LOGD_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8)),LOGTotal_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8)),LOGW_NXT_E_VCT(TenureE_VCT>quantile(TenureE_VCT,0.7)&RTotDE_VCT>quantile(RTotDE_VCT,0.8))])
+
+corr([LOGW_E_VCT,LOGD_E_VCT,LOGTotal_E_VCT,LOGW_NXT_E_VCT])
 
 %%
 %%%%%%%%%%%%%%%%%%
@@ -1366,5 +1507,9 @@ save Est4323 Est4323
 save Est51 Est51
 save Est52 Est52
 save Est53 Est53
+
+%%
+%Vote share equation
+unemp=0.05:0.001:0.1;
 
 

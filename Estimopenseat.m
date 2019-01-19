@@ -4,10 +4,14 @@ clear
 % make sure you get the sign of q_e right. Also note that f_d_qe, f_w_qe have the PARTY of Challenger.
 % **
 
+%Openseatdataの作り方。
+%Estim2ndstepSからincquality.csvを作り、1行目にラベルをつける。
+%それをdatasetのData creation for openseatに入れ、doファイルをつかってOpenseatdata.csvを作る。
+%Presseqとmidtermをq_iの前にAppend。作り方は「どうやったか.txt」内。
 
 
 
-E_V_july8=csvread('openseatdata.csv',1,0);
+E_V_july8=csvread('openseatdata_9para.csv',1,0);
 
 %Estimates from the first stage
 % load('./Est1.mat');
@@ -34,9 +38,10 @@ load('./q_C_E_VCT.mat');
 %load ('./presseq.mat')
 %load ('./DEL_Pen.mat')
 %load ('./Continue.mat')
-load ('./coef3rdstep.mat')
+load ('./coef2ndstep.mat')
 load ('./est2ndstage.mat')
-load ('./est3rdstage.mat')
+%load ('./est3rdstage.mat')
+load ('./const.mat')
 %Others
 %load ('./retire.txt');
 %load ('./stateevol.mat')
@@ -290,103 +295,54 @@ XQEV=E_V_july8(:,66); % q_I
 % Defining variables: done
 %%%%%%%%%%%%%%%%%%%%%%%%
 
+ 
 %%
-
-%Continuation payoff: inputed from incumbents' problem
-Continuei=max(0,[ones(length(LOGW_NXT_E_V),1),LOGW_NXT_E_V,LOGW_NXT_E_V.^2/10,LOGW_NXT_E_V.^3/100,LOGW_NXT_E_V.^4/1000,...
-    XQEV,LOGW_NXT_E_V.*XQEV,LOGW_NXT_E_V.^2/10.*XQEV,LOGW_NXT_E_V.^3/100.*XQEV,LOGW_NXT_E_V.^4/1000.*XQEV,...
-    zeros(length(LOGW_NXT_E_V),1),XSEV_(:,1).*SameE_V,XSEV_(:,2).*PartyE_V,...
-    PresdumE_V,MidtermE_V]*coef3rdstep);
-Continuei_VCT=Continuei;
-Continuei_VCT(E_VContestFUL,:)=[];
-
-
-%Calculate derivative of value function
- Deriv=[zeros(length(Continuei),1),ones(length(Continuei),1),2*LOGW_NXT_E_V/10,3*LOGW_NXT_E_V.^2/100,4*LOGW_NXT_E_V.^3/1000,...
-     zeros(length(Continuei),1),XQEV,2*LOGW_NXT_E_V/10.*XQEV,3*LOGW_NXT_E_V.^2/100.*XQEV,4*LOGW_NXT_E_V.^3/1000.*XQEV,zeros(length(Continuei),5)]*coef3rdstep;
- Derivhist1=Deriv;
- Deriv=max(Deriv,0.00001);
-Deriv_VCT=Deriv;
-Deriv_VCT(E_VContestFUL,:)=[];
-
-%%
-
-%Specification check
-figure(1)
-scatter(XQEVCT(LOGW_NXT_E_VCT>0&Continuei_VCT>0),Continuei_VCT(LOGW_NXT_E_VCT>0&Continuei_VCT>0))
-figure(2)
-scatter(XQEVCT(LOGW_NXT_E_VCT>0&Continuei_VCT<=0),Continuei_VCT(LOGW_NXT_E_VCT>0&Continuei_VCT<=0))
-figure(3)
-scatter(XQEVCT(LOGW_NXT_E_VCT==0),Continuei_VCT(LOGW_NXT_E_VCT==0))
-%scatter(XQEV(LOGW_NXT_E_VC>0&Continuei>0),Deriv(LOGW_NXT_E_VC>0&Continuei>0))
-%scatter(XQEV(Deriv>0),Deriv(Deriv>0))
-length(find(LOGW_NXT_E_VCT>0))
-length(find(Continuei_VCT>0))
-%length(find(Deriv>0))
-%% 
-%-----------
- D=@(test) coef3rdstep(6)+test*coef3rdstep(7)+test.^2/10*coef3rdstep(8)+test.^3/100*coef3rdstep(9)+test.^4/1000*coef3rdstep(10);
- space1=9:0.5:15;
- mat1=D(space1);
- scatter(space1,mat1);
-%%
-B=@(test,test2)coef3rdstep(2)+2*test2/10*coef3rdstep(3)+3*test2.^2/100*coef3rdstep(4)+4*test2.^3/1000*coef3rdstep(5)+test*coef3rdstep(7)+2*test2/10.*test*coef3rdstep(8)...
-   +3*test2.^2/100.*test*coef3rdstep(9)+4*test2.^3/1000.*test*coef3rdstep(10);
-space1=0.01:0.01:0.2;
-space2=5:0.5:15;
-mat1=B(space1,11);
-mat2=B(0.07,space2);
-scatter(space2,mat2)
-%-----------
-%% 
-
 %Estimation of cost parameters
-datasetVCT=[XQEVCT,LOGW_NXT_E_VCT,LOGTotal_E_VCT,LOGD_E_VCT,Continuei_VCT,Deriv_VCT];
+%datasetVCT=[XQEVCT,LOGW_NXT_E_VCT,LOGTotal_E_VCT,LOGD_E_VCT,Continuei_VCT,Deriv_VCT];
+datasetVCT=[XQEVCT,LOGW_NXT_E_VCT,LOGTotal_E_VCT,LOGD_E_VCT,XS_EVCT_,SameE_VCT,PartyE_VCT,PresdumE_VCT,MidtermE_VCT,LOGW_NXT_E_C_VCT,LOGTot_E_C_VCT,LOGD_E_C_VCT,VSEVCT];
 %datasetVCT((LOGW_NXT_E_VCT==0)|(XQEVCT>0.15),:)=[];
 
 
 %%
 
-%Estimate beta_I
+% %Estimate beta_I
 para0=0.04;
 options=optimset('MaxIter',200000,'MaxFunEvals',1000000,'Display','iter');
-[mintheta,SRR]=fminsearch(@(theta4) Minimizeopenseat(mintheta2ndstage,est3rdstage,theta4,q_C_E_VCT,datasetVCT),para0,options);
+[mintheta,SRR]=fminsearch(@(theta4) Minimizeopenseat(mintheta2ndstage,theta4,Est2,datasetVCT,coef2ndstep),para0,options);
 
 estopen=mintheta;
-save estopen estopen
+save estopen_9para estopen
 
 %%
 %Compute q_c
-load estopen
+%load estopen
+estopen=abs(Est2(3));
 thetain=mintheta2ndstage;
 theta4=estopen;
-theta3=est3rdstage;
+%theta3=est3rdstage;
 
 
 
 vdelta=0.90;
-alpha=1/2;
-beta=2;
+alpha=abs(thetain(5));
+beta=abs(thetain(6));
 ben1=abs(thetain(2));
 ben2=ben1;
 sig=abs(thetain(3));
 
-
-costc=abs(theta3(1));
-a=theta3(2);
-b=theta3(3);
-c=theta3(4);
+%costc=abs(theta4(2));
+costc=abs(thetain(1));
+a=abs(thetain(4));
 B_I=abs(theta4(1));
 
 
-OUT=((beta*costc*(alpha/beta)*ben2*(ones(length(XQEVCT),1)+a*(XQEVCT+abs(min(q_C_E_VCT))+0.001)+b*(XQEVCT+abs(min(q_C_E_VCT))+0.001).^2+c*(XQEVCT+abs(min(q_C_E_VCT))+0.001).^3).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv_VCT).*(1./exp(LOGW_NXT_E_VCT)));
+OUT=((beta*costc*(1/beta)*(ones(length(XQEVCT),1)+a*(1./exp(XQEVCT))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1))))./((vdelta*Deriv_VCT).*(1./exp(LOGW_NXT_E_VCT)));
 ako=min(max(OUT,0.000001),0.999999);
 BX1=norminv(ako);
 
 
-
-regressor=[LOGD_E_VCT,LOGD_E_C_VCT,XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,2).*PartyE_VCT];
-coef=[B_I;(-1*B_I);Est2([3,4])];
+regressor=[LOGD_E_VCT,LOGD_E_C_VCT,XS_EVCT_(:,1),XS_EVCT_(:,1).^2,XS_EVCT_(:,2).*PartyE_VCT];
+coef=[B_I;(-1*B_I);Est2(4:6)];
 qi=XQEVCT;
 %Sample selection
 %   regressor((OUT>1|OUT<0),:)=[];
@@ -411,3 +367,7 @@ computeincadv=[E_V_july8(:,[3,4,9,10,16,13,24,63]),q_C_E_V,XQEV2,question];
 dlmwrite('openquality.csv',computeincadv,'delimiter', ',', 'precision', 16)
 %Question means that in computing q_c, out condition is violated and
 %chopped at 1.
+
+%Label
+%party	opponent_total	realtotal	realdisburse	opponent_disburse	voteshare	unemploymentrate	partindex	qc	qi	question
+
