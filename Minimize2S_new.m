@@ -3,13 +3,13 @@ function [SRR2step,rsq]=Minimize2S_new(Est2,theta2,probwin,datasetV,datasetVCT,d
 % Est2 : the estimated first step estimator.
 % theta2 : the parameters that we estimate in the 2nd step.
 
-%Calculation of continuation payoff
+%Variables used - Calculation of continuation payoff
 NCE_V=datasetV(:,1:3);
 LOGTot_NCE_V=datasetV(:,4);
 E_VContestFUL=datasetVNCT(:,1);
 E_VNContestFUL=datasetVCT(:,1);
 
-%Calculation of derivative of payoff
+%Variables used - Calculation of derivative of payoff
 XQEV2=datasetV(:,5);
 LOGW_NXT_E_V=datasetV(:,6);
 SameE_V=datasetV(:,7);
@@ -20,9 +20,7 @@ PresdumE_V=datasetV(:,12);
 MidtermE_V=datasetV(:,13);
 
 
-
-
-%Derivation of challenger quality and incumbent FOC contested
+%Variables used - Derivation of challenger quality and incumbent FOC contested
 XQEVCT2=datasetVCT(:,2);
 LOGTot_NCE_VCT=datasetVCT(:,3);
 NCE_VCT=datasetVCT(:,4:6);
@@ -40,7 +38,7 @@ PresdumE_VCT=datasetVCT(:,17);
 MidtermE_VCT=datasetVCT(:,18);
 matchXQEVCT2=datasetVCT(:,19);
 
-%Derication of incumbent FOC uncontested
+%Variables used - Derication of incumbent FOC uncontested
 LOGW_NXT_E_VNCT=datasetVNCT(:,2);
 LOGTotal_E_VNCT=datasetVNCT(:,3);
 NCE_VNCT=datasetVNCT(:,4:6);
@@ -126,6 +124,7 @@ costpara=permute(repmat((ones(NN,numel(XQEV2))+a*ones(NN,1)*(1./exp(XQEV2).')),[
 %Without constant
 %costpara=permute(repmat((ones(N,1)*XQEV2.'+a*ones(N,1)*XQEV2.^2*10.'+b*ones(N,1)*XQEV2.^3*100.'),[1 1 10]),[3 1 2]);   
 
+%Calculate cont payoff
 aux1=C2.^alpha;
 aux2=(1/beta)*costpara.*C3.^beta;
 Contcontest=(ben1*aux1-cost1*aux2).*C1+BB*C5; %Benefit
@@ -133,7 +132,6 @@ Contuncontest=(ben2*aux1-cost2*aux2).*(1-C1); %Benefit
 
 
 %Discount
-
 % for j=1:T
 %     Contcontest(:,j,:,:)=((vdelta)^(j-1))*Contcontest(:,j,:,:);
 %     Contuncontest(:,j,:,:)=((vdelta)^(j-1))*Contuncontest(:,j,:,:);
@@ -210,6 +208,7 @@ DerivNCT=[zeros(length(Continuation2),1),ones(length(Continuation2),1),2*LOGW_NX
     PresdumE_VNCT,zeros(length(Continuation2),1),...
     XS_EVNCT_(:,1).*SameE_VNCT,XS_EVNCT_(:,2).*PartyE_VNCT,zeros(length(Continuation2),22),regXS_VNCT,zeros(length(Continuation2),nregXS)]*coef;
 
+%Conditions to be inserted in the estimation
 SRR17=mean(Deriv.^2.*(Deriv<0));
 std17=max(10^(-8),std(Deriv.^2.*(Deriv<0)));
 SRR18=mean(Continue.^2.*(Continue<0));
@@ -221,6 +220,8 @@ SRR20=(coef(2)<0).*coef(2).^2;
 Deriv=max(Deriv,0.00001);
 DerivNCT=max(DerivNCT,0.00001);
 
+
+%Calculate OUT by MC/MB(saving)
 expratioOUT=exp(LOGW_NXT_E_VCT)./exp(LOGTotal_E_VCT(:,1));
 OUT=((beta*cost1*(1/beta)*(ones(length(XQEVCT2),1)+a*(1./exp(XQEVCT2))).*LOGTotal_E_VCT.^(beta-1))).*expratioOUT./(vdelta*Deriv);
 
@@ -245,11 +246,9 @@ Pen=1:length(OUT);
 
 %ako=1/2+(1/pi)*atan((OUT-0.5)*h);
 ako=min(max(OUT,0.000001),0.999999);
+
+%BX1 = K in the paper
 BX1=norminv(ako);
-% BX1=norminv(max(0.01,min(0.99,(beta*(alpha/beta)*ben2*...
-%     ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1))./(vdelta*Deriv))));  %%BX1=(1/sig)*(-0.5+B_I*d_I-B_C*d_C+...)=(K) in the paper.
-BX1sig=BX1;
-%BX1sig(IND6CT,:)=[];
 
 
 %Obtain q_C_E_VCT.
@@ -257,9 +256,7 @@ q_C_E_VCT=(-1)*(sig*BX1-cc-B_I*LOGD_E_VCT-B_C*LOGD_E_VC-[XS_EVCT_(:,1),XS_EVCT_(
 const=const0;
 
 
-
-
-
+%Moment 1: error in vote share equation (epsilon) orthogonal to observables
 VV=VSEVCT-0.5-const-B_I*LOGD_E_VCT-B_C*LOGD_E_VC-[XS_EVCT_(:,1),XS_EVCT_(:,1).^2,XS_EVCT_(:,1).*SameE_VCT,XS_EVCT_(:,1).^2.*SameE_VCT,XS_EVCT_(:,2).*PartyE_VCT]*thetaS2-XQEVCT2+q_C_E_VCT-B_T*log(TenureE_VCT+1);
 %VV(IND6CT,:)=[];
 %VV(DEL_Pen,:)=[];
@@ -282,7 +279,7 @@ TenureE_VCT_m=TenureE_VCT;
 %TenureE_VCT_m(IND6CT,:)=[];
 %TenureE_VCT_m(DEL_Pen,:)=[];
 
-SRR11_1=mean(VV(Pen))^2;     %To estimate sigma.
+SRR11_1=mean(VV(Pen))^2;     
 std11_1=std(VV(Pen));
 SRR11_2=mean(VV(Pen).*LOGD_E_VCT_m(Pen))^2;
 std11_2=std(VV(Pen).*LOGD_E_VCT_m(Pen));
@@ -355,6 +352,8 @@ SRR9P=mean((VV(Pen)-mean(VV(Pen))).^2-sig^2).^2;
 std9P=std(((VV(Pen)-mean(VV(Pen))).^2-sig^2));
 %SRR9P_2=mean(sqrt(VV.^2)-sig)^2;
 %std9P_2=std(sqrt(VV.^2)-sig);
+
+
 % foc of incumbent, contested periods %%
 %FOC11=(beta*cost1*(alpha/beta)*ben2*(exp(LOGTot_NCE_VCT(:,1))./exp(NCE_VCT(:,1))).*...
 %    ((max(0,NCE_VCT(:,1)).^(alpha-1))./(max(0,LOGTot_NCE_VCT(:,1)).^(beta-1))).*LOGTotal_E_VCT.^(beta-1)).*(1./exp(LOGTotal_E_VCT(:,1)))...      %% d/dI C_I(total)
@@ -379,7 +378,6 @@ std10P=std(FOC11(Pen).^2);
 % SRR11=((1/incr)*((1/290)*sum(FOC12delta.^2,1)-(1/290)*sum(FOC12.^2,1)))^2;
 % SRR11P=(1/290)*sum(FOC12.^2,1);
 
-% %% foc of incumbent, contested periods %%
 
 
 % %% foc of incumbent, uncontested periods %%
