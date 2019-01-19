@@ -657,7 +657,7 @@ save testfunvalue likelimat parasetmat rsqmat
 %         load testfunvalue
 %       inittheta=parasetmat(13,1:9).';
 % % 
-          load output1_9para
+          load output2_8para
           inittheta=mintheta2ndstage;
 %      inittheta(4)=0.0001; 
 %     inittheta(8)=inittheta(7); 
@@ -723,7 +723,7 @@ end
 %%%%%%
 %load est2ndstage
  %theta2=[mintheta2ndstage;0.5;2];
-load output1_9para
+load output2_8para
 theta2=mintheta2ndstage;
 const0=0;
 
